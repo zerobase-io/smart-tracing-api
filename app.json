@@ -1,0 +1,32 @@
+{
+  "name": "Zerobase SmartTracing API",
+  "keywords": [
+    "coronavirus",
+    "covid",
+    "disease tracking"
+  ],
+  "website": "https://zerobase.io/",
+  "repository": "https://github.com/zerobase-io/smart-tracing-api",
+  "logo": "https://zerobase.io/assets/img/zerobase_medium_logo.png",
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "hobby"
+    }
+  },
+  "addons": ["graphenedb:dev-free"],
+  "env": {
+    "NEO4J_URL": {
+      "description": "URL (either HTTP or Bolt) for the Neo4j server",
+      "required": true
+    },
+    "NEO4J_USERNAME": {
+      "description": "Username for authenticating against the database",
+      "required": true
+    },
+    "NEO4J_PASSWORD": {
+      "description": "Password for authenticating against the database",
+      "required": true
+    }
+  }
+}
