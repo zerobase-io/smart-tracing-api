@@ -2,7 +2,7 @@
 server:
   applicationConnectors:
   - type: http
-    port: ${PORT}
+    port: ${PORT:-8080}
 database:
   url: ${NEO4J_URL:-bolt://localhost:7474}
   username: ${NEO4J_USERNAME:-neo4j}
