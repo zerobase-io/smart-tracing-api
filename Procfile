@@ -1,1 +1,1 @@
-web: java -jar target/smart-tracing-api-shaded.jar server target/classes/config.yml
+web: java -jar target/smart-tracing-api.jar server target/classes/config.yml
