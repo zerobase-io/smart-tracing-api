@@ -14,7 +14,7 @@ data class DeviceCreatedResponse(@JsonProperty("dvid") val id: String): ApiRespo
 data class ScanRecordedResponse(@JsonProperty("scan") val id: String): ApiResponse(success = true)
 
 @Path("/")
-@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+@Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 class Router(val dao: GraphDao) {
 
