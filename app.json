@@ -16,15 +16,15 @@
   },
   "addons": ["graphenedb:dev-free"],
   "env": {
-    "NEO4J_URL": {
+    "GRAPHENEDB_BOLT_URL": {
       "description": "URL (either HTTP or Bolt) for the Neo4j server",
       "required": true
     },
-    "NEO4J_USERNAME": {
+    "GRAPHENEDB_BOLT_USER": {
       "description": "Username for authenticating against the database",
       "required": true
     },
-    "NEO4J_PASSWORD": {
+    "GRAPHENEDB_BOLT_PASSWORD": {
       "description": "Password for authenticating against the database",
       "required": true
     }

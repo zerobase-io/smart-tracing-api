@@ -4,6 +4,6 @@ server:
   - type: http
     port: ${PORT:-8080}
 database:
-  url: ${NEO4J_URL:-bolt://localhost:7474}
-  username: ${NEO4J_USERNAME:-neo4j}
-  password: ${NEO4J_PASSWORD}
+  url: ${GRAPHENEDB_BOLT_URL:-bolt://localhost:7474}
+  username: ${GRAPHENEDB_BOLT_USER:-neo4j}
+  password: ${GRAPHENEDB_BOLT_PASSWORD}
