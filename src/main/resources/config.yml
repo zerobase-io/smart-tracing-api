@@ -2,7 +2,7 @@
 server:
   applicationConnectors:
   - type: http
-    port: ${PORT:-8080}
+    port: ${PORT:-9000}
 database:
   url: ${GRAPHENEDB_BOLT_URL:-bolt://localhost:7474}
   username: ${GRAPHENEDB_BOLT_USER:-neo4j}
