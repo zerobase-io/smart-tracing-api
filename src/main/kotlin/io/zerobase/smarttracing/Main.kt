@@ -10,7 +10,6 @@ import io.dropwizard.setup.Environment
 import org.eclipse.jetty.servlets.CrossOriginFilter
 import org.neo4j.driver.AuthTokens
 import org.neo4j.driver.GraphDatabase
-import org.neo4j.driver.AuthTokens
 import org.neo4j.driver.Config
 import org.neo4j.driver.Driver
 import java.net.URI
@@ -33,7 +32,7 @@ class Main: Application<Config>() {
     }
 
     override fun run(config: Config, env: Environment) {
-        val encryptedConfig: Config = Config.builder()
+        val encryptedConfig = Config.builder()
                      .withEncryption()
                      .build();
         val driver = GraphDatabase.driver(config.database.url, AuthTokens.basic(config.database.username, config.database.password), encryptedConfig)
