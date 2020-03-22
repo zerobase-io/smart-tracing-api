@@ -24,7 +24,7 @@ class Router(val dao: GraphDao) {
 
     @Path("/c/{unused: .+?}")
     @POST
-    fun createDevice(val req: CreateDeviceRequest): ApiResponse {
+    fun createDevice(req: CreateDeviceRequest): ApiResponse {
         val id = dao.createDevice(req.fingerprint?.let{ Fingerprint(it) }, req.ip)
         return when (id) {
             null -> ApiResponse(success = false, message = "Sorry, there was an error processing your account, please try again.")
