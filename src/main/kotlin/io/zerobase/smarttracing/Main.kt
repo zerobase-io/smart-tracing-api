@@ -10,13 +10,15 @@ import io.dropwizard.setup.Environment
 import org.eclipse.jetty.servlets.CrossOriginFilter
 import org.neo4j.driver.AuthTokens
 import org.neo4j.driver.GraphDatabase
-import org.neo4j.driver.Config
-import org.neo4j.driver.Driver
 import java.net.URI
 import java.util.*
 import javax.servlet.DispatcherType
 import javax.servlet.FilterRegistration
 
+data class Config(val database: Neo4jConfig): Configuration()
+data class Neo4jConfig(val url: URI, val username: String, val password: String)
+
+typealias ConnectionConfig = org.neo4j.driver.Config
 
 fun main(vararg args: String) {
     Main().run(*args)
@@ -32,10 +34,11 @@ class Main: Application<Config>() {
     }
 
     override fun run(config: Config, env: Environment) {
-        val encryptedConfig = Config.builder()
-                     .withEncryption()
-                     .build();
-        val driver = GraphDatabase.driver(config.database.url, AuthTokens.basic(config.database.username, config.database.password), encryptedConfig)
+        val driver = GraphDatabase.driver(
+                config.database.url,
+                AuthTokens.basic(config.database.username, config.database.password),
+                ConnectionConfig.builder().withEncryption().build()
+        )
 
         env.jersey().register(Router(GraphDao(driver)))
         val cors: FilterRegistration.Dynamic = env.servlets().addFilter("CORS", CrossOriginFilter::class.java)
@@ -54,6 +57,3 @@ class Main: Application<Config>() {
         cors.addMappingForUrlPatterns(EnumSet.allOf(DispatcherType::class.java), true, "/*")
     }
 }
-
-data class Config(val database: Neo4jConfig): Configuration()
-data class Neo4jConfig(val url: URI, val username: String, val password: String)
