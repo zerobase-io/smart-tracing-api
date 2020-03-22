@@ -33,10 +33,10 @@ class Main: Application<Config>() {
     }
 
     override fun run(config: Config, env: Environment) {
-        val config: Config = Config.builder()
+        val encryptedConfig: Config = Config.builder()
                      .withEncryption()
                      .build();
-        val driver = GraphDatabase.driver(config.database.url, AuthTokens.basic(config.database.username, config.database.password), config)
+        val driver = GraphDatabase.driver(config.database.url, AuthTokens.basic(config.database.username, config.database.password), encryptedConfig)
 
         env.jersey().register(Router(GraphDao(driver)))
         val cors: FilterRegistration.Dynamic = env.servlets().addFilter("CORS", CrossOriginFilter::class.java)
