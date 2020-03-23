@@ -10,7 +10,7 @@ This repository contains the back end for the Zerobase smart tracing platform. R
 
 ### Kotlin
 
-* Download [IntelliJ](https://www.jetbrains.com/idea/download/index.html?_ga=2.137859766.761208892.1584829709-1795868819.1584829709#section=mac) community version to use as an IDE for Kotlin
+* The backend is written in Kotlin make sure you have a compatible IDE such as [IntelliJ](https://www.jetbrains.com/idea/download/index.html?_ga=2.137859766.761208892.1584829709-1795868819.1584829709#section=mac) community version 
 * There is a dependency on Java 11 and Maven
 
 ### Java 11
@@ -20,7 +20,7 @@ This repository contains the back end for the Zerobase smart tracing platform. R
 ### Maven
 
 * Download Maven from [here](https://maven.apache.org/download.cgi)
-* Follow these installation instructions
+* Follow these installation instructions [here](https://maven.apache.org/install.html)
 * Add the full path to your ~/.bash_profile 
 
 
@@ -33,22 +33,25 @@ This repository contains the back end for the Zerobase smart tracing platform. R
 
 Docker is used to run Neo4j on this project 
 
-*  Install [here](https://www.docker.com/get-started?utm_source=google&utm_medium=cpc&utm_campaign=getstarted&utm_content=sitelink&utm_term=getstarted&utm_budget=growth&gclid=EAIaIQobChMIzsLmsdWu6AIVA4bICh3VWArbEAAYASABEgKP8_D_BwE)
+*  Install docker [here](https://www.docker.com/get-started?utm_source=google&utm_medium=cpc&utm_campaign=getstarted&utm_content=sitelink&utm_term=getstarted&utm_budget=growth&gclid=EAIaIQobChMIzsLmsdWu6AIVA4bICh3VWArbEAAYASABEgKP8_D_BwE)
+* Pull the Neo4j image
+
 ```sh
 $ docker pull neo4j
 ```
 
 ### Project
 
-```sh
-$ git clone https://github.com/zerobase-io/smart-tracing.git
-```
-* Open the folder in intelliJ navigate to File/Open Project Structure add java 11 as a JDK
-* In the file path src/main/kotlin/models/ open `Main.kt`
-* In `Main.kt` right click on the run button next to main and click Edit Run Configuration
-* ![main](https://github.com/alh2202/smart-tracing-api/blob/master/main.png)
+* After cloning the project there are many ways to deploy it locally, the following directions go over how to deploy it in IntelliJ. In whatever environment you choose, you must use java 11 as the JDK, set the environment variable as `GRAPHENEDB_PASSWORD=zerobase` And program arguments as `server src/main/resources/config.yml`
 
-* Set the environment variable as `GRAPHENEDB_PASSWORD=zerobase`
+
+*In IntelliJ
+	* Navigate to File/Project Structure. Update the JDK home path to Java 11.
+	* In the file path src/main/kotlin/models/ open `Main.kt`
+	* In `Main.kt` right click on the run button next to main and click Edit Run Configuration
+	* ![main](https://github.com/alh2202/smart-tracing-api/blob/master/main.png)
+
+	* Set the environment variable as `GRAPHENEDB_PASSWORD=zerobase`
 And program arguments as `server src/main/resources/config.yml`
 ![env](https://github.com/alh2202/smart-tracing-api/blob/master/env.png)
  
@@ -62,6 +65,7 @@ $ java -jar target/smart-tracing-api.jar server target/classes/config.yml
 ```
 
 * In a different terminal window, first port is http endpoint, second is bolt port :7687
+
 ```sh
 $ docker run -d -p7474:7474 -p7687:7687 --name=zerboase-db neo4j:latest
 ```
@@ -70,7 +74,8 @@ $ docker run -d -p7474:7474 -p7687:7687 --name=zerboase-db neo4j:latest
 The default username and password for Neo4j is 
 username: Neo4j 
 Password: Neo4j
-You will then be asked to set a new password, make this password “zerobase”
+
+You will then be asked to set a new password, make this password zerobase is currently used “zerobase”
 
 ### Project structure
 
