@@ -62,11 +62,10 @@ $ mvn clean install
 $ java -jar target/smart-tracing-api.jar server target/classes/config.yml
 ```
 
-* In a different terminal window, run this to create and run a docker container
+* In a different terminal window, run this to create and run a docker container. The first port is http endpoint and the second is bolt port :7687
 ```sh
 $ docker run -d -p7474:7474 -p7687:7687 --name=zerboase-db neo4j:latest
 ```
-* The first port is http endpoint and the second is bolt port :7687
 
 
 * Open http://localhost:7474/ in your browser
