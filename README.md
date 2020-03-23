@@ -20,7 +20,7 @@ This repository contains the back end for the Zerobase smart tracing platform. R
 ### Maven
 
 * Download Maven from [here](https://maven.apache.org/download.cgi)
-* Follow these installation instructions
+* Follow these installation [instructions](https://maven.apache.org/install.html)
 * Add the full path to your ~/.bash_profile 
 
 
@@ -33,7 +33,8 @@ This repository contains the back end for the Zerobase smart tracing platform. R
 
 Docker is used to run Neo4j on this project 
 
-*  Install [here](https://www.docker.com/get-started?utm_source=google&utm_medium=cpc&utm_campaign=getstarted&utm_content=sitelink&utm_term=getstarted&utm_budget=growth&gclid=EAIaIQobChMIzsLmsdWu6AIVA4bICh3VWArbEAAYASABEgKP8_D_BwE)
+*  Install Docker [here](https://www.docker.com/get-started?utm_source=google&utm_medium=cpc&utm_campaign=getstarted&utm_content=sitelink&utm_term=getstarted&utm_budget=growth&gclid=EAIaIQobChMIzsLmsdWu6AIVA4bICh3VWArbEAAYASABEgKP8_D_BwE)
+* Pull the neo4j image
 ```sh
 $ docker pull neo4j
 ```
@@ -43,7 +44,7 @@ $ docker pull neo4j
 ```sh
 $ git clone https://github.com/zerobase-io/smart-tracing.git
 ```
-* Open the folder in intelliJ navigate to File/Open Project Structure add java 11 as a JDK
+* Open the folder in intelliJ navigate to File/Project Structure. Update the JDK home path to Java 11
 * In the file path src/main/kotlin/models/ open `Main.kt`
 * In `Main.kt` right click on the run button next to main and click Edit Run Configuration
 * ![main](https://github.com/alh2202/smart-tracing-api/blob/master/main.png)
