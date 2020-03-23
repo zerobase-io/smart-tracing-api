@@ -10,8 +10,8 @@ This repository contains the back end for the Zerobase smart tracing platform. R
 
 ### Kotlin
 
-* The backend is written in Kotlin make sure you have a compatible IDE such as [IntelliJ](https://www.jetbrains.com/idea/download/index.html?_ga=2.137859766.761208892.1584829709-1795868819.1584829709#section=mac) community version 
-* There is a dependency on Java 11 and Maven
+* The backend is written in Kotlin. Make sure you have a compatible IDE such as [IntelliJ](https://www.jetbrains.com/idea/download/index.html?_ga=2.137859766.761208892.1584829709-1795868819.1584829709#section=mac).
+
 
 ### Java 11
 
@@ -42,7 +42,7 @@ $ docker pull neo4j
 
 ### Project
 
-* After cloning the project there are many ways to deploy it locally, the following directions go over how to deploy it in IntelliJ. In whatever environment you choose, you must use java 11 as the JDK, set the environment variable as `GRAPHENEDB_PASSWORD=zerobase` And program arguments as `server src/main/resources/config.yml`
+* After cloning the project there are many ways to deploy it locally. The following directions pertain to deployment via the IntelliJ IDE. In whichever environment you choose, ensure you're using Java 11 and set the environment variable `GRAPHENEDB_PASSWORD=zerobase`. Run the server via `server src/main/resources/config.yml`
 
 
 *In IntelliJ
@@ -51,7 +51,7 @@ $ docker pull neo4j
 	* In `Main.kt` right click on the run button next to main and click Edit Run Configuration
 	* ![main](https://github.com/alh2202/smart-tracing-api/blob/master/main.png)
 
-	* Set the environment variable as `GRAPHENEDB_PASSWORD=zerobase`
+	* Set the environment variable `GRAPHENEDB_PASSWORD=zerobase`
 And program arguments as `server src/main/resources/config.yml`
 ![env](https://github.com/alh2202/smart-tracing-api/blob/master/env.png)
  
