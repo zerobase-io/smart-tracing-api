@@ -46,7 +46,7 @@ $ git clone https://github.com/zerobase-io/smart-tracing.git
 ```
 * Open the folder in intelliJ navigate to File/Project Structure. Update the JDK home path to Java 11
 * In the file path src/main/kotlin/models/ open `Main.kt`
-* In `Main.kt` right click on the run button next to main and click Edit Run Configuration
+* In `Main.kt` right click on the run button next to main and click Create Run Configuration
 * ![main](https://github.com/alh2202/smart-tracing-api/blob/master/main.png)
 
 * Set the environment variable as `GRAPHENEDB_PASSWORD=zerobase`
