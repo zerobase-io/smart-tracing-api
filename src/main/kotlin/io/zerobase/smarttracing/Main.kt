@@ -7,6 +7,10 @@ import io.dropwizard.configuration.EnvironmentVariableSubstitutor
 import io.dropwizard.configuration.SubstitutingSourceProvider
 import io.dropwizard.setup.Bootstrap
 import io.dropwizard.setup.Environment
+import io.zerobase.smarttracing.resources.CreatorFilter
+import io.zerobase.smarttracing.resources.DevicesResource
+import io.zerobase.smarttracing.resources.OrganizationsResource
+import io.zerobase.smarttracing.resources.UsersResource
 import org.eclipse.jetty.servlets.CrossOriginFilter
 import org.neo4j.driver.AuthTokens
 import org.neo4j.driver.GraphDatabase
@@ -41,6 +45,15 @@ class Main: Application<Config>() {
         )
 
         env.jersey().register(Router(GraphDao(driver)))
+        env.jersey().register(CreatorFilter())
+        env.jersey().register(OrganizationsResource())
+        env.jersey().register(DevicesResource())
+        env.jersey().register(UsersResource())
+
+        addCorsFilter(env)
+    }
+
+    private fun addCorsFilter(env: Environment) {
         val cors: FilterRegistration.Dynamic = env.servlets().addFilter("CORS", CrossOriginFilter::class.java)
 
         // Configure CORS parameters
