@@ -9,7 +9,7 @@ The backend is written in Kotlin. While you can work on it in any editor, such a
 
 ### Java 11
 
-This project targets the current LTS versoin of Java: 11. You are welcome to use any of the JDK implementations locally, but deployments
+This project targets the current LTS version of Java: 11. You are welcome to use any of the JDK implementations locally, but deployments
 will be done using an AdoptOpenJDK build. If you want to use Oracle's official JDK, it can be dowloaded [here](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html).
 We recommend, however, that you install the JDK using a package manager, such as `brew` on macOS, to easily stay up to date. 
 
@@ -20,7 +20,7 @@ managers, such as `brew` on macOS, for easy updating (recommended way) but can a
 #### Install manually
 * Download Maven from [here](https://maven.apache.org/download.cgi)
 * Follow these installation instructions [here](https://maven.apache.org/install.html)
-* Add the full path to your ~/.bash_profile 
+* Add the full path to your ~/.bash_profile, ~/.zshrc, or similar.
 
 
 ### Docker
@@ -43,7 +43,7 @@ Docker is used to run Neo4j while running the project locally.
   You will then be asked to set a new password, which is what the app will use to connect.
 
 ## Project
-After cloning the project there are 2 ways to deploy it locally: using an IDE or via the command line. By default, the app listens on 
+After cloning the project there are two ways to deploy it locally: using an IDE or via the command line. By default, the app listens on 
 port 9000. You can override that with an environment variable of `PORT` if you need to.
 
 ### Running in an IDE
@@ -78,11 +78,3 @@ The following directions use Intellij as the IDE, but the steps should be simila
     ```sh
     $ GRAPHENEDB_PASSWORD=<your neo4j password> java -jar target/smart-tracing-api.jar server target/classes/config.yml
     ```
-
-
-
-
-
-
-
-
