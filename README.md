@@ -42,6 +42,13 @@ Docker is used to run Neo4j while running the project locally.
   
   You will then be asked to set a new password, which is what the app will use to connect.
 
+#### Install Neo4j without Docker
+If you're unable to use Docker to install Neo4j, there is an alternative available. The desktop version of Neo4j can be downloaded from [here](https://neo4j.com/download/). After downloading, the web page will have a token for you; *you need this token, so don't close the window*. Start the application and provide the token when prompted.
+
+Once the application is running, click the "Create Graph" button in the bottom right and create a new graph, the name of which is 
+irrelevant. You will be prompted to create a password, you will need to remember this for further steps. You can then use the browser 
+button in the top right to open the Neo4j browser.
+
 ## Project
 After cloning the project there are two ways to deploy it locally: using an IDE or via the command line. By default, the app listens on 
 port 9000. You can override that with an environment variable of `PORT` if you need to.
