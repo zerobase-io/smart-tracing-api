@@ -4,9 +4,6 @@ This repository contains the back end for the Zerobase smart tracing platform. R
 
 We use Kotlin version 1.3.70, OpenJDK version 9, any version of maven should work.
 
-# TODO
-
-*
 
 ## Set up for the project
 
