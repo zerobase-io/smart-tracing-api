@@ -7,10 +7,7 @@ import io.dropwizard.configuration.EnvironmentVariableSubstitutor
 import io.dropwizard.configuration.SubstitutingSourceProvider
 import io.dropwizard.setup.Bootstrap
 import io.dropwizard.setup.Environment
-import io.zerobase.smarttracing.resources.CreatorFilter
-import io.zerobase.smarttracing.resources.DevicesResource
-import io.zerobase.smarttracing.resources.OrganizationsResource
-import io.zerobase.smarttracing.resources.UsersResource
+import io.zerobase.smarttracing.resources.*
 import org.eclipse.jetty.servlets.CrossOriginFilter
 import org.neo4j.driver.AuthTokens
 import org.neo4j.driver.GraphDatabase
@@ -19,7 +16,9 @@ import java.util.*
 import javax.servlet.DispatcherType
 import javax.servlet.FilterRegistration
 
-data class Config(val database: Neo4jConfig): Configuration()
+typealias MultiMap<K,V> = Map<K, List<V>>
+
+data class Config(val database: Neo4jConfig, val siteTypeCategories: MultiMap<String, String>): Configuration()
 data class Neo4jConfig(val url: URI, val username: String, val password: String)
 
 typealias ConnectionConfig = org.neo4j.driver.Config
@@ -49,6 +48,7 @@ class Main: Application<Config>() {
         env.jersey().register(OrganizationsResource())
         env.jersey().register(DevicesResource())
         env.jersey().register(UsersResource())
+        env.jersey().register(ModelsResource(config.siteTypeCategories))
 
         addCorsFilter(env)
     }
