@@ -45,22 +45,22 @@ $ docker pull neo4j
 
 ### Project
 
-* After cloning the project there are many ways to deploy it locally. The following directions pertain to deployment via the IntelliJ IDE. In whichever environment you choose, ensure you're using Java 11 and set the environment variable `GRAPHENEDB_PASSWORD=zerobase`. Set the program argument `server src/main/resources/config.yml`
+* After cloning the project there are many ways to deploy it locally. The following directions pertain to deployment via the IntelliJ IDE. In whichever environment you choose, ensure you're using Java 11 and set the environment variable `GRAPHENEDB_PASSWORD=<your_password_for_neo4j>`. Pick a password and save it for later. Set the program argument `server src/main/resources/config.yml`
 
 
 *In IntelliJ
 	* Navigate to File/Project Structure. Update the JDK home path to Java 11.
 	* In the file path src/main/kotlin/models/ open `Main.kt`
 	* In `Main.kt` right click on the run button next to main and click Edit Run Configuration
-	* ![main](https://github.com/alh2202/smart-tracing-api/blob/master/main.png)
+	* ![main](./images/main.png)
 
-	* Set the environment variable `GRAPHENEDB_PASSWORD=zerobase`
+	* Set the environment variable `GRAPHENEDB_PASSWORD=<your_password_for_neo4j>`
 And program arguments as `server src/main/resources/config.yml`
-![env](https://github.com/alh2202/smart-tracing-api/blob/master/env.png)
+![env](./images/env.png)
 
 *If you're working with Arch, you can set the jdk to java-11 by running the following
 ```
-
+sudo archlinux-java set java-11-openjdk
 ```
  
 *  From the command line navigate into the folder and run the following, it downloads all of the project dependencies
@@ -77,13 +77,13 @@ $ java -jar target/smart-tracing-api.jar server target/classes/config.yml
 ```sh
 $ docker run -d -p7474:7474 -p7687:7687 --name=zerboase-db neo4j:latest
 ```
-
 * Open http://localhost:7474/ in your browser
-The default username and password for Neo4j is 
+The default username and password for neo4j is 
 username: neo4j 
 Password: neo4j
 
-You will then be asked to set a new password
+You will then be asked to set a new password <your_password_from_neo4j>
+
 
 
 
