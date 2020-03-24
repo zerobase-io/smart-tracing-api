@@ -1,9 +1,12 @@
 package io.zerobase.smarttracing.resources
 
-import io.zerobase.smarttracing.models.DeviceId
 import io.zerobase.smarttracing.models.IdWrapper
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
+
+//region Request Models
+
+//endregion
 
 @Path("/devices")
 @Consumes(MediaType.APPLICATION_JSON)

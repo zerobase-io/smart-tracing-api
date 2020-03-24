@@ -1,7 +1,6 @@
 package io.zerobase.smarttracing
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder
 import io.zerobase.smarttracing.models.DeviceId
 import io.zerobase.smarttracing.models.Fingerprint
 import javax.ws.rs.*

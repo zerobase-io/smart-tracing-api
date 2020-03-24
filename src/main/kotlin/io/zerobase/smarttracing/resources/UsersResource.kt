@@ -4,6 +4,10 @@ import io.zerobase.smarttracing.models.IdWrapper
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
 
+//region Request Models
+
+//endregion
+
 @Path("/users")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
