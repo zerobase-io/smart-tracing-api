@@ -2,94 +2,82 @@
 
 This repository contains the back end for the Zerobase smart tracing platform. Refer to the [smart-tracing repo](https://github.com/zerobase-io/smart-tracing) for the front end. We are using Kotlin and Neo4j with cloud storage on Heroku. We are using Dropwizard for the REST framework. Kotlin requires Java and Maven. 
 
-We use Kotlin version 1.3.70, OpenJDK version 9, any version of maven should work.
-
-
 ## Set up for the project
 
 ### Kotlin
-
-* The backend is written in Kotlin. Make sure you have a compatible IDE such as [IntelliJ](https://www.jetbrains.com/idea/download/index.html?_ga=2.137859766.761208892.1584829709-1795868819.1584829709).
-
+The backend is written in Kotlin. While you can work on it in any editor, such as vim or VS Code, it is significantly easier to use an IDE. We recommend [IntelliJ](https://www.jetbrains.com/idea/download/index.html).
 
 ### Java 11
 
-* This project requires Java version 11 which can be dowloaded [here](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html)
-*These are best installed with a package manager, for example using brew on Mac
+This project targets the current LTS versoin of Java: 11. You are welcome to use any of the JDK implementations locally, but deployments
+will be done using an AdoptOpenJDK build. If you want to use Oracle's official JDK, it can be dowloaded [here](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html).
+We recommend, however, that you install the JDK using a package manager, such as `brew` on macOS, to easily stay up to date. 
 
 ### Maven
+Maven is a dependency management and build tool that is commonly used in the Java world. It is available for installation via package
+managers, such as `brew` on macOS, for easy updating (recommended way) but can also be installed manually. 
 
+#### Install manually
 * Download Maven from [here](https://maven.apache.org/download.cgi)
 * Follow these installation instructions [here](https://maven.apache.org/install.html)
 * Add the full path to your ~/.bash_profile 
 
 
-### Dropwizard
-
-* A library for building RESTful web services [here](https://github.com/dropwizard/dropwizard) 
-* Maven is required to run successfully
-
 ### Docker
+Docker is used to run Neo4j while running the project locally.  
 
-Docker is used to run Neo4j on this project 
-
-*  Install docker [here](https://www.docker.com/get-started?utm_source=google&utm_medium=cpc&utm_campaign=getstarted&utm_content=sitelink&utm_term=getstarted&utm_budget=growth&gclid=EAIaIQobChMIzsLmsdWu6AIVA4bICh3VWArbEAAYASABEgKP8_D_BwE)
+* Install docker manually by following this [guide](https://www.docker.com/get-started) or via a package manager.
 * Pull the Neo4j image
+    ```sh
+    $ docker pull neo4j
+    ```
+* Run the Neo4j image 
+    ```sh
+    $ docker run -d -p7474:7474 -p7687:7687 --name=zerboase-db neo4j:latest
+    ```
+* Open http://localhost:7474/ in your browser to access the Neo4j console
+  The default credentials for neo4j are: 
+  * username: neo4j
+  * password: neo4j
+  
+  You will then be asked to set a new password, which is what the app will use to connect.
 
-```sh
-$ docker pull neo4j
-```
+## Project
+After cloning the project there are 2 ways to deploy it locally: using an IDE or via the command line. By default, the app listens on 
+port 9000. You can override that with an environment variable of `PORT` if you need to.
 
-### Project
+### Running in an IDE
+The following directions use Intellij as the IDE, but the steps should be similar if you are using a different IDE. 
 
-* After cloning the project there are many ways to deploy it locally. The following directions pertain to deployment via the IntelliJ IDE. In whichever environment you choose, ensure you're using Java 11 and set the environment variable `GRAPHENEDB_PASSWORD=<your_password_for_neo4j>`. Pick a password and save it for later. Set the program argument `server src/main/resources/config.yml`
-
-
-*In IntelliJ:
-* Navigate to File/Project Structure. Update the JDK home path to Java 11.
-* In the file path src/main/kotlin/models/ open `Main.kt`
-* In `Main.kt` right click on the run button next to main and click Edit Run Configuration
-
+* If necessary, navigate to File/Project Structure. Update the SDK for the project to JDK11.
+* Open `Main.kt`
+* In `Main.kt`, click on the run button next to main and select Edit Run Configuration
 
 ![main](./images/main.png)
 
-
-
 * Set the environment variable:
 `GRAPHENEDB_PASSWORD=<your_password_for_neo4j>`
-And program arguments as `server src/main/resources/config.yml`
-
+* Set the program arguments as `server src/main/resources/config.yml`
 
 ![env](./images/env.png)
 
+* Click `OK` and run the configuration you just made.
 
-
-*If you're working with Arch, you can set the jdk to java-11 by running the following
-
-```
-sudo archlinux-java set java-11-openjdk
-```
- 
-*  From the command line navigate into the folder and run the following, it downloads all of the project dependencies
-```sh
-$ mvn install
-```
-* Run this to start the server
-```sh
-$ java -jar target/smart-tracing-api.jar server target/classes/config.yml
-```
-
-* In a different terminal window, first port is http endpoint, second is bolt port :7687
-
-```sh
-$ docker run -d -p7474:7474 -p7687:7687 --name=zerboase-db neo4j:latest
-```
-* Open http://localhost:7474/ in your browser
-The default username and password for neo4j is 
-username: neo4j 
-Password: neo4j
-
-You will then be asked to set a new password <your_password_from_neo4j>
+### Running from the command line.
+* From the project's root directory, build the project. 
+    ```sh
+    $ mvn clean install
+    ```
+* Set the `GRAPHENEDB_PASSWORD` environment variable, either as an export or inline, and run the jar.
+    * Export
+        ```sh
+        $ export GRAPHENEDB_PASSWORD=<your neo4j password>
+        $ java -jar target/smart-tracing-api.jar server target/classes/config.yml
+        ```
+    * Inline
+    ```sh
+    $ GRAPHENEDB_PASSWORD=<your neo4j password> java -jar target/smart-tracing-api.jar server target/classes/config.yml
+    ```
 
 
 
