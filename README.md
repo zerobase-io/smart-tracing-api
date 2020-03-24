@@ -45,17 +45,27 @@ $ docker pull neo4j
 * After cloning the project there are many ways to deploy it locally. The following directions pertain to deployment via the IntelliJ IDE. In whichever environment you choose, ensure you're using Java 11 and set the environment variable `GRAPHENEDB_PASSWORD=<your_password_for_neo4j>`. Pick a password and save it for later. Set the program argument `server src/main/resources/config.yml`
 
 
-*In IntelliJ
-	* Navigate to File/Project Structure. Update the JDK home path to Java 11.
-	* In the file path src/main/kotlin/models/ open `Main.kt`
-	* In `Main.kt` right click on the run button next to main and click Edit Run Configuration
-	* ![main](./images/main.png)
+*In IntelliJ:
+* Navigate to File/Project Structure. Update the JDK home path to Java 11.
+* In the file path src/main/kotlin/models/ open `Main.kt`
+* In `Main.kt` right click on the run button next to main and click Edit Run Configuration
 
-	* Set the environment variable `GRAPHENEDB_PASSWORD=<your_password_for_neo4j>`
+
+![main](./images/main.png)
+
+
+
+* Set the environment variable:
+`GRAPHENEDB_PASSWORD=<your_password_for_neo4j>`
 And program arguments as `server src/main/resources/config.yml`
+
+
 ![env](./images/env.png)
 
+
+
 *If you're working with Arch, you can set the jdk to java-11 by running the following
+
 ```
 sudo archlinux-java set java-11-openjdk
 ```
