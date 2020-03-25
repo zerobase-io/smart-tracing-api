@@ -19,7 +19,7 @@ import javax.servlet.FilterRegistration
 
 typealias MultiMap<K,V> = Map<K, List<V>>
 
-data class Config(val database: Neo4jConfig, val siteTypeCategories: MultiMap<String, String>, val scannable: List<String>): Configuration()
+data class Config(val database: Neo4jConfig, val siteTypeCategories: MultiMap<String, String>, val scannableTypes: List<String>): Configuration()
 data class Neo4jConfig(val url: URI, val username: String, val password: String)
 
 typealias ConnectionConfig = org.neo4j.driver.Config
@@ -49,19 +49,14 @@ class Main: Application<Config>() {
          */
         val phoneUtil = PhoneNumberUtil.getInstance()
 
-        /**
-         * To prevent kotlin from making several Dao Objects
-         * when implementing a section in the api that requires
-         * the database, use this as the abstraction layer
-         */
         val dao = GraphDao(driver, phoneUtil)
 
         env.jersey().register(Router(dao))
         env.jersey().register(CreatorFilter())
-        env.jersey().register(OrganizationsResource(dao, config.siteTypeCategories, config.scannable))
+        env.jersey().register(OrganizationsResource(dao, config.siteTypeCategories, config.scannableTypes))
         env.jersey().register(DevicesResource())
         env.jersey().register(UsersResource())
-        env.jersey().register(ModelsResource(config.siteTypeCategories, config.scannable))
+        env.jersey().register(ModelsResource(config.siteTypeCategories, config.scannableTypes))
 
         addCorsFilter(env)
     }

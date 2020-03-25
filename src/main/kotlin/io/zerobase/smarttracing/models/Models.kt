@@ -12,5 +12,3 @@ inline class OrganizationId(override val value: String): Id
 inline class ScannableId(override val value: String): Id
 
 data class IdWrapper(val id: Id)
-
-data class SiteResponse(val id: String, val name: String)

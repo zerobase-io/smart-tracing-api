@@ -8,7 +8,7 @@ import javax.ws.rs.core.MediaType
 
 @Path("/models")
 @Produces(MediaType.APPLICATION_JSON)
-class ModelsResource(private val siteTypes: MultiMap<String, String>, private val scanTypes: List<String>) {
+class ModelsResource(private val siteTypes: MultiMap<String, String>, private val scannableTypes: List<String>) {
 
     @Path("/site-types")
     @GET
@@ -19,6 +19,6 @@ class ModelsResource(private val siteTypes: MultiMap<String, String>, private va
     @Path("/scannable-types")
     @GET
     fun getScannableTypes(): List<String> {
-        return scanTypes
+        return scannableTypes
     }
 }

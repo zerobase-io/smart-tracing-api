@@ -2,7 +2,6 @@ package io.zerobase.smarttracing
 
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
-import io.zerobase.smarttracing.models.SiteResponse
 import io.zerobase.smarttracing.models.DeviceId
 import io.zerobase.smarttracing.models.Fingerprint
 import io.zerobase.smarttracing.models.ScanId
@@ -70,6 +69,8 @@ class GraphDao(private val driver: Driver, val phoneUtil: PhoneNumberUtil) {
      * @param multiSite reporting if the organization has multiple sites.
      *
      * @return organization id.
+     *
+     * @throws exception if phone number is invalid.
      */
     fun createOrganization(organization: String, phone: String, email: String,
                            contactName: String, address: String, testing: Boolean,
@@ -77,7 +78,7 @@ class GraphDao(private val driver: Driver, val phoneUtil: PhoneNumberUtil) {
         val validNum = phoneUtil.isValidNumber(phoneUtil.parseAndKeepRawInput(phone, "US"))
 
         if (!validNum) {
-            return null
+            throw Exception("Invalid phone number")
         }
 
         return driver.session().use {
@@ -92,7 +93,7 @@ class GraphDao(private val driver: Driver, val phoneUtil: PhoneNumberUtil) {
                                     organization: '${organization}',
                                     address: '${address}',
                                     verified: 'false',
-                                    testing: '${testing}',
+                                    hasTestingFacilities: '${testing}',
                                     multisite: '${multiSite}'
                         })
                         RETURN o.id as id
@@ -140,14 +141,13 @@ class GraphDao(private val driver: Driver, val phoneUtil: PhoneNumberUtil) {
                    subcategory: String, lat: Float, long: Float,
                    testing: Boolean, phone: String?, email: String?,
                    contactName: String?): SiteId? {
-        val query = if (phone == null) {
-            """
+        val query = """
             MATCH (o:Organization { id: '${id}' })
             CREATE (s:Site {
                         id: '${UUID.randomUUID()}',
-                        phone: o.phone,
-                        email: o.email,
-                        contactName: o.contactName,
+                        phone: '${phone}',
+                        email: '${email}',
+                        contactName: '${contactName}',
                         name: '${name}',
                         category: '${category}',
                         subcategory: '${subcategory}',
@@ -158,25 +158,6 @@ class GraphDao(private val driver: Driver, val phoneUtil: PhoneNumberUtil) {
             CREATE (o)-[r:OWNS]->(s)
             RETURN s.id as id
             """.trimIndent()
-        } else {
-             """
-            MATCH (o:Organization { id: '${id}' })
-            CREATE (s:Site {
-                        id: '${UUID.randomUUID()}',
-                        phone: '${phone!!}',
-                        email: '${email!!}',
-                        contactName: '${contactName!!}',
-                        name: '${name}',
-                        category: '${category}',
-                        subcategory: '${subcategory}',
-                        latitude: '${lat}',
-                        longitude: '${long}',
-                        testing: '${testing}'
-            })
-            CREATE (o)-[r:OWNS]->(s)
-            RETURN s.id as id
-            """.trimIndent()
-        }
         return driver.session().use {
             it.writeTransaction { txn ->
                 val result = txn.run(query).single()["id"].asString()
@@ -190,19 +171,18 @@ class GraphDao(private val driver: Driver, val phoneUtil: PhoneNumberUtil) {
      *
      * @param id id of the organization
      */
-    fun getSites(id: String): List<SiteResponse>? {
+    fun getSites(id: String): List<Pair<String, String>> {
         return driver.session().use {
             it.writeTransaction { txn ->
                 val result = txn.run(
                         """
-                        MATCH (o:Organization { id: '${id}' })
-                        - [:OWNS] -> (s:Site)
+                        MATCH (o:Organization { id: '${id}' }) - [:OWNS] -> (s:Site)
                         RETURN s.id AS id, s.name AS name
                         """.trimIndent()
-                ).list { x -> SiteResponse(x["id"].asString(), x["name"].asString()) }
+                ).list { x -> Pair(x["id"].asString(), x["name"].asString()) }
                 return@writeTransaction result?.let { it }
             }
-        }
+        }!!
     }
 
     /**
@@ -220,8 +200,7 @@ class GraphDao(private val driver: Driver, val phoneUtil: PhoneNumberUtil) {
             it.writeTransaction { txn ->
                 val result = txn.run(
                         """
-                        MATCH (o:Organization { id: '${oid}' })
-                        - [:OWNS] -> (s:Site { id: '${sid}' })
+                        MATCH (o:Organization { id: '${oid}' }) - [:OWNS] -> (s:Site { id: '${sid}' })
                         CREATE (scan:Scannable {
                                     id: '${UUID.randomUUID()}',
                                     type: '${type}',
