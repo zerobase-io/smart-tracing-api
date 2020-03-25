@@ -96,7 +96,7 @@ class OrganizationsResource(val dao: GraphDao, private val siteTypes: MultiMap<S
             throw BadRequestException("Not a valid category please check /models/site-types")
         }
 
-        if (!siteTypes[category]?.contains(subcategory) ?: true) {
+        if (!(siteTypes[category]?.contains(subcategory) ?: false)) {
             throw BadRequestException("Not a valid subcategory please check /models/site-types")
         }
 
