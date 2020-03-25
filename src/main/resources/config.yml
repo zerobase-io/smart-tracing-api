@@ -10,6 +10,14 @@ database:
 
 siteTypeCategories:
   BUSINESS:
-  - FOOD
+    - GROCERY
+    - RESTAURANT
+  FINANCIAL:
+    - BANK
   HEALTH:
-  - DOCTOR_OFFICE
+    - DOCTOR_OFFICE
+    - HOSPITAL
+    - PHARMACY
+
+scannableTypes:
+  - QR_CODE

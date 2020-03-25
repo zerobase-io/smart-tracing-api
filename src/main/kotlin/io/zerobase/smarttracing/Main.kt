@@ -1,5 +1,6 @@
 package io.zerobase.smarttracing
 
+import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import io.dropwizard.Application
 import io.dropwizard.Configuration
@@ -18,7 +19,7 @@ import javax.servlet.FilterRegistration
 
 typealias MultiMap<K,V> = Map<K, List<V>>
 
-data class Config(val database: Neo4jConfig, val siteTypeCategories: MultiMap<String, String>): Configuration()
+data class Config(val database: Neo4jConfig, val siteTypeCategories: MultiMap<String, String>, val scannableTypes: List<String>): Configuration()
 data class Neo4jConfig(val url: URI, val username: String, val password: String)
 
 typealias ConnectionConfig = org.neo4j.driver.Config
@@ -43,12 +44,19 @@ class Main: Application<Config>() {
                 ConnectionConfig.builder().withEncryption().build()
         )
 
-        env.jersey().register(Router(GraphDao(driver)))
+        /**
+         * For phone number verification.
+         */
+        val phoneUtil = PhoneNumberUtil.getInstance()
+
+        val dao = GraphDao(driver, phoneUtil)
+
+        env.jersey().register(Router(dao))
         env.jersey().register(CreatorFilter())
-        env.jersey().register(OrganizationsResource())
+        env.jersey().register(OrganizationsResource(dao, config.siteTypeCategories, config.scannableTypes))
         env.jersey().register(DevicesResource())
         env.jersey().register(UsersResource())
-        env.jersey().register(ModelsResource(config.siteTypeCategories))
+        env.jersey().register(ModelsResource(config.siteTypeCategories, config.scannableTypes))
 
         addCorsFilter(env)
     }
