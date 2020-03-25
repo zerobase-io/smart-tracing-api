@@ -7,6 +7,7 @@ import io.zerobase.smarttracing.MultiMap
 import io.zerobase.smarttracing.models.OrganizationId
 import io.zerobase.smarttracing.models.IdWrapper
 import io.zerobase.smarttracing.models.ScannableId
+import io.zerobase.smarttracing.models.InvalidPhoneNumberException
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
 import javax.ws.rs.core.Response
@@ -74,11 +75,10 @@ class OrganizationsResource(val dao: GraphDao, private val siteTypes: MultiMap<S
                 hasMultipleSites
             )
             return id?.let { IdWrapper(id) }
-        } catch (e: Exception) {
-            val res = Response.status(Response.Status.BAD_REQUEST)
-                .entity(e.message)
-                .build()
-            throw WebApplicationException(res)
+        } catch (e: InvalidPhoneNumberException) {
+            throw BadRequestException(e.message)
+        } finally {
+            throw BadRequestException("Unknown exception")
         }
     }
 
@@ -94,18 +94,12 @@ class OrganizationsResource(val dao: GraphDao, private val siteTypes: MultiMap<S
         val longitude = request.location.longitude
         val isTesting = request.isTesting
 
-        if (!(siteTypes.containsKey(category))) {
-            val res = Response.status(Response.Status.BAD_REQUEST)
-                .entity("Not a valid category please check /models/site-types")
-                .build()
-            throw WebApplicationException(res)
+        if (!siteTypes.containsKey(category)) {
+            throw BadRequestException("Not a valid category please check /models/site-types")
         }
 
-        if (!(siteTypes[category]?.contains(subcategory) ?: false)) {
-            val res = Response.status(Response.Status.BAD_REQUEST)
-                .entity("Not a valid subcategory please check /models/site-types")
-                .build()
-            throw WebApplicationException(res)
+        if (!siteTypes[category]?.contains(subcategory) ?: true) {
+            throw BadRequestException("Not a valid subcategory please check /models/site-types")
         }
 
         val id = if (request.contact == null) {

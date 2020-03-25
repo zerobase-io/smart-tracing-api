@@ -2,6 +2,7 @@ package io.zerobase.smarttracing
 
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
+import io.zerobase.smarttracing.models.InvalidPhoneNumberException
 import io.zerobase.smarttracing.models.DeviceId
 import io.zerobase.smarttracing.models.Fingerprint
 import io.zerobase.smarttracing.models.ScanId
@@ -78,7 +79,7 @@ class GraphDao(private val driver: Driver, val phoneUtil: PhoneNumberUtil) {
         val validNum = phoneUtil.isValidNumber(phoneUtil.parseAndKeepRawInput(phone, "US"))
 
         if (!validNum) {
-            throw Exception("Invalid phone number")
+            throw InvalidPhoneNumberException("Invalid phone number")
         }
 
         return driver.session().use {
