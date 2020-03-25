@@ -95,6 +95,13 @@
             <artifactId>jackson-annotations</artifactId>
         </dependency>
 
+        <!-- libphonenumber -->
+        <dependency>
+            <groupId>com.googlecode.libphonenumber</groupId>
+            <artifactId>libphonenumber</artifactId>
+            <version>8.10.2</version>
+        </dependency>
+
         <!-- Other Dependencies -->
         <dependency>
             <groupId>org.neo4j.driver</groupId>

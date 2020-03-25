@@ -68,13 +68,13 @@ The following directions use Intellij as the IDE, but the steps should be simila
     ```sh
     $ mvn clean install
     ```
-* Set the `GRAPHENEDB_PASSWORD` environment variable, either as an export or inline, and run the jar.
+* Set the `GRAPHENEDB_BOLT_PASSWORD` environment variable, either as an export or inline, and run the jar.
     * Export
         ```sh
-        $ export GRAPHENEDB_PASSWORD=<your neo4j password>
+        $ export GRAPHENEDB_BOLT_PASSWORD=<your neo4j password>
         $ java -jar target/smart-tracing-api.jar server target/classes/config.yml
         ```
     * Inline
     ```sh
-    $ GRAPHENEDB_PASSWORD=<your neo4j password> java -jar target/smart-tracing-api.jar server target/classes/config.yml
+    $ GRAPHENEDB_BOLT_PASSWORD=<your neo4j password> java -jar target/smart-tracing-api.jar server target/classes/config.yml
     ```

@@ -13,3 +13,6 @@ siteTypeCategories:
   - FOOD
   HEALTH:
   - DOCTOR_OFFICE
+
+scannable:
+  - QR_CODE
