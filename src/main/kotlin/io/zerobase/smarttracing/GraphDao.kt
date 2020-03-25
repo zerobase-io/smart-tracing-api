@@ -66,7 +66,7 @@ class GraphDao(private val driver: Driver, val phoneUtil: PhoneNumberUtil) {
      * @param email email for the contact for the organization.
      * @param contactName name of the contact for the organization.
      * @param address address of the organization.
-     * @param testing if the organization will be doing testing.
+     * @param testing if the organization owns sites that can do testing.
      * @param multiSite reporting if the organization has multiple sites.
      *
      * @return organization id.
@@ -131,7 +131,7 @@ class GraphDao(private val driver: Driver, val phoneUtil: PhoneNumberUtil) {
      * @param subcategory subcategory of the site.
      * @param lat latitude of the site.
      * @param long longitude of the site.
-     * @param testing if the site is testing or not.
+     * @param testing whether the site can preform testing.
      * @param phone contact phone of site manager
      * @param email contact email of site manager
      * @param contactName contact name of site manager
@@ -206,7 +206,8 @@ class GraphDao(private val driver: Driver, val phoneUtil: PhoneNumberUtil) {
     }
 
     /**
-     * Creates a scannable for a site.
+     * Creates a scannable for a site. A scannable is either QR Code or BT
+     * receivers.
      *
      * @param oid organization id
      * @param sid site id
