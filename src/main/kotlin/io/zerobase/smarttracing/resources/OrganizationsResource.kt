@@ -93,7 +93,6 @@ class OrganizationsResource(val dao: GraphDao, private val siteTypes: MultiMap<S
         val latitude = request.location.latitude
         val longitude = request.location.longitude
         val isTesting = request.isTesting
-        val isSubCat = siteTypes[category]?.contains(subcategory)
 
         if (!(siteTypes.containsKey(category))) {
             val res = Response.status(Response.Status.BAD_REQUEST)
