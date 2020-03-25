@@ -77,8 +77,6 @@ class OrganizationsResource(val dao: GraphDao, private val siteTypes: MultiMap<S
             return id?.let { IdWrapper(id) }
         } catch (e: InvalidPhoneNumberException) {
             throw BadRequestException(e.message)
-        } finally {
-            throw BadRequestException("Unknown exception")
         }
     }
 
