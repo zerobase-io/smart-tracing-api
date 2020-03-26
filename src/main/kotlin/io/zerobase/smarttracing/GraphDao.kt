@@ -3,8 +3,6 @@ package io.zerobase.smarttracing
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import io.zerobase.smarttracing.models.*
-import io.zerobase.smarttracing.resources.CreateCheckInRequest
-import io.zerobase.smarttracing.resources.Location
 import org.neo4j.driver.Driver
 import java.util.*
 
@@ -18,8 +16,7 @@ class GraphDao(private val driver: Driver, val phoneUtil: PhoneNumberUtil) {
         return driver.session().use { session ->
             session.writeTransaction { txn ->
                 val result = txn.run(
-                        "CREATE (d:Device {id: '${UUID.randomUUID()}', fingerprint: '${fingerprint?.value
-                                ?: "none"}', initialIp: '${ip ?: "none"}'}) RETURN d.id as id"
+                        "CREATE (d:Device {id: '${UUID.randomUUID()}', fingerprint: '${fingerprint?.value ?: "none"}', initialIp: '${ip ?: "none"}'}) RETURN d.id as id"
                 ).single()["id"].asString()
                 return@writeTransaction result?.let { DeviceId(it) }
             }
@@ -29,13 +26,18 @@ class GraphDao(private val driver: Driver, val phoneUtil: PhoneNumberUtil) {
     /**
      * Creates a new CheckIn and returns its ID
      */
-    fun createCheckIn(scannedId: ScannableId, type: CreateCheckInRequest.ScanType, location: Location?): CheckInId? {
+    fun createCheckIn(deviceId: DeviceId, scannedId: ScannableId, loc: Location?): ScanId? {
         return driver.session().use { session ->
             session.writeTransaction { txn ->
                 val result = txn.run(
-                        // TODO [ndrwksr | 3/26/20]: Michael has graciously agreed to write this CQL.
+                    """
+                    MATCH (d:Device { id: '${deviceId.value}' })
+                    MATCH (s:Scannable { id: '${scannedId.value}' })
+                    CREATE (d) - [r:SCAN { id: '${UUID.randomUUID()}', latitude: '${loc?.latitude}', longitude: '${loc?.longitude}' }] -> (s)
+                    RETURN r.id AS id
+                    """.trimIndent()
                 ).single()["id"].asString()
-                return@writeTransaction result?.let { CheckInId(it) }
+                return@writeTransaction result?.let { ScanId(it) }
             }
         }
     }
@@ -43,24 +45,28 @@ class GraphDao(private val driver: Driver, val phoneUtil: PhoneNumberUtil) {
     /**
      * Updates the location attribute of a CheckIn. Throws 404 if CheckIn doesn't exist.
      */
-    fun updateCheckInLocation(deviceId: DeviceId, checkInId: CheckInId, lat: Float, long: Float) {
-        return driver.session().use { session ->
+    fun updateCheckInLocation(deviceId: DeviceId, checkInId: ScanId, loc: Location) {
+        driver.session().use { session ->
             session.writeTransaction { txn ->
                 txn.run(
-                        // TODO [ndrwksr | 3/26/20]: Michael has graciously agreed to write this CQL.
+                    """
+                    MATCH (d:Device { id: '${deviceId.value}' }) - [r:SCAN { id: '${checkInId.value}' }] -> ()
+                    SET r.latitude = '${loc.latitude}'
+                    SET r.longitude = '${loc.longitude}'
+                    """.trimIndent()
                 )
             }
         }
     }
 
-    fun recordPeerToPeerScan(scanner: DeviceId, scanned: DeviceId): ScanId? {
+    fun recordPeerToPeerScan(scanner: DeviceId, scanned: DeviceId, loc: Location?): ScanId? {
         return driver.session().use {
             it.writeTransaction { txn ->
                 val result = txn.run(
                         """
                             MATCH (d:Device) WHERE ID(d) = ${scanner.value}
                             MATCH (d2:Device) WHERE ID(d2) = ${scanned.value}
-                            CREATE (d)-[r:SCAN{id: '${UUID.randomUUID()}', timestamp: TIMESTAMP()}]->(d2)
+                            CREATE (d)-[r:SCAN{id: '${UUID.randomUUID()}', timestamp: TIMESTAMP(), latitude: '${loc?.latitude}', longitude: '${loc?.longitude}'}]->(d2)
                             RETURN r.id as id
                         """.trimIndent()
                 ).single()["id"].asString()

@@ -54,7 +54,7 @@ class Main: Application<Config>() {
         env.jersey().register(Router(dao))
         env.jersey().register(CreatorFilter())
         env.jersey().register(OrganizationsResource(dao, config.siteTypeCategories, config.scannableTypes))
-        env.jersey().register(DevicesResource())
+        env.jersey().register(DevicesResource(dao))
         env.jersey().register(UsersResource(dao))
         env.jersey().register(ModelsResource(config.siteTypeCategories, config.scannableTypes))
 

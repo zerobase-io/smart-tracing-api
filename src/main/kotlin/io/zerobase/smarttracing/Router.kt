@@ -34,7 +34,7 @@ class Router(val dao: GraphDao) {
     @Path("/s-id/{deviceId}")
     @POST
     fun recordCheckIn(req: PeerToPeerCheckIn): ApiResponse {
-        val id = dao.recordPeerToPeerScan(DeviceId(req.scanningDevice), DeviceId(req.scannedDevice))
+        val id = dao.recordPeerToPeerScan(DeviceId(req.scanningDevice), DeviceId(req.scannedDevice), null)
         return when (id) {
             null -> ApiResponse(success = false, message = "At least one provided ID is not valid.")
             else -> ScanRecordedResponse(id.value)
