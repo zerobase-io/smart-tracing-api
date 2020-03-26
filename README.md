@@ -85,3 +85,5 @@ The following directions use Intellij as the IDE, but the steps should be simila
     ```sh
     $ GRAPHENEDB_BOLT_PASSWORD=<your neo4j password> java -jar target/smart-tracing-api.jar server target/classes/config.yml
     ```
+  ### Debugging / Calling end points 
+  * Once you're running the project, you can double check if all is well by going to ``` localhost:8081 ``` for the admin interface (if ```0.0.0.0:8081``` isn't working for you)
