@@ -7,11 +7,16 @@ import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
 
 //region Request Models
+enum class ScanType(val type: String) {
+    DEVICE_TO_DEVICE("DEVICE_TO_DEVICE"),
+    DEVICE_TO_SCANNABLE("DEVICE_TO_SCANNABLE")
+}
+
 data class CreateDeviceRequest(val fingerprint: String)
 
 data class CreateCheckInRequest(
         val scannedId: String,
-        val type: String,
+        val type: ScanType,
         val location: Location?
 )
 
@@ -42,9 +47,9 @@ class DevicesResource(val dao: GraphDao) {
         val type = request.type
         val loc = request.location
 
-        val newCheckInId = if (type == "DEVICE_TO_SCANNABLE") {
+        val newCheckInId = if (type == ScanType.DEVICE_TO_SCANNABLE) {
             dao.createCheckIn(DeviceId(deviceId), ScannableId(scannedId), loc)
-        } else if (type == "DEVICE_TO_DEVICE") {
+        } else if (type == ScanType.DEVICE_TO_DEVICE) {
             dao.recordPeerToPeerScan(DeviceId(deviceId), DeviceId(scannedId), loc)
         } else {
             throw BadRequestException("Incorrect type")

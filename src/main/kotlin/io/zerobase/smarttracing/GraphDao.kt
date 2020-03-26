@@ -64,8 +64,8 @@ class GraphDao(private val driver: Driver, val phoneUtil: PhoneNumberUtil) {
             it.writeTransaction { txn ->
                 val result = txn.run(
                         """
-                            MATCH (d:Device) WHERE ID(d) = ${scanner.value}
-                            MATCH (d2:Device) WHERE ID(d2) = ${scanned.value}
+                            MATCH (d:Device { id: '${scanner.value}' })
+                            MATCH (d2:Device { id: '${scanned.value}' })
                             CREATE (d)-[r:SCAN{id: '${UUID.randomUUID()}', timestamp: TIMESTAMP(), latitude: '${loc?.latitude}', longitude: '${loc?.longitude}'}]->(d2)
                             RETURN r.id as id
                         """.trimIndent()
@@ -80,8 +80,8 @@ class GraphDao(private val driver: Driver, val phoneUtil: PhoneNumberUtil) {
             it.writeTransaction { txn ->
                 val result = txn.run(
                         """
-                            MATCH (d:Device) WHERE ID(d) = ${device.value}
-                            MATCH (s:Site) WHERE ID(s) = ${site.value}
+                            MATCH (d:Device) WHERE ID(d) = '${device.value}'
+                            MATCH (s:Site) WHERE ID(s) = '${site.value}'
                             CREATE (d)-[r:SCAN{id: '${UUID.randomUUID()}', timestamp: TIMESTAMP()}]->(s)
                             RETURN r.id as id
                         """.trimIndent()
