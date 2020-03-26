@@ -7,9 +7,9 @@ import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
 
 //region Request Models
-enum class ScanType(val type: String) {
-    DEVICE_TO_DEVICE("DEVICE_TO_DEVICE"),
-    DEVICE_TO_SCANNABLE("DEVICE_TO_SCANNABLE")
+enum class ScanType {
+    DEVICE_TO_DEVICE,
+    DEVICE_TO_SCANNABLE
 }
 
 data class CreateDeviceRequest(val fingerprint: String)
