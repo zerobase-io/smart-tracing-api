@@ -13,7 +13,7 @@ open class ApiResponse(val success: Boolean,
 data class DeviceCreatedResponse(@JsonProperty("dvid") val id: String): ApiResponse(success = true)
 data class ScanRecordedResponse(@JsonProperty("scan") val id: String): ApiResponse(success = true)
 
-data class CreateDeviceRequest(val fingerprint: String?, val ip: String?)
+data class LegacyCreateDeviceRequest(val fingerprint: String?, val ip: String?)
 data class PeerToPeerCheckIn(@JsonProperty("dvid") val scanningDevice: String, @JsonProperty("sdvid") val scannedDevice: String)
 
 @Path("/")
@@ -23,7 +23,7 @@ class Router(val dao: GraphDao) {
 
     @Path("/c/{unused: .+?}")
     @POST
-    fun createDevice(req: CreateDeviceRequest): ApiResponse {
+    fun createDevice(req: LegacyCreateDeviceRequest): ApiResponse {
         val id = dao.createDevice(req.fingerprint?.let{ Fingerprint(it) }, req.ip)
         return when (id) {
             null -> ApiResponse(success = false, message = "Sorry, there was an error processing your account, please try again.")

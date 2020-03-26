@@ -2,28 +2,53 @@ package io.zerobase.smarttracing
 
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
-import io.zerobase.smarttracing.models.InvalidPhoneNumberException
-import io.zerobase.smarttracing.models.DeviceId
-import io.zerobase.smarttracing.models.Fingerprint
-import io.zerobase.smarttracing.models.ScanId
-import io.zerobase.smarttracing.models.SiteId
-import io.zerobase.smarttracing.models.ScannableId
-import io.zerobase.smarttracing.models.OrganizationId
-import io.zerobase.smarttracing.models.UserId
-import io.zerobase.smarttracing.models.User
+import io.zerobase.smarttracing.models.*
+import io.zerobase.smarttracing.resources.CreateCheckInRequest
+import io.zerobase.smarttracing.resources.Location
 import org.neo4j.driver.Driver
 import java.util.*
 
 @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE", justification = "false positive")
 class GraphDao(private val driver: Driver, val phoneUtil: PhoneNumberUtil) {
 
+    /**
+     * Creates a new Device and returns its ID
+     */
     fun createDevice(fingerprint: Fingerprint?, ip: String?): DeviceId? {
         return driver.session().use { session ->
             session.writeTransaction { txn ->
                 val result = txn.run(
-                        "CREATE (d:Device {id: '${UUID.randomUUID()}', fingerprint: '${fingerprint?.value ?: "none"}', initialIp: '${ip ?: "none"}'}) RETURN d.id as id"
+                        "CREATE (d:Device {id: '${UUID.randomUUID()}', fingerprint: '${fingerprint?.value
+                                ?: "none"}', initialIp: '${ip ?: "none"}'}) RETURN d.id as id"
                 ).single()["id"].asString()
                 return@writeTransaction result?.let { DeviceId(it) }
+            }
+        }
+    }
+
+    /**
+     * Creates a new CheckIn and returns its ID
+     */
+    fun createCheckIn(scannedId: ScannableId, type: CreateCheckInRequest.ScanType, location: Location?): CheckInId? {
+        return driver.session().use { session ->
+            session.writeTransaction { txn ->
+                val result = txn.run(
+                        // TODO [ndrwksr | 3/26/20]: Michael has graciously agreed to write this CQL.
+                ).single()["id"].asString()
+                return@writeTransaction result?.let { CheckInId(it) }
+            }
+        }
+    }
+
+    /**
+     * Updates the location attribute of a CheckIn. Throws 404 if CheckIn doesn't exist.
+     */
+    fun updateCheckInLocation(deviceId: DeviceId, checkInId: CheckInId, lat: Float, long: Float) {
+        return driver.session().use { session ->
+            session.writeTransaction { txn ->
+                txn.run(
+                        // TODO [ndrwksr | 3/26/20]: Michael has graciously agreed to write this CQL.
+                )
             }
         }
     }
@@ -203,7 +228,7 @@ class GraphDao(private val driver: Driver, val phoneUtil: PhoneNumberUtil) {
      */
     fun createScannable(oid: OrganizationId, sid: SiteId, type: String,
                         singleUse: Boolean): ScannableId? {
-         return driver.session().use {
+        return driver.session().use {
             it.writeTransaction { txn ->
                 val result = txn.run(
                         """
@@ -267,7 +292,7 @@ class GraphDao(private val driver: Driver, val phoneUtil: PhoneNumberUtil) {
      * @param id id of the user to delete
      */
     fun deleteUser(id: UserId) {
-         driver.session().use {
+        driver.session().use {
             it.writeTransaction { txn ->
                 txn.run(
                         """
@@ -287,7 +312,7 @@ class GraphDao(private val driver: Driver, val phoneUtil: PhoneNumberUtil) {
      * @return User struct
      */
     fun getUser(id: UserId): User {
-         return driver.session().use {
+        return driver.session().use {
             it.writeTransaction { txn ->
                 val result = txn.run(
                         """
