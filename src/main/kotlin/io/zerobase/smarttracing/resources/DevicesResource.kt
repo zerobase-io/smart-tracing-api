@@ -10,9 +10,9 @@ import javax.ws.rs.core.MediaType
 data class CreateDeviceRequest(@JsonProperty("fingerprint") val fingerprint: Fingerprint)
 
 data class CreateCheckInRequest(
-        @JsonProperty("scannedId") val scannedId: ScannableId,
-        @JsonProperty("type") val type: ScanType,
-        @JsonProperty("location") val location: Location?
+        val scannedId: ScannableId,
+        val type: ScanType,
+        val location: Location?
 ) {
     enum class ScanType {
         DEVICE_TO_DEVICE,
@@ -42,10 +42,10 @@ class DevicesResource(val dao: GraphDao) {
         return newDeviceId?.let { IdWrapper(newDeviceId) }
     }
 
-    @Path("/{deviceId}/check-ins")
+    @Path("/{id}/check-ins")
     @POST
     @Creator
-    fun createCheckIn(@PathParam("deviceId") deviceId: String, request: CreateCheckInRequest): IdWrapper? {
+    fun createCheckIn(@PathParam("id") deviceId: String, request: CreateCheckInRequest): IdWrapper? {
         val scannedId = request.scannedId
         val type = request.type
         val location = request.location
