@@ -55,7 +55,7 @@ class Main: Application<Config>() {
         env.jersey().register(CreatorFilter())
         env.jersey().register(OrganizationsResource(dao, config.siteTypeCategories, config.scannableTypes))
         env.jersey().register(DevicesResource())
-        env.jersey().register(UsersResource())
+        env.jersey().register(UsersResource(dao))
         env.jersey().register(ModelsResource(config.siteTypeCategories, config.scannableTypes))
 
         addCorsFilter(env)

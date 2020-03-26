@@ -9,8 +9,11 @@ import io.zerobase.smarttracing.models.ScanId
 import io.zerobase.smarttracing.models.SiteId
 import io.zerobase.smarttracing.models.ScannableId
 import io.zerobase.smarttracing.models.OrganizationId
+import io.zerobase.smarttracing.models.UserId
 import org.neo4j.driver.Driver
 import java.util.*
+
+data class UserDaoStruct(val name: String?, val phone: String?, val email: String?, val id: String)
 
 @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE", justification = "false positive")
 class GraphDao(private val driver: Driver, val phoneUtil: PhoneNumberUtil) {
@@ -171,6 +174,8 @@ class GraphDao(private val driver: Driver, val phoneUtil: PhoneNumberUtil) {
      * Gets all the sites list
      *
      * @param id id of the organization
+     *
+     * @return list of all the sites.
      */
     fun getSites(id: String): List<Pair<String, String>> {
         return driver.session().use {
@@ -194,6 +199,8 @@ class GraphDao(private val driver: Driver, val phoneUtil: PhoneNumberUtil) {
      * @param sid site id
      * @param type type of scannable
      * @param singleUse if it is a single use scannable or not
+     *
+     * @return id of the scannable.
      */
     fun createScannable(oid: String, sid: String, type: String,
                         singleUse: Boolean): ScannableId? {
@@ -215,5 +222,88 @@ class GraphDao(private val driver: Driver, val phoneUtil: PhoneNumberUtil) {
                 return@writeTransaction result?.let { ScannableId(it) }
             }
         }
+    }
+
+    /**
+     * Creates a user node and links to device id.
+     *
+     * @param name name of the user.
+     * @param phone phone of the user.
+     * @param email email of the user.
+     * @param id id of the device used to create it.
+     *
+     * @returns id of the user.
+     */
+    fun createUser(name: String?, phone: String?, email: String?, id: String): UserId? {
+        val validNum = if (phone != null) {
+            phoneUtil.isValidNumber(phoneUtil.parseAndKeepRawInput(phone, "US"))
+        } else {
+            true
+        }
+
+        if (!validNum) {
+            throw InvalidPhoneNumberException("Invalid phone number")
+        }
+
+        // Can cause issues as it throws an exception when device id was used
+        // to create another device
+        return driver.session().use {
+            it.writeTransaction { txn ->
+                val result = txn.run(
+                        """
+                            MATCH (d:Device { id: '${id}' })
+                            WHERE NOT () - [:OWNS] -> (d)
+                            CREATE (u: User {
+                                        id: '${UUID.randomUUID()}',
+                                        name: '${name}',
+                                        phone: '${phone}',
+                                        email: '${email}',
+                                        deleted: 'false'
+                            }) - [r:OWNS] -> (d)
+                            RETURN u.id as id
+                        """.trimIndent()
+                ).single()["id"].asString()
+                return@writeTransaction result?.let { UserId(it) }
+            }
+        }
+    }
+
+    /**
+     * "Deletes" the user
+     *
+     * @param id id of the user to delete
+     */
+    fun deleteUser(id: String) {
+         driver.session().use {
+            it.writeTransaction { txn ->
+                txn.run(
+                        """
+                        MATCH (u:User { id: '${id}' })
+                        SET u.deleted = 'true'
+                        """
+                )
+            }
+        }
+    }
+
+    /**
+     * Gets the user
+     *
+     * @param id the id of the user
+     *
+     * @return User struct
+     */
+    fun getUser(id: String): UserDaoStruct {
+         return driver.session().use {
+            it.writeTransaction { txn ->
+                val result = txn.run(
+                        """
+                        MATCH (u:User { id: '${id}', deleted: 'false' })
+                        RETURN u.name AS name, u.phone AS phone, u.email AS email, u.id AS id
+                        """.trimIndent()
+                ).single()
+                return@writeTransaction result?.let { UserDaoStruct(it["name"].asString(), it["phone"].asString(), it["email"].asString(), it["id"].asString()) }
+            }
+        }!!
     }
 }
