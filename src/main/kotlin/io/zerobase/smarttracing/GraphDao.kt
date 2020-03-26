@@ -2,21 +2,16 @@ package io.zerobase.smarttracing
 
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
-import io.zerobase.smarttracing.models.InvalidPhoneNumberException
-import io.zerobase.smarttracing.models.DeviceId
-import io.zerobase.smarttracing.models.Fingerprint
-import io.zerobase.smarttracing.models.ScanId
-import io.zerobase.smarttracing.models.SiteId
-import io.zerobase.smarttracing.models.ScannableId
-import io.zerobase.smarttracing.models.OrganizationId
-import io.zerobase.smarttracing.models.UserId
-import io.zerobase.smarttracing.models.User
+import io.zerobase.smarttracing.models.*
 import org.neo4j.driver.Driver
 import java.util.*
 
 @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE", justification = "false positive")
 class GraphDao(private val driver: Driver, val phoneUtil: PhoneNumberUtil) {
 
+    /**
+     * Creates a new Device and returns its ID
+     */
     fun createDevice(fingerprint: Fingerprint?, ip: String?): DeviceId? {
         return driver.session().use { session ->
             session.writeTransaction { txn ->
@@ -28,14 +23,50 @@ class GraphDao(private val driver: Driver, val phoneUtil: PhoneNumberUtil) {
         }
     }
 
-    fun recordPeerToPeerScan(scanner: DeviceId, scanned: DeviceId): ScanId? {
+    /**
+     * Creates a new CheckIn and returns its ID
+     */
+    fun createCheckIn(deviceId: DeviceId, scannedId: ScannableId, loc: Location?): ScanId? {
+        return driver.session().use { session ->
+            session.writeTransaction { txn ->
+                val result = txn.run(
+                    """
+                    MATCH (d:Device { id: '${deviceId.value}' })
+                    MATCH (s:Scannable { id: '${scannedId.value}' })
+                    CREATE (d) - [r:SCAN { id: '${UUID.randomUUID()}', latitude: '${loc?.latitude}', longitude: '${loc?.longitude}' }] -> (s)
+                    RETURN r.id AS id
+                    """.trimIndent()
+                ).single()["id"].asString()
+                return@writeTransaction result?.let { ScanId(it) }
+            }
+        }
+    }
+
+    /**
+     * Updates the location attribute of a CheckIn. Throws 404 if CheckIn doesn't exist.
+     */
+    fun updateCheckInLocation(deviceId: DeviceId, checkInId: ScanId, loc: Location) {
+        driver.session().use { session ->
+            session.writeTransaction { txn ->
+                txn.run(
+                    """
+                    MATCH (d:Device { id: '${deviceId.value}' }) - [r:SCAN { id: '${checkInId.value}' }] -> ()
+                    SET r.latitude = '${loc.latitude}'
+                    SET r.longitude = '${loc.longitude}'
+                    """.trimIndent()
+                )
+            }
+        }
+    }
+
+    fun recordPeerToPeerScan(scanner: DeviceId, scanned: DeviceId, loc: Location?): ScanId? {
         return driver.session().use {
             it.writeTransaction { txn ->
                 val result = txn.run(
                         """
-                            MATCH (d:Device) WHERE ID(d) = ${scanner.value}
-                            MATCH (d2:Device) WHERE ID(d2) = ${scanned.value}
-                            CREATE (d)-[r:SCAN{id: '${UUID.randomUUID()}', timestamp: TIMESTAMP()}]->(d2)
+                            MATCH (d:Device { id: '${scanner.value}' })
+                            MATCH (d2:Device { id: '${scanned.value}' })
+                            CREATE (d)-[r:SCAN{id: '${UUID.randomUUID()}', timestamp: TIMESTAMP(), latitude: '${loc?.latitude}', longitude: '${loc?.longitude}'}]->(d2)
                             RETURN r.id as id
                         """.trimIndent()
                 ).single()["id"].asString()
@@ -49,8 +80,8 @@ class GraphDao(private val driver: Driver, val phoneUtil: PhoneNumberUtil) {
             it.writeTransaction { txn ->
                 val result = txn.run(
                         """
-                            MATCH (d:Device) WHERE ID(d) = ${device.value}
-                            MATCH (s:Site) WHERE ID(s) = ${site.value}
+                            MATCH (d:Device) WHERE ID(d) = '${device.value}'
+                            MATCH (s:Site) WHERE ID(s) = '${site.value}'
                             CREATE (d)-[r:SCAN{id: '${UUID.randomUUID()}', timestamp: TIMESTAMP()}]->(s)
                             RETURN r.id as id
                         """.trimIndent()
@@ -203,7 +234,7 @@ class GraphDao(private val driver: Driver, val phoneUtil: PhoneNumberUtil) {
      */
     fun createScannable(oid: OrganizationId, sid: SiteId, type: String,
                         singleUse: Boolean): ScannableId? {
-         return driver.session().use {
+        return driver.session().use {
             it.writeTransaction { txn ->
                 val result = txn.run(
                         """
@@ -267,7 +298,7 @@ class GraphDao(private val driver: Driver, val phoneUtil: PhoneNumberUtil) {
      * @param id id of the user to delete
      */
     fun deleteUser(id: UserId) {
-         driver.session().use {
+        driver.session().use {
             it.writeTransaction { txn ->
                 txn.run(
                         """
@@ -287,7 +318,7 @@ class GraphDao(private val driver: Driver, val phoneUtil: PhoneNumberUtil) {
      * @return User struct
      */
     fun getUser(id: UserId): User {
-         return driver.session().use {
+        return driver.session().use {
             it.writeTransaction { txn ->
                 val result = txn.run(
                         """

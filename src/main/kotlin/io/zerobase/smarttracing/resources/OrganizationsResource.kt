@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import io.zerobase.smarttracing.GraphDao
 import io.zerobase.smarttracing.MultiMap
+import io.zerobase.smarttracing.models.Location
 import io.zerobase.smarttracing.models.OrganizationId
 import io.zerobase.smarttracing.models.SiteId
 import io.zerobase.smarttracing.models.IdWrapper
@@ -20,11 +21,6 @@ data class Contact(
     val phone: String,
     val email: String,
     val contactName: String
-)
-
-data class Location(
-    val latitude: Float,
-    val longitude: Float
 )
 
 data class CreateOrganizationRequest(
