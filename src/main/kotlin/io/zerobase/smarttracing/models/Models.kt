@@ -13,3 +13,5 @@ inline class UserId(override val value: String): Id
 inline class ScannableId(override val value: String): Id
 
 data class IdWrapper(val id: Id)
+
+data class User(val name: String?, val phone: String?, val email: String?, val id: String)

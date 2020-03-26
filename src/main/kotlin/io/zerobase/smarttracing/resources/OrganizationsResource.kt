@@ -5,6 +5,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import io.zerobase.smarttracing.GraphDao
 import io.zerobase.smarttracing.MultiMap
 import io.zerobase.smarttracing.models.OrganizationId
+import io.zerobase.smarttracing.models.SiteId
 import io.zerobase.smarttracing.models.IdWrapper
 import io.zerobase.smarttracing.models.ScannableId
 import io.zerobase.smarttracing.models.InvalidPhoneNumberException
@@ -100,33 +101,26 @@ class OrganizationsResource(val dao: GraphDao, private val siteTypes: MultiMap<S
             throw BadRequestException("Not a valid subcategory please check /models/site-types")
         }
 
-        val id = if (request.contact == null) {
-            dao.createSite(
-                id, name, category, subcategory, latitude,
-                longitude, isTesting, null, null, null
-            )
-        } else {
-            dao.createSite(
-                id, name, category, subcategory, latitude,
-                longitude, isTesting, request.contact!!.phone,
-                request.contact!!.email, request.contact!!.contactName
-            )
-        }
+        val oid = dao.createSite(
+            OrganizationId(id), name, category, subcategory,
+            latitude, longitude, isTesting, request.contact?.phone,
+            request.contact?.email, request.contact?.contactName
+        )
 
-        return id?.let { IdWrapper(id) }
+        return oid?.let { IdWrapper(oid) }
     }
 
     @Path("/{id}/sites")
     @GET
     fun getSites(@PathParam("id") id: String): List<SiteResponse> {
-        val (x, y) = dao.getSites(id).unzip()
+        val (x, y) = dao.getSites(OrganizationId(id)).unzip()
         return x.zip(y) { a:String, b:String -> SiteResponse(a, b) }
     }
 
     @Path("/{id}/multiple-sites-setting")
     @PUT
     fun updateMultipleSitesSetting(@PathParam("id") id: String, hasMultipleSites: Boolean) {
-        dao.setMultiSite(id, hasMultipleSites)
+        dao.setMultiSite(OrganizationId(id), hasMultipleSites)
     }
 
     @Path("/{orgId}/sites/{siteId}/scannables")
@@ -144,7 +138,7 @@ class OrganizationsResource(val dao: GraphDao, private val siteTypes: MultiMap<S
             throw WebApplicationException(res)
         }
 
-        val id = dao.createScannable(orgId, siteId, type, singleUse)
+        val id = dao.createScannable(OrganizationId(orgId), SiteId(siteId), type, singleUse)
 
         return id?.let { IdWrapper(id) }
     }

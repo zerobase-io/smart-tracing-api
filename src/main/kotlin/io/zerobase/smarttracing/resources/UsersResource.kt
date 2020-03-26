@@ -1,5 +1,8 @@
 package io.zerobase.smarttracing.resources
 
+import io.zerobase.smarttracing.models.User
+import io.zerobase.smarttracing.models.UserId
+import io.zerobase.smarttracing.models.DeviceId
 import io.zerobase.smarttracing.models.IdWrapper
 import io.zerobase.smarttracing.GraphDao
 import io.zerobase.smarttracing.models.InvalidPhoneNumberException
@@ -21,13 +24,6 @@ data class CreateUserRequest(
     val deviceId: String
 )
 
-data class SummaryResponse(
-    val name: String?,
-    val phone: String?,
-    val email: String?,
-    val uuid: String
-)
-
 @Path("/users")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -40,7 +36,7 @@ class UsersResource(val dao: GraphDao) {
         try {
             val id = dao.createUser(
                 request.name, request.contact.phone,
-                request.contact.email, request.deviceId
+                request.contact.email, DeviceId(request.deviceId)
             )
             return id?.let { IdWrapper(id) }
         } catch (e: InvalidPhoneNumberException) {
@@ -51,14 +47,13 @@ class UsersResource(val dao: GraphDao) {
     @Path("/{id}")
     @DELETE
     fun deleteUser(@PathParam("id") id: String) {
-        dao.deleteUser(id)
+        dao.deleteUser(UserId(id))
         // TODO: Add email or something
     }
 
     @Path("/{id}/summary")
     @GET
-    fun getUserDump(@PathParam("id") id: String): SummaryResponse {
-        val (name, phone, email, uuid) = dao.getUser(id)
-        return SummaryResponse(name, phone, email, uuid)
+    fun getUserDump(@PathParam("id") id: String): User {
+        return dao.getUser(UserId(id))
     }
 }

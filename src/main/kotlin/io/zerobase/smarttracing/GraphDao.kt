@@ -10,10 +10,9 @@ import io.zerobase.smarttracing.models.SiteId
 import io.zerobase.smarttracing.models.ScannableId
 import io.zerobase.smarttracing.models.OrganizationId
 import io.zerobase.smarttracing.models.UserId
+import io.zerobase.smarttracing.models.User
 import org.neo4j.driver.Driver
 import java.util.*
-
-data class UserDaoStruct(val name: String?, val phone: String?, val email: String?, val id: String)
 
 @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE", justification = "false positive")
 class GraphDao(private val driver: Driver, val phoneUtil: PhoneNumberUtil) {
@@ -114,12 +113,12 @@ class GraphDao(private val driver: Driver, val phoneUtil: PhoneNumberUtil) {
      * @param id organization uuid.
      * @param state the value for the multi-site flag
      */
-    fun setMultiSite(id: String, state: Boolean) {
+    fun setMultiSite(id: OrganizationId, state: Boolean) {
         driver.session().use {
             it.writeTransaction { txn ->
                 txn.run(
                         """
-                        MATCH (o:Organization { id: '${id}' })
+                        MATCH (o:Organization { id: '${id.value}' })
                         SET o.multisite = 'true'
                         """
                 )
@@ -141,12 +140,12 @@ class GraphDao(private val driver: Driver, val phoneUtil: PhoneNumberUtil) {
      * @param email contact email of site manager
      * @param contactName contact name of site manager
      */
-    fun createSite(id: String, name: String, category: String,
+    fun createSite(id: OrganizationId, name: String, category: String,
                    subcategory: String, lat: Float, long: Float,
                    testing: Boolean, phone: String?, email: String?,
                    contactName: String?): SiteId? {
         val query = """
-            MATCH (o:Organization { id: '${id}' })
+            MATCH (o:Organization { id: '${id.value}' })
             CREATE (s:Site {
                         id: '${UUID.randomUUID()}',
                         phone: '${phone}',
@@ -177,12 +176,12 @@ class GraphDao(private val driver: Driver, val phoneUtil: PhoneNumberUtil) {
      *
      * @return list of all the sites.
      */
-    fun getSites(id: String): List<Pair<String, String>> {
+    fun getSites(id: OrganizationId): List<Pair<String, String>> {
         return driver.session().use {
             it.writeTransaction { txn ->
                 val result = txn.run(
                         """
-                        MATCH (o:Organization { id: '${id}' }) - [:OWNS] -> (s:Site)
+                        MATCH (o:Organization { id: '${id.value}' }) - [:OWNS] -> (s:Site)
                         RETURN s.id AS id, s.name AS name
                         """.trimIndent()
                 ).list { x -> Pair(x["id"].asString(), x["name"].asString()) }
@@ -202,13 +201,13 @@ class GraphDao(private val driver: Driver, val phoneUtil: PhoneNumberUtil) {
      *
      * @return id of the scannable.
      */
-    fun createScannable(oid: String, sid: String, type: String,
+    fun createScannable(oid: OrganizationId, sid: SiteId, type: String,
                         singleUse: Boolean): ScannableId? {
          return driver.session().use {
             it.writeTransaction { txn ->
                 val result = txn.run(
                         """
-                        MATCH (o:Organization { id: '${oid}' }) - [:OWNS] -> (s:Site { id: '${sid}' })
+                        MATCH (o:Organization { id: '${oid.value}' }) - [:OWNS] -> (s:Site { id: '${sid.value}' })
                         CREATE (scan:Scannable {
                                     id: '${UUID.randomUUID()}',
                                     type: '${type}',
@@ -234,14 +233,8 @@ class GraphDao(private val driver: Driver, val phoneUtil: PhoneNumberUtil) {
      *
      * @returns id of the user.
      */
-    fun createUser(name: String?, phone: String?, email: String?, id: String): UserId? {
-        val validNum = if (phone != null) {
-            phoneUtil.isValidNumber(phoneUtil.parseAndKeepRawInput(phone, "US"))
-        } else {
-            true
-        }
-
-        if (!validNum) {
+    fun createUser(name: String?, phone: String?, email: String?, id: DeviceId): UserId? {
+        if (phone?.let { !phoneUtil.isValidNumber(phoneUtil.parseAndKeepRawInput(phone, "US")) } ?: true) {
             throw InvalidPhoneNumberException("Invalid phone number")
         }
 
@@ -251,7 +244,7 @@ class GraphDao(private val driver: Driver, val phoneUtil: PhoneNumberUtil) {
             it.writeTransaction { txn ->
                 val result = txn.run(
                         """
-                            MATCH (d:Device { id: '${id}' })
+                            MATCH (d:Device { id: '${id.value}' })
                             WHERE NOT () - [:OWNS] -> (d)
                             CREATE (u: User {
                                         id: '${UUID.randomUUID()}',
@@ -273,12 +266,12 @@ class GraphDao(private val driver: Driver, val phoneUtil: PhoneNumberUtil) {
      *
      * @param id id of the user to delete
      */
-    fun deleteUser(id: String) {
+    fun deleteUser(id: UserId) {
          driver.session().use {
             it.writeTransaction { txn ->
                 txn.run(
                         """
-                        MATCH (u:User { id: '${id}' })
+                        MATCH (u:User { id: '${id.value}' })
                         SET u.deleted = 'true'
                         """
                 )
@@ -293,16 +286,16 @@ class GraphDao(private val driver: Driver, val phoneUtil: PhoneNumberUtil) {
      *
      * @return User struct
      */
-    fun getUser(id: String): UserDaoStruct {
+    fun getUser(id: UserId): User {
          return driver.session().use {
             it.writeTransaction { txn ->
                 val result = txn.run(
                         """
-                        MATCH (u:User { id: '${id}', deleted: 'false' })
+                        MATCH (u:User { id: '${id.value}', deleted: 'false' })
                         RETURN u.name AS name, u.phone AS phone, u.email AS email, u.id AS id
                         """.trimIndent()
                 ).single()
-                return@writeTransaction result?.let { UserDaoStruct(it["name"].asString(), it["phone"].asString(), it["email"].asString(), it["id"].asString()) }
+                return@writeTransaction result?.let { User(it["name"].asString(), it["phone"].asString(), it["email"].asString(), it["id"].asString()) }
             }
         }!!
     }
