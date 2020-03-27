@@ -89,6 +89,10 @@
                         <groupId>commons-logging</groupId>
                         <artifactId>commons-logging</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>jakarta.activation</groupId>
+                        <artifactId>jakarta.activation-api</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
         </dependencies>
@@ -187,6 +191,12 @@
             <groupId>javax.mail</groupId>
             <artifactId>mail</artifactId>
             <version>1.4</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>jakarta.activation</groupId>
+                    <artifactId>activation</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>javax.activation</groupId>

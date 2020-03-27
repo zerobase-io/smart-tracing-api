@@ -42,6 +42,7 @@ class UsersResource(val dao: GraphDao, val from: String) {
 
     @Path("/{id}")
     @DELETE
+    @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE", justification = "false positive")
     fun deleteUser(@PathParam("id") id: String) {
         val to = dao.deleteUser(UserId(id))
         to?.let { thanksForDeletingUser(it, from) }
