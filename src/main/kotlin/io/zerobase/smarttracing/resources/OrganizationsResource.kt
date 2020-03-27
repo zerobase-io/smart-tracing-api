@@ -46,7 +46,7 @@ data class SiteResponse(val id: String, val name: String)
 @Path("/organizations")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-class OrganizationsResource(val dao: GraphDao, private val siteTypes: MultiMap<String, String>, private val scanTypes: List<String>) {
+class OrganizationsResource(val dao: GraphDao, private val siteTypes: MultiMap<String, String>, private val scanTypes: List<String>, private val from: String) {
 
     @POST
     @Creator

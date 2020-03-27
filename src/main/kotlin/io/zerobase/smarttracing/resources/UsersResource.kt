@@ -22,7 +22,7 @@ data class CreateUserRequest(
 @Path("/users")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-class UsersResource(val dao: GraphDao) {
+class UsersResource(val dao: GraphDao, val from: String) {
 
     @POST
     @Creator
@@ -43,8 +43,8 @@ class UsersResource(val dao: GraphDao) {
     @Path("/{id}")
     @DELETE
     fun deleteUser(@PathParam("id") id: String) {
-        dao.deleteUser(UserId(id))
-        // TODO: Add email or something
+        val to = dao.deleteUser(UserId(id))
+        to?.let { thanksForDeletingUser(it, from) }
     }
 
     @Path("/{id}/summary")

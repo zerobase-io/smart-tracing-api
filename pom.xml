@@ -31,6 +31,7 @@
         <basepom.shaded.main-class>io.zerobase.smarttracing.MainKt</basepom.shaded.main-class>
         <dropwizard.version>2.0.2</dropwizard.version>
         <gremlin.version>[3.4.6,4)</gremlin.version>
+        <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
     </properties>
 
     <dependencyManagement>
@@ -166,6 +167,32 @@
             <artifactId>logback-access</artifactId>
         </dependency>
 
+        <!-- AWS Sending Emails -->
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>ses</artifactId>
+            <version>2.11.2</version>
+        </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>sdk-core</artifactId>
+            <version>2.11.2</version>
+        </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>regions</artifactId>
+            <version>2.11.2</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.mail</groupId>
+            <artifactId>mail</artifactId>
+            <version>1.4</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.activation</groupId>
+            <artifactId>activation</artifactId>
+            <version>1.1</version>
+        </dependency>
 
         <!-- Other Dependencies -->
         <dependency>

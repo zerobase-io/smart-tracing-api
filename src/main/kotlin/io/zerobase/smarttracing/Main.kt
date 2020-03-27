@@ -44,6 +44,7 @@ class Main: Application<Config>() {
          * For phone number verification.
          */
         val phoneUtil = PhoneNumberUtil.getInstance()
+        val from = config.amazonaws.from
 
         val dao = GraphDao(graph, phoneUtil)
 
@@ -51,9 +52,9 @@ class Main: Application<Config>() {
         env.jersey().register(InvalidIdExceptionMapper())
         env.jersey().register(Router(dao))
         env.jersey().register(CreatorFilter())
-        env.jersey().register(OrganizationsResource(dao, config.siteTypeCategories, config.scannableTypes))
+        env.jersey().register(OrganizationsResource(dao, config.siteTypeCategories, config.scannableTypes, from))
         env.jersey().register(DevicesResource(dao))
-        env.jersey().register(UsersResource(dao))
+        env.jersey().register(UsersResource(dao, from))
         env.jersey().register(ModelsResource(config.siteTypeCategories, config.scannableTypes))
 
         addCorsFilter(env)

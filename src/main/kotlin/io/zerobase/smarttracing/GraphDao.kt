@@ -240,6 +240,27 @@ class GraphDao(private val graph: GraphTraversalSource, private val phoneUtil: P
     }
 
     /**
+     * Gets the email for the organization
+     *
+     * @param oid organization id
+     *
+     * @return email of the organization.
+     */
+    fun getEmailOrg(oid: OrganizationId): String {
+        return driver.session().use {
+            it.writeTransaction { txn ->
+                val result = txn.run(
+                        """
+                        MATCH (o:Organization { id: '${oid.value}' })
+                        RETURN o.email AS email
+                        """.trimIndent()
+                ).single()["email"].asString()
+                return@writeTransaction result?.let { it }
+            }
+        }!!
+    }
+
+    /**
      * Creates a user node and links to device id.
      *
      * @param name name of the user.
