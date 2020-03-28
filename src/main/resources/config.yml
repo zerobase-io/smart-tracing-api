@@ -4,7 +4,7 @@ server:
   - type: http
     port: ${PORT:-9000}
 database:
-  url: ${GRAPHENEDB_BOLT_URL:-bolt://localhost:7687}
+  url: ${GRAPHENEDB_BOLT_URL:-bolt://192.168.99.101:7687}
   username: ${GRAPHENEDB_BOLT_USER:-neo4j}
   password: ${GRAPHENEDB_BOLT_PASSWORD}
 

@@ -1,0 +1,11 @@
+build/
+.gradle/
+
+# IntelliJ project files
+.idea/
+*.ipr
+*.iws
+*.iml
+
+src/test/pdfs/zerobase-qr.pdf
+out/

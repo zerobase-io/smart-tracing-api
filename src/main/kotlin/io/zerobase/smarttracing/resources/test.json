@@ -1,0 +1,8 @@
+{
+  "name": "string",
+  "contact": {
+    "phone": "string",
+    "email": "string"
+  },
+  "deviceId": "string"
+}
