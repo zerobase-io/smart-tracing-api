@@ -1,9 +1,13 @@
 name: Build and deploy to staging
-on: [push]
+on:
+  push:
+    branches: master
+  tag-ignore:
+  - v*
 
 jobs:
-  release:
-    name: Maven Build
+  build:
+    name: Release and deploy
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -17,12 +21,14 @@ jobs:
         path: ~/.m2
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2
-    - name: Build with Maven
-      run: mvn -B verify
-    - name: Publish package
-      run: mvn -B deploy
+    - name: Release
+      run: mvn -B release:prepare release:perform
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - run: docker --version
+    - uses: actions/github-script@0.9.0
+      script: |
+        version=$(cat target/classes/build.properties | grep version | awk -F= '{print $2}')
+        docker build . -t smart-tracing-api:${version} -t smart-tracing-api:latest
+        # TODO: docker push ... once we have a repo to push to
 
 
