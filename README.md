@@ -98,3 +98,28 @@ set an environment variable of `DB_PORT` to the port your gremlin server is runn
   shoudl see a simple page that exposes metrics and healthcheck results. You can also curl `http://localhost:8081/healthchecks` if
   you prefer the command line.
 * App endpoints are available at `http://localhost:9000`
+
+### Zerobase Backend PDF / QR Generation
+------------------------------
+Libraries: zxing, thymeleaf, itext, flying saucer
+
+PDF and QR generation files exist here: 
+```
+src/main/kotlin/io/zerobase/smarttracing/resources/PdfGenerator.kt
+src/main/kotlin/io/zerobase/smarttracing/resources/QRCodeGenerator.kt
+```
+
+PDF Configurations (via html, css, img, asset templates etc) here: 
+```
+src/main/resources/pdfconfig
+```
+
+To generate a PDF for yourself, you can run the main function in GeneratePdf (```PdfGenerator.kt```). 
+    
+A copy of the generated PDF is checked-in, in case you want to see what is generated:
+
+    src/main/resources/pdfconfig/example-zerobase-qr.pdf        
+
+There is a copy of the Zerobase generated pdf called example-zerobase-qr.pdf
+
+![Image of PDF](./images/zerobase_screenshot_pdf.PNG "zerobase qr example")
