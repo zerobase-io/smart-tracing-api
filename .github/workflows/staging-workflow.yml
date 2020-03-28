@@ -19,10 +19,10 @@ jobs:
         restore-keys: ${{ runner.os }}-m2
     - name: Build with Maven
       run: mvn -B verify
-    - run: mkdir artifacts && cp target/smart-tracing-api.jar target/classes/config.yml artifacts
     - name: Publish package
       run: mvn -B deploy
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - run: docker --version
 
 
