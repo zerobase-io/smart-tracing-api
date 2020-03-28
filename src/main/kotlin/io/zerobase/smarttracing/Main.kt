@@ -1,17 +1,17 @@
 package io.zerobase.smarttracing
 
-import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.google.i18n.phonenumbers.PhoneNumberUtil
 import io.dropwizard.Application
 import io.dropwizard.Configuration
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor
 import io.dropwizard.configuration.SubstitutingSourceProvider
 import io.dropwizard.setup.Bootstrap
 import io.dropwizard.setup.Environment
+import io.zerobase.smarttracing.config.GraphDatabaseFactory
 import io.zerobase.smarttracing.resources.*
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource
 import org.eclipse.jetty.servlets.CrossOriginFilter
-import org.neo4j.driver.AuthTokens
-import org.neo4j.driver.GraphDatabase
 import java.net.URI
 import java.util.*
 import javax.servlet.DispatcherType
@@ -19,7 +19,11 @@ import javax.servlet.FilterRegistration
 
 typealias MultiMap<K,V> = Map<K, List<V>>
 
-data class Config(val database: Neo4jConfig, val siteTypeCategories: MultiMap<String, String>, val scannableTypes: List<String>): Configuration()
+data class Config(
+        val database: GraphDatabaseFactory = GraphDatabaseFactory(),
+        val siteTypeCategories: MultiMap<String, String>,
+        val scannableTypes: List<String>
+): Configuration()
 data class Neo4jConfig(val url: URI, val username: String, val password: String)
 
 typealias ConnectionConfig = org.neo4j.driver.Config
@@ -38,18 +42,20 @@ class Main: Application<Config>() {
     }
 
     override fun run(config: Config, env: Environment) {
-        val driver = GraphDatabase.driver(
-                config.database.url,
-                AuthTokens.basic(config.database.username, config.database.password),
-                ConnectionConfig.builder().withEncryption().build()
-        )
+//        val driver = GraphDatabase.driver(
+//                config.database.url,
+//                AuthTokens.basic(config.database.username, config.database.password),
+//                ConnectionConfig.builder().withEncryption().build()
+//        )
+
+        val graph: GraphTraversalSource = config.database.build(env)
 
         /**
          * For phone number verification.
          */
         val phoneUtil = PhoneNumberUtil.getInstance()
 
-        val dao = GraphDao(driver, phoneUtil)
+        val dao = GraphDao(graph, phoneUtil)
 
         env.jersey().register(Router(dao))
         env.jersey().register(CreatorFilter())

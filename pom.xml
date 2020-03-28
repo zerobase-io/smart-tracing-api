@@ -106,7 +106,20 @@
             <artifactId>jackson-annotations</artifactId>
         </dependency>
 
+        <!-- AWS Dependencies -->
+        <dependency>
+            <groupId>org.apache.tinkerpop</groupId>
+            <artifactId>gremlin-driver</artifactId>
+            <version>3.4.1</version>
+        </dependency>
+
         <!-- Other Dependencies -->
+        <dependency>
+            <groupId>com.google.auto.service</groupId>
+            <artifactId>auto-service</artifactId>
+            <version>1.0-rc6</version>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>com.googlecode.libphonenumber</groupId>
             <artifactId>libphonenumber</artifactId>

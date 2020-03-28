@@ -3,15 +3,9 @@ server:
   applicationConnectors:
   - type: http
     port: ${PORT:-9000}
-logging:
-  loggers:
-    # Enable errors from body processing
-    io.dropwziard.jersey.jackson.JsonProcessingExceptionMapper: DEBUG
+
 database:
-  hosts: ${DB_HOSTS:-[localhost]}
-  port: ${DB_PORT:-8182}
-  username: ${DB_USER:-neo4j}
-  password: ${DB_PASSWORD}
+  hosts: [localhost]
 
 siteTypeCategories:
   BUSINESS:

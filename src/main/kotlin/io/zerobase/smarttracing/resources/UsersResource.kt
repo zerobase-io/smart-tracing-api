@@ -53,7 +53,7 @@ class UsersResource(val dao: GraphDao) {
 
     @Path("/{id}/summary")
     @GET
-    fun getUserDump(@PathParam("id") id: String): User {
-        return dao.getUser(UserId(id))
+    fun getUserDump(@PathParam("id") id: String): User? {
+        return dao.getUser(UserId(id)) ?: throw NotFoundException()
     }
 }

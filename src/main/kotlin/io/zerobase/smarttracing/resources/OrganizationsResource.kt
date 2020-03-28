@@ -62,17 +62,8 @@ class OrganizationsResource(val dao: GraphDao, private val siteTypes: MultiMap<S
         val hasTestingFacilities = request.hasTestingFacilities ?: false
         val hasMultipleSites = request.hasMultipleSites ?: true
 
-        try {
-            val id = dao.createOrganization(
-                name, phone, email,
-                contactName, address,
-                hasTestingFacilities,
-                hasMultipleSites
-            )
-            return id?.let { IdWrapper(id) }
-        } catch (e: InvalidPhoneNumberException) {
-            throw BadRequestException(e.message)
-        }
+        val id = dao.createOrganization(name, phone, email, contactName, address, hasTestingFacilities, hasMultipleSites)
+        return IdWrapper(id)
     }
 
     @Path("/{id}/sites")
@@ -91,17 +82,17 @@ class OrganizationsResource(val dao: GraphDao, private val siteTypes: MultiMap<S
             throw BadRequestException("Not a valid category please check /models/site-types")
         }
 
-        if (!(siteTypes[category]?.contains(subcategory) ?: false)) {
+        if (siteTypes[category]?.contains(subcategory) != true) {
             throw BadRequestException("Not a valid subcategory please check /models/site-types")
         }
 
-        val oid = dao.createSite(
+        val id = dao.createSite(
             OrganizationId(id), name, category, subcategory,
             latitude, longitude, isTesting, request.siteManagerContactInfo?.phone,
             request.siteManagerContactInfo?.email, request.siteManagerContactInfo?.contactName
         )
 
-        return oid?.let { IdWrapper(oid) }
+        return IdWrapper(id)
     }
 
     @Path("/{id}/sites")

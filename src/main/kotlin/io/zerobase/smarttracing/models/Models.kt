@@ -1,16 +1,18 @@
 package io.zerobase.smarttracing.models
 
+import com.fasterxml.jackson.annotation.JsonValue
+
 interface Id {
     val value: String
 }
 
 inline class Fingerprint(val value: String)
-inline class DeviceId(override val value: String): Id
-inline class SiteId(override val value: String): Id
-inline class ScanId(override val value: String): Id
-inline class OrganizationId(override val value: String): Id
-inline class UserId(override val value: String): Id
-inline class ScannableId(override val value: String): Id
+inline class DeviceId(@JsonValue override val value: String): Id
+inline class SiteId(@JsonValue override val value: String): Id
+inline class ScanId(@JsonValue override val value: String): Id
+inline class OrganizationId(@JsonValue override val value: String): Id
+inline class UserId(@JsonValue override val value: String): Id
+inline class ScannableId(@JsonValue override val value: String): Id
 
 data class IdWrapper(val id: Id)
 
