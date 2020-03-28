@@ -12,7 +12,6 @@ import io.zerobase.smarttracing.config.GraphDatabaseFactory
 import io.zerobase.smarttracing.resources.*
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource
 import org.eclipse.jetty.servlets.CrossOriginFilter
-import java.net.URI
 import java.util.*
 import javax.servlet.DispatcherType
 import javax.servlet.FilterRegistration
@@ -24,9 +23,6 @@ data class Config(
         val siteTypeCategories: MultiMap<String, String>,
         val scannableTypes: List<String>
 ): Configuration()
-data class Neo4jConfig(val url: URI, val username: String, val password: String)
-
-typealias ConnectionConfig = org.neo4j.driver.Config
 
 fun main(vararg args: String) {
     Main().run(*args)
@@ -42,12 +38,6 @@ class Main: Application<Config>() {
     }
 
     override fun run(config: Config, env: Environment) {
-//        val driver = GraphDatabase.driver(
-//                config.database.url,
-//                AuthTokens.basic(config.database.username, config.database.password),
-//                ConnectionConfig.builder().withEncryption().build()
-//        )
-
         val graph: GraphTraversalSource = config.database.build(env)
 
         /**

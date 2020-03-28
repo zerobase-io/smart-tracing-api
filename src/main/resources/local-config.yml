@@ -6,6 +6,7 @@ server:
 
 database:
   hosts: [localhost]
+  port: ${DB_PORT:-8182}
 
 siteTypeCategories:
   BUSINESS:

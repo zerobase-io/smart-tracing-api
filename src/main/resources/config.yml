@@ -8,8 +8,8 @@ logging:
     # Enable errors from body processing
     io.dropwziard.jersey.jackson.JsonProcessingExceptionMapper: DEBUG
 database:
-  hosts: ${DB_HOSTS:-[localhost]}
-  port: ${DB_PORT:-8182}
+  hosts: ${DB_HOSTS}
+  port: ${DB_PORT}
 
 siteTypeCategories:
   BUSINESS:
