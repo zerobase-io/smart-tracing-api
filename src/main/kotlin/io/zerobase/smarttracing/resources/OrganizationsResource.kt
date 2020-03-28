@@ -1,6 +1,5 @@
 package io.zerobase.smarttracing.resources
 
-import com.fasterxml.jackson.annotation.JsonProperty
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import io.zerobase.smarttracing.GraphDao
 import io.zerobase.smarttracing.MultiMap
@@ -8,7 +7,6 @@ import io.zerobase.smarttracing.models.Location
 import io.zerobase.smarttracing.models.OrganizationId
 import io.zerobase.smarttracing.models.SiteId
 import io.zerobase.smarttracing.models.IdWrapper
-import io.zerobase.smarttracing.models.ScannableId
 import io.zerobase.smarttracing.models.InvalidPhoneNumberException
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
@@ -25,7 +23,7 @@ data class Contact(
 
 data class CreateOrganizationRequest(
     val name: String,
-    val contact: Contact,
+    val contactInfo: Contact,
     val address: String,
     val hasTestingFacilities: Boolean?,
     val hasMultipleSites: Boolean?
@@ -37,7 +35,7 @@ data class CreateSiteRequest(
     val subcategory: String,
     val location: Location,
     val isTesting: Boolean,
-    val contact: Contact?
+    val siteManagerContactInfo: Contact?
 )
 
 data class CreateScannableRequest(
@@ -57,9 +55,9 @@ class OrganizationsResource(val dao: GraphDao, private val siteTypes: MultiMap<S
     @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE", justification = "false positive")
     fun createOrganization(request: CreateOrganizationRequest): IdWrapper? {
         val name = request.name
-        val phone = request.contact.phone
-        val email = request.contact.email
-        val contactName = request.contact.contactName
+        val phone = request.contactInfo.phone
+        val email = request.contactInfo.email
+        val contactName = request.contactInfo.contactName
         val address = request.address
         val hasTestingFacilities = request.hasTestingFacilities ?: false
         val hasMultipleSites = request.hasMultipleSites ?: true
@@ -99,8 +97,8 @@ class OrganizationsResource(val dao: GraphDao, private val siteTypes: MultiMap<S
 
         val oid = dao.createSite(
             OrganizationId(id), name, category, subcategory,
-            latitude, longitude, isTesting, request.contact?.phone,
-            request.contact?.email, request.contact?.contactName
+            latitude, longitude, isTesting, request.siteManagerContactInfo?.phone,
+            request.siteManagerContactInfo?.email, request.siteManagerContactInfo?.contactName
         )
 
         return oid?.let { IdWrapper(oid) }
