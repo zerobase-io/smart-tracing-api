@@ -1,0 +1,24 @@
+version '0.1.0'
+
+apply plugin: 'java'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.4'
+    compile group: 'org.thymeleaf', name: 'thymeleaf', version: '3.0.6.RELEASE'
+    compile group: 'com.github.jknack', name: 'handlebars', version: '4.0.6'
+    compile group: 'net.sf.jtidy', name: 'jtidy', version: 'r938'
+    compile group: 'org.xhtmlrenderer', name: 'flying-saucer-core', version: '9.1.6'
+    compile group: 'org.xhtmlrenderer', name: 'flying-saucer-pdf-itext5', version: '9.1.6'
+    compile "com.google.zxing:core:3.3.0"
+    compile 'com.google.zxing:javase:3.3.0'
+
+    testCompile('junit:junit:4.12')
+}

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" type="text/css" media="all" href="css/style.css"/>
+    </head>
+
+    <body>
+        <div class='header' th:include="header::header"></div>
+
+        <div th:include="letterhead::letterhead"></div>
+
+        <p>Please take three seconds right now to help our community by checking in.
+
+        </p>
+        <p>
+            <em>
+                The more community members participating, the more protected we all are.
+            </em>
+        </p>
+        <p> <strong>You could save a life.</strong>
+        </p>
+
+        <img class="qr-code" th:attr="src='qr/processed/qr_logo_overlay.png'" alt="logo">
+
+        <h3> To protect your privacy, we do not track any information related to your identity. </h3>
+
+        <h2><u><strong>Please Check In</strong></u></h2>
+        <ol>
+            <li>Open the <strong> camera </strong>on your smartphone</li>
+            <li>Point your phone at the <strong>QR code above</strong> & the message "Open zerobase.io" will appear</li>
+            <li>Click to open zerobase.io and you will see a "Scan Succeeded" message!</li>
+            <li><strong>All done!</strong> You can also share your phone number to receive anonymous notification in case you might have been exposed. </li>
+        </ol>
+
+        <h3> Thank you for doing your part in keeping [[${data.getTown()}]], [[${data.getState()}]] healthy! </h3>
+        <div class='footer' th:include="footer::footer"></div>
+
+        <div class="next-page">
+
+
+        </div>
+
+        <div class='footer' th:include="footer::footer"></div>
+
+    </body>
+
+</html>
