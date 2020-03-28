@@ -18,6 +18,12 @@
         <developerConnection>scm:git:ssh://git@github.com/zerobase-io/smart-tracing-api.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/zerobase-io/smart-tracing-api</url>
+        </repository>
+    </distributionManagement>
 
     <properties>
         <kotlin.version>1.3.70</kotlin.version>
