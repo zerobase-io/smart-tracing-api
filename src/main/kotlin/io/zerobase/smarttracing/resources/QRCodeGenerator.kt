@@ -47,8 +47,8 @@ class GenerateQRCode(var logoPath: String, // have to use source path
         g.drawImage(overlay.getScaledInstance(scaledWidth, scaledHeight, BufferedImage.SCALE_SMOOTH), 0, 0, Color(0, 0, 0, 0), null)
         g.dispose()
         //          to test if the image is coming out right
-//            File outputfile = new File("src/test/resources/zerobase_qr_logo_processed.png");
-//            ImageIO.write(imageBuff, "png", outputfile);
+        //            File outputfile = new File("src/test/resources/zerobase_qr_logo_processed.png");
+        //            ImageIO.write(imageBuff, "png", outputfile);
         return imageBuff
     }
 
