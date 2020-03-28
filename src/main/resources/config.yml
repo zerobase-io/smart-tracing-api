@@ -10,8 +10,6 @@ logging:
 database:
   hosts: ${DB_HOSTS:-[localhost]}
   port: ${DB_PORT:-8182}
-  username: ${DB_USER:-neo4j}
-  password: ${DB_PASSWORD}
 
 siteTypeCategories:
   BUSINESS:

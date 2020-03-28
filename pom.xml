@@ -106,14 +106,12 @@
             <artifactId>jackson-annotations</artifactId>
         </dependency>
 
-        <!-- AWS Dependencies -->
+        <!-- Other Dependencies -->
         <dependency>
             <groupId>org.apache.tinkerpop</groupId>
             <artifactId>gremlin-driver</artifactId>
             <version>3.4.1</version>
         </dependency>
-
-        <!-- Other Dependencies -->
         <dependency>
             <groupId>com.google.auto.service</groupId>
             <artifactId>auto-service</artifactId>
@@ -124,11 +122,6 @@
             <groupId>com.googlecode.libphonenumber</groupId>
             <artifactId>libphonenumber</artifactId>
             <version>8.10.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.neo4j.driver</groupId>
-            <artifactId>neo4j-java-driver</artifactId>
-            <version>4.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
@@ -157,6 +150,9 @@
             <artifactId>spotbugs-annotations</artifactId>
             <version>4.0.1</version>
         </dependency>
+
+        <!-- Test Dependencies -->
+
     </dependencies>
 
     <build>

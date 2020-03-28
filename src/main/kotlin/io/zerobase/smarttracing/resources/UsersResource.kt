@@ -33,6 +33,9 @@ class UsersResource(val dao: GraphDao) {
     @Creator
     @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE", justification = "false positive")
     fun createUser(request: CreateUserRequest): IdWrapper? {
+        if (request.name == null && request.contact.phone == null && request.contact.email == null) {
+            throw BadRequestException("At least one contact method or a name is required to create a user")
+        }
         try {
             val id = dao.createUser(
                 request.name, request.contact.phone,

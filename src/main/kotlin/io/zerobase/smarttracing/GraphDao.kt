@@ -1,12 +1,22 @@
 package io.zerobase.smarttracing
 
+import com.google.i18n.phonenumbers.NumberParseException
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import io.zerobase.smarttracing.models.*
 import io.zerobase.smarttracing.utils.LoggerDelegate
+import org.apache.tinkerpop.gremlin.process.traversal.Traversal
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource
 import org.apache.tinkerpop.gremlin.structure.T
+import org.apache.tinkerpop.gremlin.structure.VertexProperty
 import java.util.*
 
+private fun <T> VertexProperty<T>.getIfPresent(): T? {
+    return if (isPresent) { value() } else { null }
+}
+
+private fun <S, T> Traversal<S, T>.getIfPresent(): T? {
+    return tryNext().orElse(null)
+}
 
 class GraphDao(private val graph: GraphTraversalSource, private val phoneUtil: PhoneNumberUtil) {
     companion object {
@@ -22,6 +32,7 @@ class GraphDao(private val graph: GraphTraversalSource, private val phoneUtil: P
             val vertex = graph.addV("Device")
                     .property(T.id, id)
                     .property("fingerprint", fingerprint?.value ?: "none")
+                    .property("creationTimestamp", System.currentTimeMillis())
                     .next()
             return vertex?.run { DeviceId(id) } ?: throw EntityCreationException("Failed to save device")
         } catch (ex: Exception) {
@@ -81,7 +92,7 @@ class GraphDao(private val graph: GraphTraversalSource, private val phoneUtil: P
         }
     }
 
-    fun recordDeviceCheckIn(device: DeviceId, site: SiteId): ScanId? {
+    fun recordDeviceCheckIn(device: DeviceId, site: SiteId): ScanId {
         val id = UUID.randomUUID().toString()
         try {
             graph.addE("SCAN")
@@ -90,6 +101,7 @@ class GraphDao(private val graph: GraphTraversalSource, private val phoneUtil: P
                     .property(T.id, id)
                     .property("timestamp", System.currentTimeMillis())
                     .next()
+            return ScanId(id)
         } catch (ex: Exception) {
             log.error("error creating site scan. device={} site={}", device, site, ex)
             throw EntityCreationException("Error creating scan between device and site.", ex);
@@ -114,10 +126,7 @@ class GraphDao(private val graph: GraphTraversalSource, private val phoneUtil: P
     fun createOrganization(name: String, phone: String, email: String, contactName: String, address: String,
                            hasTestingFacilities: Boolean, multiSite: Boolean): OrganizationId {
 
-        // ZZ as the region code forces E.164
-        if (!phoneUtil.isValidNumber(phoneUtil.parseAndKeepRawInput(phone, "ZZ"))) {
-            throw InvalidPhoneNumberException("Invalid phone number")
-        }
+        validatePhoneNumber(phone)
 
         val id = UUID.randomUUID().toString()
         try {
@@ -131,6 +140,7 @@ class GraphDao(private val graph: GraphTraversalSource, private val phoneUtil: P
                 .property("verified", false)
                 .property("hasTestingFacilities", hasTestingFacilities)
                 .property("multisite", multiSite)
+                .property("creationTimestamp", System.currentTimeMillis())
                 .next()
             return OrganizationId(id)
         } catch (ex: Exception) {
@@ -163,172 +173,141 @@ class GraphDao(private val graph: GraphTraversalSource, private val phoneUtil: P
      * @param email contact email of site manager
      * @param contactName contact name of site manager
      */
-    fun createSite(id: OrganizationId, name: String, category: String, subcategory: String, lat: Float, long: Float,
+    fun createSite(organizationId: OrganizationId, name: String, category: String, subcategory: String, lat: Float, long: Float,
                    testing: Boolean, phone: String?, email: String?, contactName: String?): SiteId {
         val id = UUID.randomUUID().toString()
         try {
-            graph.addV("Site")
+            val siteVertex = graph.addV("Site")
                 .property(T.id, id)
                 .property("latitude", lat)
                 .property("longitude", long)
-                .property("")
+                .property("category", category)
+                .property("subcategory", subcategory)
+                .property("latitude", lat)
+                .property("longitude", long)
+                .property("contactName", contactName)
+                .property("phone", phone)
+                .property("email", email)
+                .property("testing", testing)
+                .property("creationTimestamp", System.currentTimeMillis())
+                .next()
+            graph.addE("OWNS").from(graph.V(T.id, organizationId.value)).to(siteVertex)
+            return SiteId(id)
+        } catch (ex: Exception) {
+            log.error("error creating site. organization={} name={} category={}-{} testing={}", id, name, category, subcategory, testing, ex)
+            throw EntityCreationException("Error creating site.", ex)
         }
-//        val query = """
-//            MATCH (o:Organization { id: '${id.value}' })
-//            CREATE (s:Site {
-//                        id: '${UUID.randomUUID()}',
-//                        phone: '${phone}',
-//                        email: '${email}',
-//                        contactName: '${contactName}',
-//                        name: '${name}',
-//                        category: '${category}',
-//                        subcategory: '${subcategory}',
-//                        latitude: '${lat}',
-//                        longitude: '${long}',
-//                        testing: '${testing}'
-//            })
-//            CREATE (o)-[r:OWNS]->(s)
-//            RETURN s.id as id
-//            """.trimIndent()
-//        return driver.session().use {
-//            it.writeTransaction { txn ->
-//                val result = txn.run(query).single()["id"].asString()
-//                return@writeTransaction result?.let { SiteId(it) }
-//            }
-//        }
     }
-//
-//    /**
-//     * Gets all the sites list
-//     *
-//     * @param id id of the organization
-//     *
-//     * @return list of all the sites.
-//     */
+
+    /**
+     * Gets all the sites list
+     *
+     * @param id id of the organization
+     *
+     * @return list of all the sites.
+     */
     fun getSites(id: OrganizationId): List<Pair<String, String>> {
-        return listOf()
-//        return driver.session().use {
-//            it.writeTransaction { txn ->
-//                val result = txn.run(
-//                        """
-//                        MATCH (o:Organization { id: '${id.value}' }) - [:OWNS] -> (s:Site)
-//                        RETURN s.id AS id, s.name AS name
-//                        """.trimIndent()
-//                ).list { x -> Pair(x["id"].asString(), x["name"].asString()) }
-//                return@writeTransaction result?.let { it }
-//            }
-//        }!!
+        return graph.V(T.id, id.value).outE("OWNS").otherV().toList()
+            .map{ "${it.id()}" to it.property<String>("name").value() }
     }
-//
-//    /**
-//     * Creates a scannable for a site. A scannable is either QR Code or BT
-//     * receivers.
-//     *
-//     * @param oid organization id
-//     * @param sid site id
-//     * @param type type of scannable
-//     * @param singleUse if it is a single use scannable or not
-//     *
-//     * @return id of the scannable.
-//     */
-    fun createScannable(oid: OrganizationId, sid: SiteId, type: String, singleUse: Boolean): ScannableId? {
-    return null
-//        return driver.session().use {
-//            it.writeTransaction { txn ->
-//                val result = txn.run(
-//                        """
-//                        MATCH (o:Organization { id: '${oid.value}' }) - [:OWNS] -> (s:Site { id: '${sid.value}' })
-//                        CREATE (scan:Scannable {
-//                                    id: '${UUID.randomUUID()}',
-//                                    type: '${type}',
-//                                    singleUse: '${singleUse}',
-//                                    active: 'true'
-//                        })
-//                        CREATE (s)-[r:OWNS]->(scan)
-//                        RETURN scan.id as id
-//                        """.trimIndent()
-//                ).single()["id"].asString()
-//                return@writeTransaction result?.let { ScannableId(it) }
-//            }
-//        }
+
+    /**
+     * Creates a scannable for a site. A scannable is either QR Code or BT
+     * receivers.
+     *
+     * @param oid organization id
+     * @param sid site id
+     * @param type type of scannable
+     * @param singleUse if it is a single use scannable or not
+     *
+     * @return id of the scannable.
+     */
+    fun createScannable(oid: OrganizationId, sid: SiteId, type: String, singleUse: Boolean): ScannableId {
+        val id = UUID.randomUUID().toString()
+        try {
+            graph.addV("Scannable").property(T.id, id).property("type", type).property("singleUse", singleUse)
+                .property("active", true).addE("OWNS")
+                .from(graph.V(T.id, sid.value))
+                .next()
+            return ScannableId(id)
+        } catch (ex: Exception) {
+            log.error("error creating scannable. organization={} site={} type={}", oid, sid, type)
+            throw EntityCreationException("Error creating scannable.", ex)
+        }
     }
-//
-//    /**
-//     * Creates a user node and links to device id.
-//     *
-//     * @param name name of the user.
-//     * @param phone phone of the user.
-//     * @param email email of the user.
-//     * @param id id of the device used to create it.
-//     *
-//     * @returns id of the user.
-//     */
-    fun createUser(name: String?, phone: String?, email: String?, id: DeviceId): UserId? {
-        return null
-//        if (phone?.let { !phoneUtil.isValidNumber(phoneUtil.parseAndKeepRawInput(phone, "US")) } ?: true) {
-//            throw InvalidPhoneNumberException("Invalid phone number")
-//        }
-//
-//        // Can cause issues as it throws an exception when device id was used
-//        // to create another device
-//        return driver.session().use {
-//            it.writeTransaction { txn ->
-//                val result = txn.run(
-//                        """
-//                            MATCH (d:Device { id: '${id.value}' })
-//                            WHERE NOT () - [:OWNS] -> (d)
-//                            CREATE (u: User {
-//                                        id: '${UUID.randomUUID()}',
-//                                        name: '${name}',
-//                                        phone: '${phone}',
-//                                        email: '${email}',
-//                                        deleted: 'false'
-//                            }) - [r:OWNS] -> (d)
-//                            RETURN u.id as id
-//                        """.trimIndent()
-//                ).single()["id"].asString()
-//                return@writeTransaction result?.let { UserId(it) }
-//            }
-//        }
+
+    /**
+     * Creates a user node and links to device id.
+     *
+     * @param name name of the user.
+     * @param phone phone of the user.
+     * @param email email of the user.
+     * @param id id of the device used to create it.
+     *
+     * @returns id of the user.
+     */
+    fun createUser(name: String?, phone: String?, email: String?, deviceId: DeviceId): UserId {
+        phone?.apply { validatePhoneNumber(phone) }
+        val id = UUID.randomUUID().toString()
+        try {
+            graph.addV("USER")
+                .property(T.id, id).property("name", name).property("phone", phone).property("email", email)
+                .property("deleted", false)
+                .addE("OWNS").from(graph.V(T.id, deviceId))
+                .next()
+            return UserId(id)
+        } catch (ex: Exception) {
+            log.error("error creating user for device. device={}", deviceId, ex)
+            throw EntityCreationException("Error creating user.", ex)
+        }
     }
-//
-//    /**
-//     * "Deletes" the user
-//     *
-//     * @param id id of the user to delete
-//     */
+
+    /**
+     * "Deletes" the user
+     *
+     * @param id id of the user to delete
+     */
     fun deleteUser(id: UserId) {
-//        driver.session().use {
-//            it.writeTransaction { txn ->
-//                txn.run(
-//                        """
-//                        MATCH (u:User { id: '${id.value}' })
-//                        SET u.deleted = 'true'
-//                        """
-//                )
-//            }
-//        }
+        try {
+            graph.V(T.id, id.value).property("deleted", true).next()
+        } catch (ex: Exception) {
+            log.error("failed to delete user. id={}", id, ex)
+            throw ex
+        }
     }
-//
-//    /**
-//     * Gets the user
-//     *
-//     * @param id the id of the user
-//     *
-//     * @return User struct
-//     */
+
+    /**
+     * Gets the user
+     *
+     * @param id the id of the user
+     *
+     * @return User struct
+     */
     fun getUser(id: UserId): User? {
-        return null
-//        return driver.session().use {
-//            it.writeTransaction { txn ->
-//                val result = txn.run(
-//                        """
-//                        MATCH (u:User { id: '${id.value}', deleted: 'false' })
-//                        RETURN u.name AS name, u.phone AS phone, u.email AS email, u.id AS id
-//                        """.trimIndent()
-//                ).single()
-//                return@writeTransaction result?.let { User(it["name"].asString(), it["phone"].asString(), it["email"].asString(), it["id"].asString()) }
-//            }
-//        }!!
+        try {
+            val vertex = graph.V(T.id, id.value).has("deleted", false).getIfPresent() ?: return null
+            return User(
+                id = id,
+                name = vertex.property<String>("name").value(),
+                phone = vertex.property<String>("phone").getIfPresent(),
+                email = vertex.property<String>("email").getIfPresent()
+            )
+        } catch (ex: Exception) {
+            log.error("error getting user. id={}", ex)
+            throw ex
+        }
+    }
+
+    private fun validatePhoneNumber(phone: String) {
+        try {
+            // ZZ as the region code forces E.164
+            val parsedPhoneNumber = phoneUtil.parse(phone, "ZZ")
+            val validityResult = phoneUtil.isPossibleNumberWithReason(parsedPhoneNumber)
+            if (validityResult != PhoneNumberUtil.ValidationResult.IS_POSSIBLE) {
+                throw InvalidPhoneNumberException("Unable to validate phone number: $validityResult")
+            }
+        } catch (ex: NumberParseException) {
+            throw InvalidPhoneNumberException("Phone number could not be parsed: ${ex.message}")
+        }
     }
 }
