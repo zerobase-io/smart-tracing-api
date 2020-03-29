@@ -3,7 +3,10 @@ package io.zerobase.smarttracing
 import com.fasterxml.jackson.annotation.JsonProperty
 import io.zerobase.smarttracing.models.DeviceId
 import io.zerobase.smarttracing.models.Fingerprint
-import javax.ws.rs.*
+import javax.ws.rs.Consumes
+import javax.ws.rs.POST
+import javax.ws.rs.Path
+import javax.ws.rs.Produces
 import javax.ws.rs.core.MediaType
 
 open class ApiResponse(val success: Boolean,
@@ -24,10 +27,10 @@ class Router(val dao: GraphDao) {
     @Path("/c/{unused: .+?}")
     @POST
     fun createDevice(req: LegacyCreateDeviceRequest): ApiResponse {
-        val id = dao.createDevice(req.fingerprint?.let{ Fingerprint(it) }, req.ip)
-        return when (id) {
-            null -> ApiResponse(success = false, message = "Sorry, there was an error processing your account, please try again.")
-            else -> DeviceCreatedResponse(id.value)
+        try {
+            return dao.createDevice(req.fingerprint?.let(::Fingerprint), req.ip).let { DeviceCreatedResponse(it.value) }
+        } catch (_: Exception) {
+            return ApiResponse(success = false, message = "Sorry, there was an error processing your account, please try again.")
         }
     }
 

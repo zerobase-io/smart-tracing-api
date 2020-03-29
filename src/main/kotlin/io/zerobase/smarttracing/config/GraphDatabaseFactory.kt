@@ -11,7 +11,7 @@ data class Credentials(val username: String, val password: String)
 
 @OptIn(ExperimentalUnsignedTypes::class)
 class GraphDatabaseFactory {
-    var hosts: Array<String> = arrayOf("localhost")
+    var hosts: List<String> = listOf("localhost")
     var port: UInt = 8182u
     var path: String? = null
     var maxConnectionPoolSize: UInt? = null
@@ -22,7 +22,7 @@ class GraphDatabaseFactory {
 
     fun build(environment: Environment): GraphTraversalSource {
         val builder = Cluster.build()
-                .addContactPoints(*hosts)
+                .addContactPoints(*hosts.toTypedArray())
                 .port(port.toInt())
         path?.also { builder.path(it) }
         maxConnectionPoolSize?.let(UInt::toInt)?.also { builder.maxConnectionPoolSize(it) }

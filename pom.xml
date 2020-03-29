@@ -57,12 +57,35 @@
             </dependency>
             <dependency>
                 <groupId>io.dropwizard</groupId>
+                <artifactId>dropwizard-dependencies</artifactId>
+                <version>${dropwizard.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+            <dependency>
+                <groupId>io.dropwizard</groupId>
                 <artifactId>dropwizard-jersey</artifactId>
                 <version>${dropwizard.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>jakarta.activation</groupId>
                         <artifactId>jakarta.activation-api</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.yaml</groupId>
+                <artifactId>snakeyaml</artifactId>
+                <version>[1.24,2)</version>
+            </dependency>
+            <dependency>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>amazon-neptune-gremlin-java-sigv4</artifactId>
+                <version>1.0</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -125,25 +148,13 @@
         </dependency>
         <dependency>
             <groupId>com.amazonaws</groupId>
-            <artifactId>aws-java-sdk-core</artifactId>
-            <version>1.11.307</version>
-        </dependency>
-        <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>amazon-neptune-sigv4-signer</artifactId>
-            <version>1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.amazonaws</groupId>
             <artifactId>amazon-neptune-gremlin-java-sigv4</artifactId>
-            <version>1.0</version>
         </dependency>
 
         <!-- Other Dependencies -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.7.30</version>
         </dependency>
         <dependency>
             <groupId>com.googlecode.libphonenumber</groupId>
@@ -177,6 +188,10 @@
             <artifactId>spotbugs-annotations</artifactId>
             <version>4.0.1</version>
         </dependency>
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+        </dependency>
 
         <!-- Test Dependencies -->
 
@@ -198,7 +213,15 @@
                     <release>11</release>
                 </configuration>
             </plugin>
-
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <configuration>
+                    <ignoredUnusedDeclaredDependencies>
+                        <!-- Tinkerpop pulls in an older version, so we need to explicitly depend on it even though we don't use it directly -->
+                        <dependency>org.yaml:snakeyaml</dependency>
+                    </ignoredUnusedDeclaredDependencies>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>

@@ -2,6 +2,7 @@ package io.zerobase.smarttracing
 
 import com.google.i18n.phonenumbers.NumberParseException
 import com.google.i18n.phonenumbers.PhoneNumberUtil
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import io.zerobase.smarttracing.models.*
 import io.zerobase.smarttracing.utils.LoggerDelegate
 import org.apache.tinkerpop.gremlin.process.traversal.Traversal
@@ -26,6 +27,7 @@ class GraphDao(private val graph: GraphTraversalSource, private val phoneUtil: P
     /**
      * Creates a new Device and returns its ID
      */
+    @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE", justification = "false positive")
     fun createDevice(fingerprint: Fingerprint?, ip: String?): DeviceId {
         val id = UUID.randomUUID().toString()
         try {
@@ -33,7 +35,7 @@ class GraphDao(private val graph: GraphTraversalSource, private val phoneUtil: P
                     .property(T.id, id)
                     .property("fingerprint", fingerprint?.value ?: "none")
                     .property("creationTimestamp", System.currentTimeMillis())
-                    .next()
+                    .getIfPresent()
             return vertex?.run { DeviceId(id) } ?: throw EntityCreationException("Failed to save device")
         } catch (ex: Exception) {
             log.error("error creating device. fingerprint={}", fingerprint, ex)
@@ -55,7 +57,7 @@ class GraphDao(private val graph: GraphTraversalSource, private val phoneUtil: P
                     .property("timestamp", System.currentTimeMillis())
                     .property("latitude", loc?.latitude)
                     .property("longitude", loc?.longitude)
-                    .next()
+                    .getIfPresent()
             return ScanId(scanId)
         } catch (ex: Exception) {
             log.error("error creating check-in. device={} scannable={}", deviceId, scannedId, ex)
@@ -74,7 +76,7 @@ class GraphDao(private val graph: GraphTraversalSource, private val phoneUtil: P
                 .next()
     }
 
-    fun recordPeerToPeerScan(scanner: DeviceId, scanned: DeviceId, loc: Location?): ScanId? {
+    fun recordPeerToPeerScan(scanner: DeviceId, scanned: DeviceId, loc: Location?): ScanId {
         val scanId = UUID.randomUUID().toString()
         try {
             graph.addE("SCAN")
@@ -206,6 +208,7 @@ class GraphDao(private val graph: GraphTraversalSource, private val phoneUtil: P
      *
      * @return list of all the sites.
      */
+    @SuppressFBWarnings("BC_BAD_CAST_TO_ABSTRACT_COLLECTION", justification = "false positive")
     fun getSites(id: OrganizationId): List<Pair<String, String>> {
         return graph.V(T.id, id.value).outE("OWNS").otherV().toList()
             .map{ "${it.id()}" to it.property<String>("name").value() }
