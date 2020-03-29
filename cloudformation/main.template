@@ -1,0 +1,48 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: Zerobase API Main Stack
+
+Parameters:
+  TemplateBucketName:
+    Type: String
+    Description: Bucket to upload nested cloudformation templates
+    Default: zerobase-cloudformation-templates
+  Environment:
+    Type: String
+    AllowedValues: ['staging', 'prod']
+  InfrastructureStackName:
+    Type: String
+  AppVersion:
+    Type: String
+
+Resources:
+  DatabaseStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub 'https://${TemplateBucketName}.s3.amazonaws.com/${Environment}/api/database.template'
+      TimeoutInMinutes: 20
+      Parameters:
+        AppSecurityGroupId: { "Fn::ImportValue": !Sub '${InfrastructureStackName}-EcsClusterSecurityGroupId' }
+        BastionSecurityGroupId: { "Fn::ImportValue": !Sub '${InfrastructureStackName}-BastionSecurityGroupId' }
+        Environment: !Ref Environment
+        InstanceType: db.r4.large
+        SubnetIds: { "Fn::ImportValue":  !Sub '${InfrastructureStackName}-DatabaseSubnetIds' }
+        VpcId: { "Fn::ImportValue": !Sub '${InfrastructureStackName}-VpcId' }
+
+  TaskDefinition:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub 'https://${TemplateBucketName}.s3.amazonaws.com/${Environment}/api/task-definition.template'
+      TimeoutInMinutes: 20
+      Parameters:
+        Version: !Ref
+        DatabaseArn:
+
+        AppSecurityGroupId: { "Fn::ImportValue": !Sub '${InfrastructureStackName}-EcsClusterSecurityGroupId' }
+        BastionSecurityGroupId: { "Fn::ImportValue": !Sub '${InfrastructureStackName}-BastionSecurityGroupId' }
+        Environment: !Ref Environment
+        InstanceType: db.r4.large
+        SubnetIds: { "Fn::ImportValue":  !Sub '${InfrastructureStackName}-DatabaseSubnetIds' }
+        VpcId: { "Fn::ImportValue": !Sub '${InfrastructureStackName}-VpcId' }
+
+...
