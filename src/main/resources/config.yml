@@ -10,6 +10,7 @@ logging:
 database:
   hosts: ${DB_HOSTS}
   port: ${DB_PORT}
+  enableAwsSigner: true
 
 siteTypeCategories:
   BUSINESS:
