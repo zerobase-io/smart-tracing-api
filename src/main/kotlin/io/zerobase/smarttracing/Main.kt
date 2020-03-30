@@ -44,7 +44,6 @@ class Main: Application<Config>() {
          * For phone number verification.
          */
         val phoneUtil = PhoneNumberUtil.getInstance()
-        val from = config.amazonaws.from
 
         val dao = GraphDao(graph, phoneUtil)
 

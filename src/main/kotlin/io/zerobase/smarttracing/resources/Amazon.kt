@@ -19,8 +19,10 @@ import java.util.Properties
 import software.amazon.awssdk.core.SdkBytes
 import software.amazon.awssdk.services.ses.model.SendRawEmailRequest
 import software.amazon.awssdk.services.ses.model.RawMessage
+import io.zerobase.smarttracing.AmazonConfig
 
-class AmazonSES(private val from: String) {
+// Currently only implements the AmazonSES
+class Amazon(private val config: AmazonConfig) {
     private val session: Session
     private val client: SesClient
 
@@ -40,12 +42,12 @@ class AmazonSES(private val from: String) {
      * @throw MessagingException when we cannot message
      * @throw IOException input output exception
      */
-    fun sendNormal(subject: String, html_string: String, to: String) {
-        if (from != "") {
+    private fun sendNormal(subject: String, html_string: String, to: String) {
+        if (config.from != "") {
             val message = MimeMessage(session)
 
             message.setSubject(subject, "UTF-8")
-            message.setFrom(InternetAddress(from))
+            message.setFrom(InternetAddress(config.from))
             message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to))
 
             val msgBody = MimeMultipart("alternative")
@@ -81,19 +83,18 @@ class AmazonSES(private val from: String) {
      * @param subject subject to send this under
      * @param html html to send
      * @param to address to send to
-     * @param from address to send from
      * @param url the url to encode in a qr code and send
      *
      * @throw AddressException when the address is incorrect
      * @throw MessagingException when we cannot message
      * @throw IOException input output exception
      */
-    fun sendQRScannable(subject: String, html_string: String, to: String, url: String) {
-        if (from != "") {
+    private fun sendQRScannable(subject: String, html_string: String, to: String, url: String) {
+        if (config.from != "") {
             val message = MimeMessage(session)
 
             message.setSubject(subject, "UTF-8")
-            message.setFrom(InternetAddress(from))
+            message.setFrom(InternetAddress(config.from))
             message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to))
 
             val attachment = MimeBodyPart()
@@ -128,7 +129,6 @@ class AmazonSES(private val from: String) {
      * Sends thank you for joining email to a user
      *
      * @param to address to send to
-     * @param from address to send from
      *
      * @throw AddressException when the address is incorrect
      * @throw MessagingException when we cannot message
@@ -142,7 +142,6 @@ class AmazonSES(private val from: String) {
      * Sends thank you for joining email to an organization
      *
      * @param to address to send to
-     * @param from address to send from
      *
      * @throw AddressException when the address is incorrect
      * @throw MessagingException when we cannot message
@@ -156,7 +155,6 @@ class AmazonSES(private val from: String) {
      * Sends thank you for deletine email to a user
      *
      * @param to address to send to
-     * @param from address to send from
      *
      * @throw AddressException when the address is incorrect
      * @throw MessagingException when we cannot message
@@ -170,7 +168,6 @@ class AmazonSES(private val from: String) {
      * Sends thank you for joining email to an organization
      *
      * @param to address to send to
-     * @param from address to send from
      *
      * @throw AddressException when the address is incorrect
      * @throw MessagingException when we cannot message
