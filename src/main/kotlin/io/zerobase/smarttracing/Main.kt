@@ -52,9 +52,9 @@ class Main: Application<Config>() {
         env.jersey().register(InvalidIdExceptionMapper())
         env.jersey().register(Router(dao))
         env.jersey().register(CreatorFilter())
-        env.jersey().register(OrganizationsResource(dao, config.siteTypeCategories, config.scannableTypes, from))
+        env.jersey().register(OrganizationsResource(dao, config.siteTypeCategories, config.scannableTypes, amazon))
         env.jersey().register(DevicesResource(dao))
-        env.jersey().register(UsersResource(dao, from))
+        env.jersey().register(UsersResource(dao, amazon))
         env.jersey().register(ModelsResource(config.siteTypeCategories, config.scannableTypes))
 
         addCorsFilter(env)
