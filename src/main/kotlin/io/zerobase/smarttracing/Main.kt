@@ -47,6 +47,8 @@ class Main: Application<Config>() {
 
         val dao = GraphDao(graph, phoneUtil)
 
+        env.jersey().register(InvalidPhoneNumberExceptionMapper())
+        env.jersey().register(InvalidIdExceptionMapper())
         env.jersey().register(Router(dao))
         env.jersey().register(CreatorFilter())
         env.jersey().register(OrganizationsResource(dao, config.siteTypeCategories, config.scannableTypes))

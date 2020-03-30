@@ -69,8 +69,8 @@ class GraphDao(private val graph: GraphTraversalSource, private val phoneUtil: P
      * Updates the location attribute of a CheckIn. Throws 404 if CheckIn doesn't exist.
      */
     fun updateCheckInLocation(deviceId: DeviceId, checkInId: ScanId, loc: Location) {
-        graph.V(T.id, checkInId.value).inE("SCAN")
-                .from(graph.V(T.id, deviceId.value))
+        graph.V(checkInId.value).inE("SCAN")
+                .from(graph.V(deviceId.value))
                 .property("latitude", loc.latitude)
                 .property("longitude", loc.longitude)
                 .next()
@@ -98,8 +98,8 @@ class GraphDao(private val graph: GraphTraversalSource, private val phoneUtil: P
         val id = UUID.randomUUID().toString()
         try {
             graph.addE("SCAN")
-                    .from(graph.V(T.id, device.value))
-                    .to(graph.V(T.id, site.value))
+                    .from(graph.V(device.value))
+                    .to(graph.V(site.value))
                     .property(T.id, id)
                     .property("timestamp", System.currentTimeMillis())
                     .next()
@@ -158,7 +158,7 @@ class GraphDao(private val graph: GraphTraversalSource, private val phoneUtil: P
      * @param state the value for the multi-site flag
      */
     fun setMultiSite(id: OrganizationId, state: Boolean) {
-        graph.V(T.id, id.value).property("multisite", state).next()
+        graph.V(id.value).property("multisite", state).getIfPresent()
     }
 
     /**
@@ -193,7 +193,7 @@ class GraphDao(private val graph: GraphTraversalSource, private val phoneUtil: P
                 .property("testing", testing)
                 .property("creationTimestamp", System.currentTimeMillis())
                 .next()
-            graph.addE("OWNS").from(graph.V(T.id, organizationId.value)).to(siteVertex)
+            graph.addE("OWNS").from(graph.V(organizationId.value)).to(siteVertex)
             return SiteId(id)
         } catch (ex: Exception) {
             log.error("error creating site. organization={} name={} category={}-{} testing={}", id, name, category, subcategory, testing, ex)
@@ -210,7 +210,7 @@ class GraphDao(private val graph: GraphTraversalSource, private val phoneUtil: P
      */
     @SuppressFBWarnings("BC_BAD_CAST_TO_ABSTRACT_COLLECTION", justification = "false positive")
     fun getSites(id: OrganizationId): List<Pair<String, String>> {
-        return graph.V(T.id, id.value).outE("OWNS").otherV().toList()
+        return graph.V(id.value).outE("OWNS").otherV().toList()
             .map{ "${it.id()}" to it.property<String>("name").value() }
     }
 
@@ -230,7 +230,7 @@ class GraphDao(private val graph: GraphTraversalSource, private val phoneUtil: P
         try {
             graph.addV("Scannable").property(T.id, id).property("type", type).property("singleUse", singleUse)
                 .property("active", true).addE("OWNS")
-                .from(graph.V(T.id, sid.value))
+                .from(graph.V(sid.value))
                 .next()
             return ScannableId(id)
         } catch (ex: Exception) {
@@ -252,11 +252,12 @@ class GraphDao(private val graph: GraphTraversalSource, private val phoneUtil: P
     fun createUser(name: String?, phone: String?, email: String?, deviceId: DeviceId): UserId {
         phone?.apply { validatePhoneNumber(phone) }
         val id = UUID.randomUUID().toString()
+        val deviceVertex = graph.V(deviceId.value).getIfPresent() ?: throw InvalidIdException(deviceId)
         try {
             graph.addV("USER")
                 .property(T.id, id).property("name", name).property("phone", phone).property("email", email)
                 .property("deleted", false)
-                .addE("OWNS").from(graph.V(T.id, deviceId.value))
+                .addE("OWNS").from(deviceVertex)
                 .next()
             return UserId(id)
         } catch (ex: Exception) {
@@ -272,7 +273,7 @@ class GraphDao(private val graph: GraphTraversalSource, private val phoneUtil: P
      */
     fun deleteUser(id: UserId) {
         try {
-            graph.V(T.id, id.value).property("deleted", true).next()
+            graph.V(id.value).property("deleted", true).getIfPresent()
         } catch (ex: Exception) {
             log.error("failed to delete user. id={}", id, ex)
             throw ex
@@ -288,7 +289,7 @@ class GraphDao(private val graph: GraphTraversalSource, private val phoneUtil: P
      */
     fun getUser(id: UserId): User? {
         try {
-            val vertex = graph.V(T.id, id.value).has("deleted", false).getIfPresent() ?: return null
+            val vertex = graph.V(id.value).has("deleted", false).getIfPresent() ?: return null
             return User(
                 id = id,
                 name = vertex.property<String>("name").value(),

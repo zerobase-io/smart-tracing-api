@@ -2,6 +2,9 @@
 
 This repository contains the back end for the Zerobase smart tracing platform. Refer to the [smart-tracing repo](https://github.com/zerobase-io/smart-tracing) for the front end. We are using Kotlin and Neo4j with cloud storage on Heroku. We are using Dropwizard for the REST framework. Kotlin requires Java and Maven.
 
+Any commands shown in this read-me are written in bash. If you are on Windows or use an alternate shell, like fish, please adjust the commands
+accordingly.
+
 ## Set up for the project
 
 ### Kotlin
@@ -32,9 +35,14 @@ Docker is used to run a graph database while running the project locally.
     ```sh
     $ docker pull tinkerpop/gremlin-server
     ```
-* Run the gremlin image
+* Run the gremlin image. By default, the Gremlin server does not support the string ids we are using with Neptune. As such we need
+  to override the settings so it will.
     ```sh
-    $ docker run -d -p 8182:8182 --name=zerboase-db tinkerpop/gremlin-server:latest
+    $ docker run -d \
+            -p 8182:8182 \
+            -v $(pwd)/src/test/resources/tinkergraph-overrides.properties:/opt/gremlin-server/conf/tinkergraph-empty.properties \
+            --name=zerboase-db \
+            tinkerpop/gremlin-server:latest
     ```
 By default, there are no credentials for the local install
 
