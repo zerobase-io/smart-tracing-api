@@ -88,3 +88,4 @@ set an environment variable of `DB_PORT` to the port your gremlin server is runn
 * Once you're running the project, you can double check if all is well by visiting `http://localhost:8081` in your browser. You
   shoudl see a simple page that exposes metrics and healthcheck results. You can also curl `http://localhost:8081/healthchecks` if
   you prefer the command line.
+* App endpoints are available at `http://localhost:9000`
