@@ -28,7 +28,22 @@ database:
   enableSsl: ${ENABLE_SSL:-true}
 
 amazonaws:
-  from: ${FROM_EMAIL:-""}
+  fromEmailSES: ${FROM_EMAIL:-""}
+
+emailConfig:
+  CREATE_ORG:
+    subject: "Thank you joining our program"
+    resource: "email-templates/org-join"
+  CREATE_SCANNABLE:
+    subject: "Thank you for creating a scannable"
+    resource: "email-templates/create-scannable"
+    attach_name: "scannable.pdf"
+  CREATE_USER:
+    subject: "Thank you for joining"
+    resource: "email-templates/user-join"
+  DELETE_USER:
+    subject: "Sorry to see you go"
+    resource: "email-templates/user-delete"
 
 siteTypeCategories:
   BUSINESS:

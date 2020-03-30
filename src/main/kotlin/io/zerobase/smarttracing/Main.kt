@@ -17,12 +17,14 @@ import javax.servlet.DispatcherType
 import javax.servlet.FilterRegistration
 
 typealias MultiMap<K,V> = Map<K, List<V>>
+typealias EmailConfig = Map<EmailType, EmailConfigEntry>
 
 data class Config(
         val database: GraphDatabaseFactory = GraphDatabaseFactory(),
         val siteTypeCategories: MultiMap<String, String>,
         val scannableTypes: List<String>
 ): Configuration()
+data class AWS(val fromEmailSES: String)
 
 fun main(vararg args: String) {
     Main().run(*args)
@@ -45,15 +47,20 @@ class Main: Application<Config>() {
          */
         val phoneUtil = PhoneNumberUtil.getInstance()
 
-        val dao = GraphDao(graph, phoneUtil)
+        // For emails
+        println(config.emailConfig)
+        val amazonSES = AmazonSES()
+        val email = Email(config.amazonaws.fromEmailSES, amazonSES, config.emailConfig)
+
+        val dao = GraphDao(driver, phoneUtil)
 
         env.jersey().register(InvalidPhoneNumberExceptionMapper())
         env.jersey().register(InvalidIdExceptionMapper())
         env.jersey().register(Router(dao))
         env.jersey().register(CreatorFilter())
-        env.jersey().register(OrganizationsResource(dao, config.siteTypeCategories, config.scannableTypes, amazon))
+        env.jersey().register(OrganizationsResource(dao, config.siteTypeCategories, config.scannableTypes, email))
         env.jersey().register(DevicesResource(dao))
-        env.jersey().register(UsersResource(dao, amazon))
+        env.jersey().register(UsersResource(dao, email))
         env.jersey().register(ModelsResource(config.siteTypeCategories, config.scannableTypes))
 
         addCorsFilter(env)

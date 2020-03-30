@@ -95,6 +95,13 @@
                     </exclusion>
                 </exclusions>
             </dependency>
+            <dependency>
+                <groupId>software.amazon.awssdk</groupId>
+                <artifactId>bom</artifactId>
+                <version>2.11.2</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -171,21 +178,28 @@
             <artifactId>logback-access</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.activation</groupId>
+            <artifactId>jakarta.activation</artifactId>
+            <version>1.2.1</version>
+        </dependency>
+
         <!-- AWS Sending Emails -->
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>ses</artifactId>
-            <version>2.11.2</version>
         </dependency>
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>sdk-core</artifactId>
-            <version>2.11.2</version>
         </dependency>
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>regions</artifactId>
-            <version>2.11.2</version>
         </dependency>
         <dependency>
             <groupId>javax.mail</groupId>
@@ -193,7 +207,7 @@
             <version>1.4</version>
             <exclusions>
                 <exclusion>
-                    <groupId>jakarta.activation</groupId>
+                    <groupId>javax.activation</groupId>
                     <artifactId>activation</artifactId>
                 </exclusion>
             </exclusions>

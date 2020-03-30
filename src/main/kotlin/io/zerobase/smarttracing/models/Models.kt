@@ -22,3 +22,16 @@ data class Location(
     val latitude: Float,
     val longitude: Float
 )
+
+data class EmailConfigEntry(
+    val subject: String,
+    val resource: String,
+    val attach_name: String?
+)
+
+enum class EmailType {
+    CREATE_ORG, CREATE_SCANNABLE,
+    CREATE_USER, DELETE_USER
+}
+
+typealias EmailConfig = Map<EmailType, EmailConfigEntry>

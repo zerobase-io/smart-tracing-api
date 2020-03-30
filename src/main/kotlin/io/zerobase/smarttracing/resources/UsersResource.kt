@@ -22,7 +22,7 @@ data class CreateUserRequest(
 @Path("/users")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-class UsersResource(val dao: GraphDao, val amazon: Amazon) {
+class UsersResource(val dao: GraphDao, val email: Email) {
 
     @POST
     @Creator
@@ -44,8 +44,9 @@ class UsersResource(val dao: GraphDao, val amazon: Amazon) {
     @DELETE
     @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE", justification = "false positive")
     fun deleteUser(@PathParam("id") id: String) {
-        val to = dao.deleteUser(UserId(id))
-        to?.let { amazon.thanksForDeletingUser(it) }
+        val to = dao.getUser(UserId(id))?.email
+        dao.deleteUser(UserId(id))
+        to?.let { email.send(it, null, EmailType.DELETE_USER) }
     }
 
     @Path("/{id}/summary")
