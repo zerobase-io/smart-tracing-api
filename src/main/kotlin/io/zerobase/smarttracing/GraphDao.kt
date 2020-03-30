@@ -256,7 +256,7 @@ class GraphDao(private val graph: GraphTraversalSource, private val phoneUtil: P
             graph.addV("USER")
                 .property(T.id, id).property("name", name).property("phone", phone).property("email", email)
                 .property("deleted", false)
-                .addE("OWNS").from(graph.V(T.id, deviceId))
+                .addE("OWNS").from(graph.V(T.id, deviceId.value))
                 .next()
             return UserId(id)
         } catch (ex: Exception) {

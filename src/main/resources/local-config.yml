@@ -5,7 +5,8 @@ server:
     port: ${PORT:-9000}
 
 database:
-  hosts: [localhost]
+  endpoints:
+    write: localhost
   port: ${DB_PORT:-8182}
 
 siteTypeCategories:

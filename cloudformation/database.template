@@ -58,12 +58,12 @@ Resources:
     - SubnetGroup
     - "InstanceParameterGroup"
     Properties:
-      DBClusterIdentifier: !Sub '${AWS::StackName}-cluster'
       DBSubnetGroupName: !Ref SubnetGroup
       VpcSecurityGroupIds: [!Ref SecurityGroup]
       DBClusterParameterGroupName: !Ref ClusterParameterGroup
       Port: !Ref ClusterPort
       IamAuthEnabled: !Ref IamAuthentication
+      StorageEncrypted: true
       Tags:
       - Key: Name
         Value: smart-tracing-api-graph-db
@@ -117,7 +117,6 @@ Resources:
   PrimaryInstance:
     Type: AWS::Neptune::DBInstance
     Properties:
-      DBInstanceIdentifier: primary
       DBClusterIdentifier: !Ref Cluster
       DBInstanceClass: !Ref InstanceType
       DBParameterGroupName: !Ref InstanceParameterGroup
@@ -140,7 +139,6 @@ Resources:
     Type: AWS::Neptune::DBInstance
     Condition: EnableFirstReplica
     Properties:
-      DBInstanceIdentifier: replica-1
       DBClusterIdentifier: !Ref Cluster
       DBInstanceClass: !Ref InstanceType
       Tags:
@@ -162,7 +160,6 @@ Resources:
     Type: 'AWS::Neptune::DBInstance'
     Condition: EnableSecondReplica
     Properties:
-      DBInstanceIdentifier: replica-2
       DBClusterIdentifier: !Ref Cluster
       DBInstanceClass: !Ref InstanceType
       Tags:
@@ -237,4 +234,5 @@ Outputs:
     Value: !GetAtt Cluster.Endpoint
   ReadEndpoint:
     Value: !GetAtt Cluster.ReadEndpoint
-
+  ClusterPort:
+    Value: !Ref ClusterPort

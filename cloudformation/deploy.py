@@ -3,16 +3,17 @@ import boto3, botocore, sys, json, datetime
 cf = boto3.client("cloudformation")
 s3 = boto3.client("s3")
 
-def main(stack_name, environment, parameters_file, template_bucket_name = "zerobase-cloudformation-templates"):
+def main(stack_name, environment, version, template_bucket_name = "zerobase-cloudformation-templates"):
     'Update or create stack'
 
-    for template_name in ["database"]:
+    for template_name in ["database", "service"]:
         file_name = f"{template_name}.template"
         _parse_template(file_name)
         s3.upload_file(Bucket=template_bucket_name, Key=f"{environment}/api/{file_name}", Filename=file_name)
 
     template_data = _parse_template("main.template")
-    parameter_data = _parse_parameters(parameters_file)
+    parameter_data = _parse_parameters(f"{environment}.json")
+    parameter_data.append({ "ParameterKey": "AppVersion", "ParameterValue": version })
 
     full_stack_name = f"{environment}-{stack_name}"
     params = {
@@ -40,11 +41,12 @@ def main(stack_name, environment, parameters_file, template_bucket_name = "zerob
         else:
             raise
     else:
-        print(json.dumps(
-            cf.describe_stacks(StackName=stack_result['StackId']),
-            indent=2,
-            default=json_serial
-        ))
+        print("CloudFormation template executed successfully.")
+#         print(json.dumps(
+#             cf.describe_stacks(StackName=stack_result['StackId']),
+#             indent=2,
+#             default=json_serial
+#         ))
 
 
 def _parse_template(template):

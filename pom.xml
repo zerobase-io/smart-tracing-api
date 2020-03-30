@@ -29,7 +29,7 @@
         <kotlin.version>1.3.70</kotlin.version>
         <basepom.shaded.main-class>io.zerobase.smarttracing.MainKt</basepom.shaded.main-class>
         <dropwizard.version>2.0.2</dropwizard.version>
-        <gremlin.version>3.4.6</gremlin.version>
+        <gremlin.version>[3.4.6,4)</gremlin.version>
     </properties>
 
     <dependencyManagement>
@@ -120,6 +120,10 @@
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-jersey</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.dropwizard</groupId>
+            <artifactId>dropwizard-logging</artifactId>
+        </dependency>
 
         <!-- Jackson Dependencies -->
         <dependency>
@@ -150,6 +154,17 @@
             <groupId>com.amazonaws</groupId>
             <artifactId>amazon-neptune-gremlin-java-sigv4</artifactId>
         </dependency>
+
+        <!-- Logging Dependencies -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-access</artifactId>
+        </dependency>
+
 
         <!-- Other Dependencies -->
         <dependency>
@@ -219,7 +234,19 @@
                     <ignoredUnusedDeclaredDependencies>
                         <!-- Tinkerpop pulls in an older version, so we need to explicitly depend on it even though we don't use it directly -->
                         <dependency>org.yaml:snakeyaml</dependency>
+                        <!--
+                            These annotations are useful for compile time linting, I don't want to be pulling them in and out every
+                            time we change which annotations we are using. Since it's compile time only, I'm just ignoring it.
+                        -->
+                        <dependecy>org.jetbrains:annotations</dependecy>
                     </ignoredUnusedDeclaredDependencies>
+                    <ignoredUsedUndeclaredDependencies>
+                        <!--
+                            This isn't something we are actually depending on. There are no references anywhere in the project.
+                            Ignoring because it's a false positive.
+                        -->
+                        <dependency>edu.washington.cs.types.checker:checker-framework</dependency>
+                    </ignoredUsedUndeclaredDependencies>
                 </configuration>
             </plugin>
             <plugin>

@@ -6,6 +6,7 @@ This repository contains the back end for the Zerobase smart tracing platform. R
 
 ### Kotlin
 The backend is written in Kotlin. While you can work on it in any editor, such as vim or VS Code, it is significantly easier to use an IDE. We recommend [IntelliJ](https://www.jetbrains.com/idea/download/index.html).
+If you are using Intellij, the Kotlin plugin must be **at least 1.3.70**.
 
 ### Java 11
 
@@ -33,7 +34,7 @@ Docker is used to run a graph database while running the project locally.
     ```
 * Run the gremlin image
     ```sh
-    $ docker run -d -8182 --name=zerboase-db tinkerpop/gremlin-server:latest
+    $ docker run -d -p 8182:8182 --name=zerboase-db tinkerpop/gremlin-server:latest
     ```
 By default, there are no credentials for the local install
 

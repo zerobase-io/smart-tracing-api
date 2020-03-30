@@ -9,9 +9,14 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
 
 data class Credentials(val username: String, val password: String)
 
+data class Endpoints(val write: String, val read: String?)
+
+
 @OptIn(ExperimentalUnsignedTypes::class)
 class GraphDatabaseFactory {
-    var hosts: List<String> = listOf("localhost")
+    enum class Mode { READ, WRITE }
+
+    var endpoints: Endpoints = Endpoints(write = "localhost", read = null)
     var port: UInt = 8182u
     var path: String? = null
     var maxConnectionPoolSize: UInt? = null
@@ -20,9 +25,14 @@ class GraphDatabaseFactory {
     var credentials: Credentials? = null
     var enableAwsSigner: Boolean = false
 
-    fun build(environment: Environment): GraphTraversalSource {
+    fun build(environment: Environment, mode: Mode = Mode.WRITE): GraphTraversalSource {
+        val endpoint = if (mode == Mode.WRITE || endpoints.read == null) {
+            endpoints.write
+        } else {
+            endpoints.read
+        }
         val builder = Cluster.build()
-                .addContactPoints(*hosts.toTypedArray())
+                .addContactPoints(endpoint)
                 .port(port.toInt())
         path?.also { builder.path(it) }
         maxConnectionPoolSize?.let(UInt::toInt)?.also { builder.maxConnectionPoolSize(it) }

@@ -1,14 +1,28 @@
 ---
 server:
-  applicationConnectors:
-  - type: http
-    port: ${PORT:-9000}
+  type: simple
+  applicationContextPath: /
+  adminContextPath: /admin
+  connector:
+    type: http
+    port: ${PORT:-8080}
+  requestLog:
+    appenders:
+    - type: console
+      filterFactories:
+      - type: noise
+        path: healthcheck
+
 logging:
+  level: ${ROOT_LOG_LEVEL:-INFO}
   loggers:
     # Enable errors from body processing
     io.dropwziard.jersey.jackson.JsonProcessingExceptionMapper: DEBUG
+
 database:
-  hosts: ${DB_HOSTS}
+  endpoints:
+    write: ${WRITE_ENDPOINT}
+    read: ${READ_ENDPOINT}
   port: ${DB_PORT}
   enableAwsSigner: true
 

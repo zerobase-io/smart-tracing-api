@@ -20,7 +20,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub 'https://${TemplateBucketName}.s3.amazonaws.com/${Environment}/api/database.template'
-      TimeoutInMinutes: 20
+      TimeoutInMinutes: 30
       Parameters:
         AppSecurityGroupId: { "Fn::ImportValue": !Sub '${InfrastructureStackName}-EcsClusterSecurityGroupId' }
         BastionSecurityGroupId: { "Fn::ImportValue": !Sub '${InfrastructureStackName}-BastionSecurityGroupId' }
@@ -29,20 +29,24 @@ Resources:
         SubnetIds: { "Fn::ImportValue":  !Sub '${InfrastructureStackName}-DatabaseSubnetIds' }
         VpcId: { "Fn::ImportValue": !Sub '${InfrastructureStackName}-VpcId' }
 
-  TaskDefinition:
+  Service:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub 'https://${TemplateBucketName}.s3.amazonaws.com/${Environment}/api/task-definition.template'
-      TimeoutInMinutes: 20
+      TemplateURL: !Sub 'https://${TemplateBucketName}.s3.amazonaws.com/${Environment}/api/service.template'
+      TimeoutInMinutes: 10
       Parameters:
-        Version: !Ref
-        DatabaseArn:
-
-        AppSecurityGroupId: { "Fn::ImportValue": !Sub '${InfrastructureStackName}-EcsClusterSecurityGroupId' }
-        BastionSecurityGroupId: { "Fn::ImportValue": !Sub '${InfrastructureStackName}-BastionSecurityGroupId' }
         Environment: !Ref Environment
-        InstanceType: db.r4.large
-        SubnetIds: { "Fn::ImportValue":  !Sub '${InfrastructureStackName}-DatabaseSubnetIds' }
-        VpcId: { "Fn::ImportValue": !Sub '${InfrastructureStackName}-VpcId' }
-
+        AppVersion: !Ref AppVersion
+        DnsName: !Join ['.', ['api', {"Fn::ImportValue": !Sub '${InfrastructureStackName}-DomainSuffix'}]]
+        LoadBalancerListener: {"Fn::ImportValue": !Sub '${InfrastructureStackName}-EcsLoadBalancerListener'}
+        LoadBalancerDnsName: {"Fn::ImportValue": !Sub '${InfrastructureStackName}-EcsLoadBalancerDnsName'}
+        LoadBalancerHostedZoneId: {"Fn::ImportValue": !Sub '${InfrastructureStackName}-EcsLoadBalancerHostedZoneId'}
+        VpcId: {"Fn::ImportValue": !Sub '${InfrastructureStackName}-VpcId'}
+        EcsClusterArn:  {"Fn::ImportValue": !Sub '${InfrastructureStackName}-EcsClusterArn'}
+        EcsClusterServiceRoleArn: {"Fn::ImportValue": !Sub '${InfrastructureStackName}-EcsServiceRoleArn'}
+        HostedZoneId: {"Fn::ImportValue": !Sub '${InfrastructureStackName}-PublicHostedZoneId'}
+        DatabaseArn: !GetAtt DatabaseStack.Outputs.ClusterArn
+        WriteEndpoint: !GetAtt DatabaseStack.Outputs.WriteEndpoint
+        ReadEndpoint: !GetAtt DatabaseStack.Outputs.ReadEndpoint
+        DatabasePort: !GetAtt DatabaseStack.Outputs.ClusterPort
 ...
