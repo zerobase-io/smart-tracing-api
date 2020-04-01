@@ -26,6 +26,7 @@ Resources:
         BastionSecurityGroupId: { "Fn::ImportValue": !Sub '${InfrastructureStackName}-BastionSecurityGroupId' }
         Environment: !Ref Environment
         InstanceType: db.r4.large
+        ReplicaCount: 0
         SubnetIds: { "Fn::ImportValue":  !Sub '${InfrastructureStackName}-DatabaseSubnetIds' }
         VpcId: { "Fn::ImportValue": !Sub '${InfrastructureStackName}-VpcId' }
 
