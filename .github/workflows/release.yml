@@ -41,7 +41,7 @@ jobs:
 
         IFS=. read major minor patch <<< $(mvn -q -Dexec.executable="echo" -Dexec.args='${project.version}' --non-recursive exec:exec | awk -F- '{print $1}')
         next_version="${major}.${minor}.$((${patch} + 1))"
-        mvn -B versions:set -DnewVerions=${next_version}-SNAPSHOT versions:commit
+        mvn -B versions:set -DnewVersion=${next_version}-SNAPSHOT versions:commit
         git commit -am "[skip ci] Next Version: v${next_version}-SNAPSHOT" --author='github-actions <noreply@zerobase.io>'
 
         git push
