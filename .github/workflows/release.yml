@@ -54,7 +54,7 @@ jobs:
       run: |
         version=$(cat target/classes/build.properties | grep version | awk -F= '{print $2}')
         docker build . -t zerobaseio/smart-tracing-api:${version} -t zerobaseio/smart-tracing-api:latest
-        docker login --username zerboaseuser --password ${DOCKERHUB_ACCESS_TOKEN}
+        docker login --username zerobaseuser --password ${DOCKERHUB_ACCESS_TOKEN}
         docker push zerobaseio/smart-tracing-api
     - uses: actions/setup-python@v1
       with:
