@@ -2,6 +2,9 @@ name: Build and deploy to staging
 on:
   push:
     branches-ignore: master
+    paths:
+    - pom.xml
+    - src/*
 
 jobs:
   build:
