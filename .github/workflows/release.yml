@@ -60,9 +60,12 @@ jobs:
       with:
         python-version: 3.8
     - name: Deploy to staging environment
+      env:
+        AWS_DEFAULT_REGION: us-east-1
+        AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
+        AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
       run: |
         pip install boto3
         version=$(cat target/classes/build.properties | grep version | awk -F= '{print $2}')
         cd cloudformation
-        export AWS_DEFAULT_REGION=us-east-1
         python deploy.py api staging ${version}
