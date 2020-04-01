@@ -28,8 +28,24 @@ jobs:
     - name: Perform Java Release
       run: |
         git config user.name github-actions
-        git config user.email no-reply@zerobase.io
-        mvn -B release:prepare release:perform -DscmCommentPrefix='[skip ci]' -DtagNameFormat='v@{project.version}' -DdeployAtEnd=true
+        git config user.email noreply@zerobase.io
+
+        release_version=$(mvn -q -Dexec.executable='echo' -Dexec.args='${project.version}' --non-recursive exec:exec | awk -F'-' '{print $1}' | tail -1 | tr -d '[:space:]')
+        mvn -B versions:resolve-ranges
+        mvn -B versions:set -DnewVersion=${release_version}
+        mvn -B clean deploy
+        git commit -am "[skip ci] Release: v${release_version}" --author='github-actions <noreply@zerobase.io>'
+        git tag v${release_version}
+
+        mvn versions:revert
+
+        IFS=. read major minor patch <<< $(mvn -q -Dexec.executable="echo" -Dexec.args='${project.version}' --non-recursive exec:exec | awk -F- '{print $1}')
+        next_version="${major}.${minor}.$((${patch} + 1))"
+        mvn -B versions:set -DnewVerions=${next_version}-SNAPSHOT versions:commit
+        git commit -am "[skip ci] Next Version: v${next_version}-SNAPSHOT" --author='github-actions <noreply@zerobase.io>'
+
+        git push
+        git push --tags
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Build and push docker image
