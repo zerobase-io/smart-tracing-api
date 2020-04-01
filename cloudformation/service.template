@@ -134,6 +134,8 @@ Resources:
           Value: !Ref ReadEndpoint
         - Name: DB_PORT
           Value: !Ref DatabasePort
+        - Name: SERVICE_REGION
+          Value: !Ref AWS::Region
         Image: !Sub 'zerobaseio/smart-tracing-api:${AppVersion}'
         Memory: !Ref Memory
         LogConfiguration:
