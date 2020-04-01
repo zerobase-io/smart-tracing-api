@@ -54,7 +54,8 @@ suffice.
 
 ## Project
 After cloning the project there are two ways to deploy it locally: using an IDE or via the command line. By default, the app listens on
-port 9000. You can override that with an environment variable of `PORT` if you need to.
+port 9000. You can override that with an environment variable of `PORT` if you need to. The `local-config.yml` defaults to `localhost`
+and `8182` for the database. Both can be overriden with environment variables, using `DB_HOST` and `DB_PORT` respectively.
 
 ### Running in an IDE
 The following directions use Intellij as the IDE, but the steps should be similar if you are using a different IDE.
