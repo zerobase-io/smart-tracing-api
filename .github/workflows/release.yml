@@ -27,8 +27,8 @@ jobs:
         restore-keys: ${{ runner.os }}-m2
     - name: Perform Java Release
       run: |
-        git config user.name=github-actions
-        git config user.email=no-reply@zerobase.io
+        git config user.name github-actions
+        git config user.email no-reply@zerobase.io
         mvn -B release:prepare release:perform -DscmCommentPrefix='[skip ci]' -DtagNameFormat='v@{project.version}' -DdeployAtEnd=true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
