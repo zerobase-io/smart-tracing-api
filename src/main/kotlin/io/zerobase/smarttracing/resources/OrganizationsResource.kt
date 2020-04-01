@@ -1,13 +1,11 @@
 package io.zerobase.smarttracing.resources
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import io.zerobase.smarttracing.GraphDao
 import io.zerobase.smarttracing.MultiMap
+import io.zerobase.smarttracing.models.IdWrapper
 import io.zerobase.smarttracing.models.Location
 import io.zerobase.smarttracing.models.OrganizationId
 import io.zerobase.smarttracing.models.SiteId
-import io.zerobase.smarttracing.models.IdWrapper
-import io.zerobase.smarttracing.models.InvalidPhoneNumberException
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
 import javax.ws.rs.core.Response
@@ -52,8 +50,7 @@ class OrganizationsResource(val dao: GraphDao, private val siteTypes: MultiMap<S
 
     @POST
     @Creator
-    @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE", justification = "false positive")
-    fun createOrganization(request: CreateOrganizationRequest): IdWrapper? {
+    fun createOrganization(request: CreateOrganizationRequest): IdWrapper {
         val name = request.name
         val phone = request.contactInfo.phone
         val email = request.contactInfo.email
@@ -62,24 +59,13 @@ class OrganizationsResource(val dao: GraphDao, private val siteTypes: MultiMap<S
         val hasTestingFacilities = request.hasTestingFacilities ?: false
         val hasMultipleSites = request.hasMultipleSites ?: true
 
-        try {
-            val id = dao.createOrganization(
-                name, phone, email,
-                contactName, address,
-                hasTestingFacilities,
-                hasMultipleSites
-            )
-            return id?.let { IdWrapper(id) }
-        } catch (e: InvalidPhoneNumberException) {
-            throw BadRequestException(e.message)
-        }
+        return dao.createOrganization(name, phone, email, contactName, address, hasTestingFacilities, hasMultipleSites).let(::IdWrapper)
     }
 
     @Path("/{id}/sites")
     @POST
     @Creator
-    @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE", justification = "false positive")
-    fun createSite(@PathParam("id") id: String, request: CreateSiteRequest): IdWrapper? {
+    fun createSite(@PathParam("id") organizationId: String, request: CreateSiteRequest): IdWrapper {
         val name = request.name ?: ""
         val category = request.category
         val subcategory = request.subcategory
@@ -91,17 +77,15 @@ class OrganizationsResource(val dao: GraphDao, private val siteTypes: MultiMap<S
             throw BadRequestException("Not a valid category please check /models/site-types")
         }
 
-        if (!(siteTypes[category]?.contains(subcategory) ?: false)) {
+        if (siteTypes[category]?.contains(subcategory) != true) {
             throw BadRequestException("Not a valid subcategory please check /models/site-types")
         }
 
-        val oid = dao.createSite(
-            OrganizationId(id), name, category, subcategory,
+        return dao.createSite(
+            OrganizationId(organizationId), name, category, subcategory,
             latitude, longitude, isTesting, request.siteManagerContactInfo?.phone,
             request.siteManagerContactInfo?.email, request.siteManagerContactInfo?.contactName
-        )
-
-        return oid?.let { IdWrapper(oid) }
+        ).let(::IdWrapper)
     }
 
     @Path("/{id}/sites")
@@ -120,8 +104,8 @@ class OrganizationsResource(val dao: GraphDao, private val siteTypes: MultiMap<S
     @Path("/{orgId}/sites/{siteId}/scannables")
     @POST
     @Creator
-    @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE", justification = "false positive")
-    fun createScannable(@PathParam("orgId") orgId: String, @PathParam("siteId") siteId: String, request: CreateScannableRequest): IdWrapper? {
+    fun createScannable(@PathParam("orgId") orgId: String, @PathParam("siteId") siteId: String,
+                        request: CreateScannableRequest): IdWrapper {
         val type = request.type
         val singleUse = request.singleUse
 
@@ -132,8 +116,6 @@ class OrganizationsResource(val dao: GraphDao, private val siteTypes: MultiMap<S
             throw WebApplicationException(res)
         }
 
-        val id = dao.createScannable(OrganizationId(orgId), SiteId(siteId), type, singleUse)
-
-        return id?.let { IdWrapper(id) }
+        return dao.createScannable(OrganizationId(orgId), SiteId(siteId), type, singleUse).let(::IdWrapper)
     }
 }

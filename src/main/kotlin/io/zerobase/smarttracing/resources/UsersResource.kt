@@ -1,12 +1,7 @@
 package io.zerobase.smarttracing.resources
 
-import io.zerobase.smarttracing.models.User
-import io.zerobase.smarttracing.models.UserId
-import io.zerobase.smarttracing.models.DeviceId
-import io.zerobase.smarttracing.models.IdWrapper
 import io.zerobase.smarttracing.GraphDao
-import io.zerobase.smarttracing.models.InvalidPhoneNumberException
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
+import io.zerobase.smarttracing.models.*
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
 
@@ -31,14 +26,15 @@ class UsersResource(val dao: GraphDao) {
 
     @POST
     @Creator
-    @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE", justification = "false positive")
     fun createUser(request: CreateUserRequest): IdWrapper? {
+        if (request.name == null && request.contact.phone == null && request.contact.email == null) {
+            throw BadRequestException("At least one contact method or a name is required to create a user")
+        }
         try {
-            val id = dao.createUser(
+            return dao.createUser(
                 request.name, request.contact.phone,
                 request.contact.email, DeviceId(request.deviceId)
-            )
-            return id?.let { IdWrapper(id) }
+            ).let(::IdWrapper)
         } catch (e: InvalidPhoneNumberException) {
             throw BadRequestException(e.message)
         }
@@ -53,7 +49,7 @@ class UsersResource(val dao: GraphDao) {
 
     @Path("/{id}/summary")
     @GET
-    fun getUserDump(@PathParam("id") id: String): User {
-        return dao.getUser(UserId(id))
+    fun getUserDump(@PathParam("id") id: String): User? {
+        return dao.getUser(UserId(id)) ?: throw NotFoundException()
     }
 }

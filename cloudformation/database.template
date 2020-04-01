@@ -1,0 +1,238 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Zerobase API Database Stack
+
+Parameters:
+  AppSecurityGroupId:
+    Type: AWS::EC2::SecurityGroup::Id
+  BastionSecurityGroupId:
+    Type: AWS::EC2::SecurityGroup::Id
+  ClusterPort:
+    Type: Number
+    Default: 8182
+  ReplicaCount:
+    Type: Number
+    Default: 1
+    MinValue: 0
+    MaxValue: 2
+  EnableAuditLog:
+    Type: Number
+    AllowedValues: [0, 1]
+    ConstraintDescription: standard numeric boolean
+    Default: 0
+  Environment:
+    Type: String
+  IamAuthentication:
+    Type: String
+    AllowedValues: ['true', 'false']
+    Default: true
+  InstanceType:
+    Type: String
+    AllowedValues:
+    - db.r5.large
+    - db.r5.xlarge
+    - db.r5.2xlarge
+    - db.r5.4xlarge
+    - db.r5.12xlarge
+    - db.r4.large
+    - db.r4.xlarge
+    - db.r4.2xlarge
+    - db.r4.4xlarge
+    - db.r4.8xlarge
+  QueryTimeout:
+    Type: Number
+    Description: Timeout in seconds
+    Default: 10000
+  SubnetIds:
+    Type: List<AWS::EC2::Subnet::Id>
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+
+Conditions:
+  EnableFirstReplica: !Not [!Equals [0, !Ref ReplicaCount]]
+  EnableSecondReplica: !Equals [2, !Ref ReplicaCount]
+
+Resources:
+  Cluster:
+    Type: AWS::Neptune::DBCluster
+    DependsOn:
+    - SubnetGroup
+    - "InstanceParameterGroup"
+    Properties:
+      DBSubnetGroupName: !Ref SubnetGroup
+      VpcSecurityGroupIds: [!Ref SecurityGroup]
+      DBClusterParameterGroupName: !Ref ClusterParameterGroup
+      Port: !Ref ClusterPort
+      IamAuthEnabled: !Ref IamAuthentication
+      StorageEncrypted: true
+      Tags:
+      - Key: Name
+        Value: smart-tracing-api-graph-db
+      - Key: StackId
+        Value: !Sub '${AWS::StackId}'
+      - Key: Stack
+        Value: !Sub '${AWS::Region}-${AWS::StackName}'
+      - Key: Application
+        Value: SmartTracing API
+      - Key: Environment
+        Value: !Ref Environment
+
+  ClusterParameterGroup:
+    Type: 'AWS::Neptune::DBClusterParameterGroup'
+    Properties:
+      Family: neptune1
+      Description: test-cfn-neptune-db-cluster-parameter-group-description
+      Parameters:
+        neptune_enable_audit_log: !Ref EnableAuditLog
+      Tags:
+      - Key: Name
+        Value: smart-tracing-api-graph-db
+      - Key: StackId
+        Value: !Sub '${AWS::StackId}'
+      - Key: Stack
+        Value: !Sub '${AWS::Region}-${AWS::StackName}'
+      - Key: Application
+        Value: SmartTracing API
+      - Key: Environment
+        Value: !Ref Environment
+
+  InstanceParameterGroup:
+    Type: AWS::Neptune::DBParameterGroup
+    Properties:
+      Family: neptune1
+      Description: test-cfn-neptune-db-parameter-group-description
+      Parameters:
+        neptune_query_timeout: !Ref QueryTimeout
+      Tags:
+      - Key: Name
+        Value: smart-tracing-api-graph-db
+      - Key: StackId
+        Value: !Sub '${AWS::StackId}'
+      - Key: Stack
+        Value: !Sub '${AWS::Region}-${AWS::StackName}'
+      - Key: Application
+        Value: SmartTracing API
+      - Key: Environment
+        Value: !Ref Environment
+
+  PrimaryInstance:
+    Type: AWS::Neptune::DBInstance
+    Properties:
+      DBClusterIdentifier: !Ref Cluster
+      DBInstanceClass: !Ref InstanceType
+      DBParameterGroupName: !Ref InstanceParameterGroup
+      Tags:
+      - Key: Name
+        Value: smart-tracing-api-graph-db
+      - Key: StackId
+        Value: !Sub '${AWS::StackId}'
+      - Key: Stack
+        Value: !Sub '${AWS::Region}-${AWS::StackName}'
+      - Key: Application
+        Value: SmartTracing API
+      - Key: Environment
+        Value: !Ref Environment
+    DependsOn:
+    - Cluster
+    - InstanceParameterGroup
+
+  ReplicaInstanceOne:
+    Type: AWS::Neptune::DBInstance
+    Condition: EnableFirstReplica
+    Properties:
+      DBClusterIdentifier: !Ref Cluster
+      DBInstanceClass: !Ref InstanceType
+      Tags:
+      - Key: Name
+        Value: smart-tracing-api-graph-db
+      - Key: StackId
+        Value: !Sub '${AWS::StackId}'
+      - Key: Stack
+        Value: !Sub '${AWS::Region}-${AWS::StackName}'
+      - Key: Application
+        Value: SmartTracing API
+      - Key: Environment
+        Value: !Ref Environment
+    DependsOn:
+    - Cluster
+    - PrimaryInstance
+
+  ReplicaInstanceTwo:
+    Type: 'AWS::Neptune::DBInstance'
+    Condition: EnableSecondReplica
+    Properties:
+      DBClusterIdentifier: !Ref Cluster
+      DBInstanceClass: !Ref InstanceType
+      Tags:
+      - Key: Name
+        Value: smart-tracing-api-graph-db
+      - Key: StackId
+        Value: !Sub '${AWS::StackId}'
+      - Key: Stack
+        Value: !Sub '${AWS::Region}-${AWS::StackName}'
+      - Key: Application
+        Value: SmartTracing API
+      - Key: Environment
+        Value: !Ref Environment
+    DependsOn:
+    - Cluster
+    - PrimaryInstance
+
+  Role:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - ec2.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: /
+
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !Ref VpcId
+      GroupDescription: Allow Access to database from private subnets and bastion
+      SecurityGroupIngress:
+      - FromPort: !Ref ClusterPort
+        ToPort: !Ref ClusterPort
+        IpProtocol: tcp
+        SourceSecurityGroupId: !Ref AppSecurityGroupId
+        Description: App access
+      - FromPort: !Ref ClusterPort
+        ToPort: !Ref ClusterPort
+        IpProtocol: tcp
+        SourceSecurityGroupId: !Ref BastionSecurityGroupId
+        Description: Bastoin access
+      Tags:
+      - Key: Name
+        Value: smart-tracing-api-graph-db
+      - Key: StackId
+        Value: !Sub '${AWS::StackId}'
+      - Key: Stack
+        Value: !Sub '${AWS::Region}-${AWS::StackName}'
+      - Key: Application
+        Value: SmartTracing API
+      - Key: Environment
+        Value: !Ref Environment
+
+  SubnetGroup:
+    Type: AWS::Neptune::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: Database security group
+      SubnetIds: !Ref SubnetIds
+
+Outputs:
+  ClusterArn:
+    Value: !Sub
+    - 'arn:${AWS::Partition}:neptune-db:${AWS::Region}:${AWS::AccountId}:${ClusterId}'
+    - ClusterId: !GetAtt Cluster.ClusterResourceId
+  WriteEndpoint:
+    Value: !GetAtt Cluster.Endpoint
+  ReadEndpoint:
+    Value: !GetAtt Cluster.ReadEndpoint
+  ClusterPort:
+    Value: !Ref ClusterPort

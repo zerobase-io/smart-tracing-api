@@ -1,6 +1,5 @@
 package io.zerobase.smarttracing.resources
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import io.zerobase.smarttracing.GraphDao
 import io.zerobase.smarttracing.models.*
 import javax.ws.rs.*
@@ -12,7 +11,7 @@ enum class ScanType {
     DEVICE_TO_SCANNABLE
 }
 
-data class CreateDeviceRequest(val fingerprint: String)
+data class CreateDeviceRequest(val fingerprint: String?)
 
 data class CreateCheckInRequest(
         val scannedId: String,
@@ -29,20 +28,18 @@ class DevicesResource(val dao: GraphDao) {
 
     @POST
     @Creator
-    @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE", justification = "false positive")
     fun createDevice(request: CreateDeviceRequest): IdWrapper? {
-        val fingerprint = Fingerprint(request.fingerprint)
+        val fingerprint = request.fingerprint?.let { Fingerprint(it) }
 
         val newDeviceId = dao.createDevice(fingerprint, null)
 
-        return newDeviceId?.let { IdWrapper(newDeviceId) }
+        return IdWrapper(newDeviceId)
     }
 
     @Path("/{id}/check-ins")
     @POST
     @Creator
-    @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE", justification = "false positive")
-    fun createCheckIn(@PathParam("id") deviceId: String, request: CreateCheckInRequest): IdWrapper? {
+    fun createCheckIn(@PathParam("id") deviceId: String, request: CreateCheckInRequest): IdWrapper {
         val scannedId = request.scannedId
         val type = request.type
         val loc = request.location
@@ -55,7 +52,7 @@ class DevicesResource(val dao: GraphDao) {
             throw BadRequestException("Incorrect type")
         }
 
-        return newCheckInId?.let { IdWrapper(newCheckInId) }
+        return IdWrapper(newCheckInId)
     }
 
     @Path("/{deviceId}/check-ins/{checkInId}/location")

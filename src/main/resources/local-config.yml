@@ -1,0 +1,24 @@
+---
+server:
+  applicationConnectors:
+  - type: http
+    port: ${PORT:-9000}
+
+database:
+  endpoints:
+    write: ${DB_HOST:-localhost}
+  port: ${DB_PORT:-8182}
+
+siteTypeCategories:
+  BUSINESS:
+    - GROCERY
+    - RESTAURANT
+  FINANCIAL:
+    - BANK
+  HEALTH:
+    - DOCTOR_OFFICE
+    - HOSPITAL
+    - PHARMACY
+
+scannableTypes:
+  - QR_CODE

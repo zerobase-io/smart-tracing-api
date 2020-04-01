@@ -1,0 +1,175 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: Zerobase API Service Stack
+
+Parameters:
+  Environment:
+    Type: String
+    AllowedValues: ['staging', 'prod']
+  AppVersion:
+    Type: String
+  DnsName:
+    Type: String
+  LoadBalancerListener:
+    Type: String
+  LoadBalancerDnsName:
+    Type: String
+  LoadBalancerHostedZoneId:
+    Type: String
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+  EcsClusterArn:
+    Type: String
+    Description: ARN of the cluster to deploy to
+  TaskCount:
+    Type: Number
+    MinValue: 1
+    MaxValue: 6
+    Default: 2
+  EcsClusterServiceRoleArn:
+    Type: String
+  HostedZoneId:
+    Type: String
+  LogRetentionDays:
+    Type: Number
+    MinValue: 0
+    MaxValue: 14
+    Default: 7
+  Memory:
+    Type: Number
+    Default: 384
+  Cpu:
+    Type: Number
+    Default: 10
+  DatabaseArn:
+    Type: String
+    Description: ARN for neptune database, used for task IAM role
+  WriteEndpoint:
+    Type: String
+  ReadEndpoint:
+    Type: String
+  DatabasePort:
+    Type: Number
+    MinValue: 0
+
+Resources:
+  DnsRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      AliasTarget:
+        DNSName: !Ref LoadBalancerDnsName
+        HostedZoneId: !Ref LoadBalancerHostedZoneId
+      HostedZoneId: !Ref HostedZoneId
+      Name: !Ref DnsName
+      Type: A
+
+  ListenerRule:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      Actions:
+      - TargetGroupArn: !Ref TargetGroup
+        Type: forward
+      Conditions:
+      - Field: host-header
+        Values:
+        - !Ref DnsName
+      ListenerArn: !Ref LoadBalancerListener
+      Priority: 7
+
+  TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 5
+      HealthCheckPath: /admin/healthcheck
+      HealthCheckTimeoutSeconds: 2
+      HealthyThresholdCount: 2
+      Port: 8080
+      Protocol: HTTP
+      Tags:
+      - Key: Name
+        Value: smart-tracing-api-service
+      - Key: StackId
+        Value: !Sub '${AWS::StackId}'
+      - Key: Stack
+        Value: !Sub '${AWS::Region}-${AWS::StackName}'
+      - Key: Application
+        Value: SmartTracing API
+      - Key: Environment
+        Value: !Ref Environment
+      TargetGroupAttributes:
+      - Key: deregistration_delay.timeout_seconds
+        Value: 0
+      UnhealthyThresholdCount: 2
+      VpcId: !Ref VpcId
+
+  Service:
+    Type: AWS::ECS::Service
+    DependsOn: ListenerRule
+    Properties:
+      Cluster: !Ref EcsClusterArn
+      DesiredCount: !Ref TaskCount
+      LoadBalancers:
+      - ContainerName: app
+        ContainerPort: 8080
+        TargetGroupArn: !Ref TargetGroup
+      Role: !Ref EcsClusterServiceRoleArn
+      TaskDefinition: !Ref TaskDefinition
+
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '${Environment}-smart-tracing-api'
+      RetentionInDays: !Ref LogRetentionDays
+
+  TaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      ContainerDefinitions:
+      - Cpu: !Ref Cpu
+        Essential: true
+        Environment:
+        - Name: WRITE_ENDPOINT
+          Value: !Ref WriteEndpoint
+        - Name: READ_ENDPOINT
+          Value: !Ref ReadEndpoint
+        - Name: DB_PORT
+          Value: !Ref DatabasePort
+        Image: !Sub 'zerobaseio/smart-tracing-api:${AppVersion}'
+        Memory: !Ref Memory
+        LogConfiguration:
+          LogDriver: awslogs
+          Options:
+            awslogs-group: !Ref LogGroup
+            awslogs-region: !Ref AWS::Region
+            awslogs-stream-prefix: !Sub '${Environment}-smart-tracing-api'
+        Name: app
+        PortMappings:
+        - ContainerPort: 8080
+          HostPort: 0
+        - ContainerPort: 8081
+          HostPort: 0
+        Privileged: false
+      Family: !Sub '${Environment}-smart-tracing-api'
+      TaskRoleArn: !Ref TaskRole
+
+  TaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: ecs-tasks.amazonaws.com
+          Action: sts:AssumeRole
+      Path: "/"
+      Policies:
+      - PolicyName: database-access
+        PolicyDocument:
+          Version: 2012-10-17
+          Statement:
+          - Action:
+            - neptune-db:*
+            Effect: Allow
+            Resource: !Sub '${DatabaseArn}/*'
+...
