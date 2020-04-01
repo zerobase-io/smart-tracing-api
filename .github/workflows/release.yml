@@ -33,6 +33,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Build and push docker image
+      env:
+        DOCKERHUB_ACCESS_TOKEN: ${{secrets.DOCKERHUB_ACCESS_TOKEN}}
       run: |
         version=$(cat target/classes/build.properties | grep version | awk -F= '{print $2}')
         docker build . -t zerobaseio/smart-tracing-api:${version} -t zerobaseio/smart-tracing-api:latest

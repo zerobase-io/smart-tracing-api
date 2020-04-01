@@ -15,7 +15,8 @@
     <version>1.0.0-SNAPSHOT</version>
 
     <scm>
-        <developerConnection>scm:git:ssh://git@github.com/zerobase-io/smart-tracing-api.git</developerConnection>
+        <developerConnection>scm:git:https://github.com/zerobase-io/smart-tracing-api.git</developerConnection>
+        <connection>scm:git:https://github.com/zerobase-io/smart-tracing-api.git</connection>
         <tag>HEAD</tag>
     </scm>
     <distributionManagement>
