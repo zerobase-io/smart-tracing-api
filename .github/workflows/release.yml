@@ -5,9 +5,9 @@ on:
     - master
     tag-ignore:
     - v*
-    paths:
-    - pom.xml
-    - src/*
+#    paths:
+#    - pom.xml
+#    - src/*
 
 jobs:
   release:
