@@ -3,8 +3,11 @@ on:
   push:
     branches:
     - master
-  tag-ignore:
-  - v*
+    tag-ignore:
+    - v*
+    paths:
+    - pom.xml
+    - src/*
 
 jobs:
   release:
