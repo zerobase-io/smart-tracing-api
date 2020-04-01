@@ -20,7 +20,7 @@ import com.google.common.io.Resources
 import javax.activation.DataHandler
 
 // Currently only implements the AmazonSES
-class Email(private val fromEmailSES: String, private val amazonSES: AmazonSES,
+class Email(private val fromEmail: String, private val emailSender: EmailSender,
             private val config: EmailConfig) {
     private val session: Session
 
@@ -43,7 +43,7 @@ class Email(private val fromEmailSES: String, private val amazonSES: AmazonSES,
      */
     fun send(to: String, attachment: ByteArray?, type: EmailType) {
         if (config[type] == null) {
-            throw InvalidEmailType("Invalid email type ${type}")
+            throw InvalidEmailTypeException("Invalid email type ${type}")
         }
         val subject = config[type]!!.subject
         val resource_name = config[type]!!.resource
@@ -55,11 +55,11 @@ class Email(private val fromEmailSES: String, private val amazonSES: AmazonSES,
             Resources.getResource("${resource_name}.txt"),
             Charsets.UTF_8
         )
-        if (fromEmailSES != "") {
+        if (fromEmail != "") {
             val message = MimeMessage(session)
 
             message.setSubject(subject, "UTF-8")
-            message.setFrom(InternetAddress(fromEmailSES))
+            message.setFrom(InternetAddress(fromEmail))
             message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to))
 
             val msgBody = MimeMultipart("alternative")
@@ -93,7 +93,7 @@ class Email(private val fromEmailSES: String, private val amazonSES: AmazonSES,
 
             val arr = outStream.toByteArray()
 
-            amazonSES.sendEmail(arr)
+            emailSender.sendEmail(arr)
         }
     }
 }

@@ -246,7 +246,7 @@ class GraphDao(private val graph: GraphTraversalSource, private val phoneUtil: P
      *
      * @return email of the organization.
      */
-    fun getEmailOrg(oid: OrganizationId): String {
+    fun getOrganizationEmail(oid: OrganizationId): String {
         return driver.session().use {
             it.writeTransaction { txn ->
                 val result = txn.run(

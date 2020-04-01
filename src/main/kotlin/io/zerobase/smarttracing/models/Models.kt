@@ -30,7 +30,7 @@ data class EmailConfigEntry(
 )
 
 enum class EmailType {
-    CREATE_ORG, CREATE_SCANNABLE,
+    CREATE_ORGANIZATION, CREATE_SCANNABLE,
     CREATE_USER, DELETE_USER
 }
 

@@ -178,16 +178,6 @@
             <artifactId>logback-access</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.activation</groupId>
-            <artifactId>jakarta.activation</artifactId>
-            <version>1.2.1</version>
-        </dependency>
-
         <!-- AWS Sending Emails -->
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
@@ -254,7 +244,15 @@
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.activation</groupId>
+            <artifactId>jakarta.activation</artifactId>
+            <version>1.2.1</version>
+        </dependency>
         <!-- Test Dependencies -->
 
     </dependencies>

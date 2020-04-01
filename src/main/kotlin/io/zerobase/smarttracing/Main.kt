@@ -15,16 +15,18 @@ import org.eclipse.jetty.servlets.CrossOriginFilter
 import java.util.*
 import javax.servlet.DispatcherType
 import javax.servlet.FilterRegistration
+import software.amazon.awssdk.regions.Region
+import software.amazon.awssdk.services.ses.SesClient
 
 typealias MultiMap<K,V> = Map<K, List<V>>
-typealias EmailConfig = Map<EmailType, EmailConfigEntry>
 
 data class Config(
         val database: GraphDatabaseFactory = GraphDatabaseFactory(),
         val siteTypeCategories: MultiMap<String, String>,
         val scannableTypes: List<String>
 ): Configuration()
-data class AWS(val fromEmailSES: String)
+data class SimpleEmailService(val region: Region, val endpoint: URI?)
+data class AWS(val ses: SimpleEmailService)
 
 fun main(vararg args: String) {
     Main().run(*args)
@@ -48,9 +50,9 @@ class Main: Application<Config>() {
         val phoneUtil = PhoneNumberUtil.getInstance()
 
         // For emails
-        println(config.emailConfig)
-        val amazonSES = AmazonSES()
-        val email = Email(config.amazonaws.fromEmailSES, amazonSES, config.emailConfig)
+        val sesClient = SesClient.builder().region(config.amazonaws.ses.region).build()
+        val amazonSES = AmazonSES(sesClient)
+        val email = Email(config.appConfig.fromEmail, amazonSES, config.emailConfig)
 
         val dao = GraphDao(driver, phoneUtil)
 
