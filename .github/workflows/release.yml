@@ -33,7 +33,7 @@ jobs:
         release_version=$(mvn -q -Dexec.executable='echo' -Dexec.args='${project.version}' --non-recursive exec:exec | awk -F'-' '{print $1}' | tail -1 | tr -d '[:space:]')
         mvn -B versions:resolve-ranges
         mvn -B versions:set -DnewVersion=${release_version}
-        mvn -B clean deploy
+        mvn -B clean verify
         git commit -am "[skip ci] Release: v${release_version}" --author='github-actions <noreply@zerobase.io>'
         git tag v${release_version}
 
