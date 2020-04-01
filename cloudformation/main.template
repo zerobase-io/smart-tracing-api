@@ -39,7 +39,7 @@ Resources:
         Environment: !Ref Environment
         AppVersion: !Ref AppVersion
         DnsName: !Join ['.', ['api', {"Fn::ImportValue": !Sub '${InfrastructureStackName}-DomainSuffix'}]]
-        LoadBalancerListener: {"Fn::ImportValue": !Sub '${InfrastructureStackName}-EcsLoadBalancerListener'}
+        LoadBalancerListener: {"Fn::ImportValue": !Sub '${InfrastructureStackName}-EcsSecureLoadBalancerListener'}
         LoadBalancerDnsName: {"Fn::ImportValue": !Sub '${InfrastructureStackName}-EcsLoadBalancerDnsName'}
         LoadBalancerHostedZoneId: {"Fn::ImportValue": !Sub '${InfrastructureStackName}-EcsLoadBalancerHostedZoneId'}
         VpcId: {"Fn::ImportValue": !Sub '${InfrastructureStackName}-VpcId'}
