@@ -27,7 +27,7 @@ class GeneratePdf {
     fun generatePdf(businessname: String, town: String, state: String) {
         val genQR = GenerateQRCode(ZB_LOGO_IMAGE_PATH, QR_CODE_IMAGE_PATH)
         try {
-            genQR.generateQRCodeImage(QR_VALUE, 350, 350)
+            genQR.generateQRCodeImage(QR_VALUE, QR_WIDTH, QR_HEIGHT)
         } catch (e: WriterException) {
             println("Could not generate QR Code, WriterException :: " + e.message)
         } catch (e: IOException) {
@@ -113,6 +113,8 @@ class GeneratePdf {
         private const val QR_CODE_IMAGE_PATH = "src/main/resources/pdfconfig/qr/processed/qr_logo_overlay.png"
         private const val ZB_LOGO_IMAGE_PATH = "src/main/resources/pdfconfig/qr/rawfiles/zerobase_qr_logo.png"
         private const val QR_VALUE = "https://zerobase.io/"
+        private const val QR_WIDTH = 1000 // also makes qr overlay better quality with increase in qr width:height ratio
+        private const val QR_HEIGHT = 1000
         @Throws(Exception::class)
         @JvmStatic
         fun main(args: Array<String>) {

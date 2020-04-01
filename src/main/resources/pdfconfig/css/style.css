@@ -119,7 +119,7 @@ div.footer {
 }
 
 .logo {
-    width: 275px;
+    width: 200px;
 }
 
 .footer {
@@ -172,5 +172,5 @@ hr {
   display: block;
   margin-left: auto;
   margin-right: auto;
-  width: 50%;
+  width: 70%;
 }

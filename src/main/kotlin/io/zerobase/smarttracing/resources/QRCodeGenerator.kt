@@ -66,19 +66,4 @@ class GenerateQRCode(var logoPath: String, // have to use source path
         }
     }
 
-    companion object {
-        @Throws(Exception::class)
-        @JvmStatic
-        fun main(args: Array<String>) { // variable duplicated here for testing purposes
-//        String QR_CODE_IMAGE_PATH = "src/test/resources/qr/zerobase-zerobase-qr.png";
-//        try {
-//            generateQRCodeImage("This is my first QR Code", 350, 350, QR_CODE_IMAGE_PATH);
-//        } catch (WriterException e) {
-//            System.out.println("Could not generate QR Code, WriterException :: " + e.getMessage());
-//        } catch (IOException e) {
-//            System.out.println("Could not generate QR Code, IOException :: " + e.getMessage());
-//        }
-        }
-    }
-
 }
