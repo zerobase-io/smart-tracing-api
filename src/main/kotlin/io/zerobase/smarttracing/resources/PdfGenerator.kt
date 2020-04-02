@@ -1,6 +1,7 @@
 package io.zerobase.smarttracing.resources
 
 import com.google.zxing.WriterException
+import io.dropwizard.util.Resources
 import org.thymeleaf.TemplateEngine
 import org.thymeleaf.context.Context
 import org.thymeleaf.templatemode.TemplateMode
@@ -41,7 +42,7 @@ class GeneratePdf {
         // of the main HTML file, we also have partials like a footer or
         // a header. We can re-use those partials in different documents.
         val templateResolver = ClassLoaderTemplateResolver()
-        templateResolver.prefix = "/"
+        templateResolver.prefix = "/pdfconfig/"
         templateResolver.suffix = ".html"
         templateResolver.templateMode = TemplateMode.HTML
         templateResolver.characterEncoding = UTF_8
@@ -58,20 +59,18 @@ class GeneratePdf {
         // XHTML. Note that this might not work for very complicated HTML. But
         // it's good enough for a simple letter.
 
-        val renderedHtmlContent = templateEngine.process("template", context)
-        val xHtml = convertToXhtml(renderedHtmlContent)
-        val renderer = ITextRenderer()
+//        val renderedHtmlContent = templateEngine.process("template", context)
+//        val xHtml = convertToXhtml(renderedHtmlContent)
+//        val renderer = ITextRenderer()
         // FlyingSaucer has a working directory. If you run this test, the working directory
         // will be the root folder of your project. However, all files (HTML, CSS, etc.) are
         // located under "/src/test/resources". So we want to use this folder as the working
         // directory.
-        val baseUrl = FileSystems
-                .getDefault()
-                .getPath("src", "main", "resources", "pdfconfig")
-                .toUri()
-                .toURL()
-                .toString()
+        val baseUrl = Resources.getResource("pdfconfig").toString()
         print(baseUrl);
+        val renderedHtmlContent = templateEngine.process("template", context)
+        val xHtml = convertToXhtml(renderedHtmlContent)
+        val renderer = ITextRenderer()
         renderer.setDocumentFromString(xHtml, baseUrl)
         renderer.layout()
 
