@@ -24,6 +24,7 @@ class GraphDatabaseFactory {
     var workerPoolSize: UInt? = null
     var credentials: Credentials? = null
     var enableAwsSigner: Boolean = false
+    var enableSsl: Boolean = false
 
     fun build(environment: Environment, mode: Mode = Mode.WRITE): GraphTraversalSource {
         val endpoint = if (mode == Mode.WRITE || endpoints.read == null) {
@@ -32,8 +33,9 @@ class GraphDatabaseFactory {
             endpoints.read
         }
         val builder = Cluster.build()
-                .addContactPoints(endpoint)
-                .port(port.toInt())
+            .addContactPoints(endpoint)
+            .port(port.toInt())
+            .enableSsl(enableSsl)
         path?.also { builder.path(it) }
         maxConnectionPoolSize?.let(UInt::toInt)?.also { builder.maxConnectionPoolSize(it) }
         minConnectionPoolSize?.let(UInt::toInt)?.also { builder.minConnectionPoolSize(it) }
