@@ -24,7 +24,7 @@ database:
     write: ${WRITE_ENDPOINT}
     read: ${READ_ENDPOINT}
   port: ${DB_PORT}
-  enableAwsSigner: true
+  enableAwsSigner: ${ENABLE_AWS_SIGNING:-true}
 
 siteTypeCategories:
   BUSINESS:
