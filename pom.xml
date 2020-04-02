@@ -32,6 +32,8 @@
         <dropwizard.version>2.0.2</dropwizard.version>
         <gremlin.version>[3.4.6,4)</gremlin.version>
         <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
+        <junit.jupiter.version>5.5.2</junit.jupiter.version>
+        <junit.platform.version>1.5.2</junit.platform.version>
     </properties>
 
     <dependencyManagement>
@@ -285,20 +287,20 @@
         </dependency>
         <dependency>
             <groupId>org.xhtmlrenderer</groupId>
-            <artifactId>flying-saucer-core</artifactId>
-            <version>9.1.6</version>
+            <artifactId>flying-saucer-pdf-openpdf</artifactId>
+            <version>9.1.20</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>org.xhtmlrenderer</groupId>
-            <artifactId>flying-saucer-pdf-itext5</artifactId>
-            <version>9.1.6</version>
-            <scope>compile</scope>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${junit.jupiter.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.12</version>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-runner</artifactId>
+            <version>${junit.platform.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -317,12 +319,6 @@
         <resources>
             <resource>
                 <directory>src/main/resources/pdfconfig</directory>
-                <includes>
-                    <include>**/*.lng</include>
-                    <include>**/*.afm</include>
-                    <include>**/*.html</include>
-                    <include>**/*.txt</include>
-                </includes>
             </resource>
         </resources>
 

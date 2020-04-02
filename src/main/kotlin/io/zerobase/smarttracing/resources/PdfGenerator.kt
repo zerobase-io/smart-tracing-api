@@ -8,6 +8,7 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver
 import org.w3c.tidy.Tidy
 import org.xhtmlrenderer.pdf.ITextRenderer
 import java.io.*
+import java.nio.charset.StandardCharsets
 import java.nio.file.FileSystems
 import java.util.*
 
@@ -77,16 +78,19 @@ class GeneratePdf {
         outputStream.close()
     }
 
-    @Throws(UnsupportedEncodingException::class)
     private fun convertToXhtml(html: String): String {
-        val tidy = Tidy()
-        tidy.inputEncoding = UTF_8
-        tidy.outputEncoding = UTF_8
-        tidy.xhtml = true
-        val inputStream = ByteArrayInputStream(html.toByteArray(charset(UTF_8)))
-        val outputStream = ByteArrayOutputStream()
-        tidy.parseDOM(inputStream, outputStream)
-        return outputStream.toString(UTF_8)
+        try{
+            val tidy = Tidy()
+            tidy.inputEncoding = UTF_8
+            tidy.outputEncoding = UTF_8
+            tidy.xhtml = true
+            val inputStream = ByteArrayInputStream(html.toByteArray(StandardCharsets.UTF_8))
+            val outputStream = ByteArrayOutputStream()
+            tidy.parseDOM(inputStream, outputStream)
+            return outputStream.toString(UTF_8)
+        } catch (e: UnsupportedEncodingException){
+            throw Exception(e)
+        }
     }
 
     private fun organizationData(businessname: String, state: String, town: String): Data {
@@ -104,9 +108,6 @@ class GeneratePdf {
 
     }
 
-
-
-
     companion object {
         private const val OUTPUT_FILE = "src/main/resources/pdfconfig/pdfs/zerobase-qr.pdf"
         private const val UTF_8 = "UTF-8"
@@ -115,7 +116,6 @@ class GeneratePdf {
         private const val QR_VALUE = "https://zerobase.io/"
         private const val QR_WIDTH = 1000 // also makes qr overlay better quality with increase in qr width:height ratio
         private const val QR_HEIGHT = 1000
-        @Throws(Exception::class)
         @JvmStatic
         fun main(args: Array<String>) {
             val businesssname = "Test101"
