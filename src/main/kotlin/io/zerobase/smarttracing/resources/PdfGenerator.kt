@@ -25,8 +25,7 @@ import java.util.*
  * /test.pdf
  */
 class GeneratePdf {
-    @Throws(Exception::class)
-    fun generatePdf(businessname: String, town: String, state: String, outputfile: String) {
+    fun generatePdf(businessname: String, town: String, state: String, outputfile: String): ByteArray {
         // Generate QR Code
         val genQR = GenerateQRCode(ZB_LOGO_IMAGE_PATH, QR_CODE_IMAGE_PATH)
         try {
@@ -48,6 +47,7 @@ class GeneratePdf {
         templateResolver.characterEncoding = UTF_8
         val templateEngine = TemplateEngine()
         templateEngine.setTemplateResolver(templateResolver)
+
         val data = organizationData(businessname, town, state)
         val context = Context()
         val dataMap = HashMap<String, Any>()
@@ -59,13 +59,6 @@ class GeneratePdf {
         // XHTML. Note that this might not work for very complicated HTML. But
         // it's good enough for a simple letter.
 
-//        val renderedHtmlContent = templateEngine.process("template", context)
-//        val xHtml = convertToXhtml(renderedHtmlContent)
-//        val renderer = ITextRenderer()
-        // FlyingSaucer has a working directory. If you run this test, the working directory
-        // will be the root folder of your project. However, all files (HTML, CSS, etc.) are
-        // located under "/src/test/resources". So we want to use this folder as the working
-        // directory.
         val baseUrl = Resources.getResource("pdfconfig").toString()
         print(baseUrl);
         val renderedHtmlContent = templateEngine.process("template", context)
@@ -75,8 +68,9 @@ class GeneratePdf {
         renderer.layout()
 
         // And finally, we create the PDF:
-        val outputStream: OutputStream = FileOutputStream(outputfile)
+        val outputStream: ByteArrayOutputStream = ByteArrayOutputStream()
         outputStream.use { renderer.createPDF(it) }
+        return outputStream.toByteArray()
     }
 
     private fun convertToXhtml(html: String): String {
