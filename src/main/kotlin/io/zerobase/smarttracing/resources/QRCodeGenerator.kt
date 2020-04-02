@@ -13,7 +13,7 @@ import java.io.IOException
 import java.util.*
 import javax.imageio.ImageIO
 
-class GenerateQRCode(var logoPath: String, // have to use source path
+class QRCodeGenerator(var logoPath: String, // have to use source path
                      var qrCodeFinalPath: String) {
     @Throws(IOException::class)
     private fun getQRCodeWithOverlay(qrcode: BufferedImage) {

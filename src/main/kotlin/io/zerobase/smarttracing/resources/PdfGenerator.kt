@@ -24,7 +24,7 @@ import java.util.*
  *
  * /test.pdf
  */
-class GeneratePdf {
+class PdfGenerator {
     fun generatePdf(businessname: String, town: String, state: String, outputfile: String): ByteArray {
         // Generate QR Code
         val genQR = GenerateQRCode(ZB_LOGO_IMAGE_PATH, QR_CODE_IMAGE_PATH)
@@ -113,7 +113,7 @@ class GeneratePdf {
             val state = "Testingstate"
             val outputfile = args[0]
             try {
-                GeneratePdf().generatePdf(businesssname, town, state, outputfile)
+                PdfGenerator().generatePdf(businesssname, town, state, outputfile)
             } catch (e: WriterException) {
                 println("Could not generate pdf, WriterException :: " + e.message)
             } catch (e: IOException) {
