@@ -1,6 +1,7 @@
 package io.zerobase.smarttracing.models
 
 import com.fasterxml.jackson.annotation.JsonValue
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 
 interface Id {
     val value: String
@@ -23,15 +24,5 @@ data class Location(
     val longitude: Float
 )
 
-data class EmailConfigEntry(
-    val subject: String,
-    val resource: String,
-    val attach_name: String?
-)
-
-enum class EmailType {
-    CREATE_ORGANIZATION, CREATE_SCANNABLE,
-    CREATE_USER, DELETE_USER
-}
-
-typealias EmailConfig = Map<EmailType, EmailConfigEntry>
+@SuppressFBWarnings("EI_EXPOSE_REP", justification = "This is temporary, should be fixed later")
+class Attachment(val array: ByteArray, val name: String)

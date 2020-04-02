@@ -17,6 +17,8 @@ import javax.servlet.DispatcherType
 import javax.servlet.FilterRegistration
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.ses.SesClient
+import com.github.mustachejava.DefaultMustacheFactory
+import javax.mail.Session
 
 typealias MultiMap<K,V> = Map<K, List<V>>
 
@@ -44,15 +46,17 @@ class Main: Application<Config>() {
     override fun run(config: Config, env: Environment) {
         val graph: GraphTraversalSource = config.database.build(env)
 
+        val session = Session.getDefaultInstance(Properties())
+        val mustacheFactory = DefaultMustacheFactory()
+
         /**
          * For phone number verification.
          */
         val phoneUtil = PhoneNumberUtil.getInstance()
 
         // For emails
-        val sesClient = SesClient.builder().region(config.amazonaws.ses.region).build()
-        val amazonSES = AmazonSES(sesClient)
-        val email = Email(config.appConfig.fromEmail, amazonSES, config.emailConfig)
+        val sesClient = SesClient.builder().region(Region.US_EAST_1).build()
+        val amazonSES = AmazonSES(sesClient, session, config.appConfig.fromEmail)
 
         val dao = GraphDao(driver, phoneUtil)
 
@@ -60,9 +64,9 @@ class Main: Application<Config>() {
         env.jersey().register(InvalidIdExceptionMapper())
         env.jersey().register(Router(dao))
         env.jersey().register(CreatorFilter())
-        env.jersey().register(OrganizationsResource(dao, config.siteTypeCategories, config.scannableTypes, email))
+        env.jersey().register(OrganizationsResource(dao, config.siteTypeCategories, config.scannableTypes, mustacheFactory, amazonSES))
         env.jersey().register(DevicesResource(dao))
-        env.jersey().register(UsersResource(dao, email))
+        env.jersey().register(UsersResource(dao, mustacheFactory, amazonSES))
         env.jersey().register(ModelsResource(config.siteTypeCategories, config.scannableTypes))
 
         addCorsFilter(env)

@@ -4,6 +4,7 @@ import io.zerobase.smarttracing.GraphDao
 import io.zerobase.smarttracing.models.*
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
+import com.github.mustachejava.MustacheFactory
 
 /**
  * Request data types to simplify coding.
@@ -22,7 +23,9 @@ data class CreateUserRequest(
 @Path("/users")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-class UsersResource(val dao: GraphDao, val email: Email) {
+class UsersResource(val dao: GraphDao,
+                    private val mustacheFactory: MustacheFactory,
+                    private val emailSender: EmailSender) {
 
     @POST
     @Creator
@@ -42,11 +45,15 @@ class UsersResource(val dao: GraphDao, val email: Email) {
 
     @Path("/{id}")
     @DELETE
-    @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE", justification = "false positive")
     fun deleteUser(@PathParam("id") id: String) {
-        val to = dao.getUser(UserId(id))?.email
+        val user = dao.getUser(UserId(id))
         dao.deleteUser(UserId(id))
-        to?.let { email.send(it, null, EmailType.DELETE_USER) }
+        if (user != null) {
+            val toEmail = user?.email
+            val userDeleteNotification = UserDeleteNotification(user.name ?: "No Name", mustacheFactory)
+            val emailBody = userDeleteNotification.render()
+            toEmail?.let { emailSender.sendEmail("Good luck", it, emailBody) }
+        }
     }
 
     @Path("/{id}/summary")

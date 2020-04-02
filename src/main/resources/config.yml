@@ -27,25 +27,6 @@ database:
   enableAwsSigner: ${ENABLE_AWS_SIGNING:-true}
   enableSsl: ${ENABLE_SSL:-true}
 
-amazonaws:
-  ses:
-    region: US_EAST_1
-
-emailConfig:
-  CREATE_ORG:
-    subject: "Thank you joining our program"
-    resource: "email-templates/org-join"
-  CREATE_SCANNABLE:
-    subject: "Thank you for creating a qr code"
-    resource: "email-templates/create-qr-code"
-    attach_name: "qr-code.pdf"
-  CREATE_USER:
-    subject: "Thank you for joining"
-    resource: "email-templates/user-join"
-  DELETE_USER:
-    subject: "Sorry to see you go"
-    resource: "email-templates/user-delete"
-
 appConfig:
   fromEmail: ${FROM_EMAIL:-""}
 

@@ -261,6 +261,27 @@ class GraphDao(private val graph: GraphTraversalSource, private val phoneUtil: P
     }
 
     /**
+     * Gets the name for the organization
+     *
+     * @param oid organization id
+     *
+     * @return name of the organization.
+     */
+    fun getOrganizationName(oid: OrganizationId): String {
+        return driver.session().use {
+            it.writeTransaction { txn ->
+                val result = txn.run(
+                        """
+                        MATCH (o:Organization { id: '${oid.value}' })
+                        RETURN o.name AS name
+                        """.trimIndent()
+                ).single()["name"].asString()
+                return@writeTransaction result?.let { it }
+            }
+        }!!
+    }
+
+    /**
      * Creates a user node and links to device id.
      *
      * @param name name of the user.
