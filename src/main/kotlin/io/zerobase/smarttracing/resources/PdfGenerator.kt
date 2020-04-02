@@ -71,9 +71,11 @@ class PdfGenerator {
         renderer.layout()
 
         // And finally, we create the PDF:
-        val byteOutputStream = ByteArrayOutputStream()
         val outputStream: OutputStream = FileOutputStream(outputfile)
         outputStream.use { renderer.createPDF(it) }
+
+        // returning a byte array instead
+        val byteOutputStream = ByteArrayOutputStream()
         byteOutputStream.use { renderer.createPDF(it) }
         return byteOutputStream.toByteArray()
     }
@@ -119,9 +121,9 @@ class PdfGenerator {
             try {
                 PdfGenerator().generatePdf(businesssname, town, state, outputfile)
             } catch (e: WriterException) {
-                println("Could not generate pdf, WriterException :: " + e.message)
+                throw Exception("Could not generate pdf, WriterException :: " + e.message)
             } catch (e: IOException) {
-                println("Could not generate pdf, IOException :: " + e.message)
+                throw Exception("Could not generate pdf, IOException :: " + e.message)
             }
         }
     }
