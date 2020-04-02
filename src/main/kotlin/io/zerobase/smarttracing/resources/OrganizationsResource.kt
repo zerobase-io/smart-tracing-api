@@ -6,11 +6,11 @@ import io.zerobase.smarttracing.models.IdWrapper
 import io.zerobase.smarttracing.models.Location
 import io.zerobase.smarttracing.models.OrganizationId
 import io.zerobase.smarttracing.models.SiteId
+import io.zerobase.smarttracing.notifications.NotificationFactory
+import io.zerobase.smarttracing.notifications.NotificationManager
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
 import javax.ws.rs.core.Response
-import io.zerobase.smarttracing.notifications.NotificationFactory
-import io.zerobase.smarttracing.notifications.NotificationManager
 
 /**
  * Requests from clients.

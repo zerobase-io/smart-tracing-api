@@ -1,19 +1,19 @@
 package io.zerobase.smarttracing.notifications
 
+import software.amazon.awssdk.core.SdkBytes
+import software.amazon.awssdk.services.ses.SesClient
+import software.amazon.awssdk.services.ses.model.RawMessage
+import software.amazon.awssdk.services.ses.model.SendRawEmailRequest
+import java.io.ByteArrayOutputStream
+import java.nio.charset.StandardCharsets
+import javax.activation.DataHandler
 import javax.mail.Message
 import javax.mail.Session
 import javax.mail.internet.InternetAddress
+import javax.mail.internet.MimeBodyPart
 import javax.mail.internet.MimeMessage
 import javax.mail.internet.MimeMultipart
-import javax.mail.internet.MimeBodyPart
 import javax.mail.util.ByteArrayDataSource
-import java.io.ByteArrayOutputStream
-import javax.activation.DataHandler
-
-import software.amazon.awssdk.services.ses.SesClient
-import software.amazon.awssdk.core.SdkBytes
-import software.amazon.awssdk.services.ses.model.*
-import java.nio.charset.StandardCharsets
 
 class AmazonEmailSender(
     private val client: SesClient,

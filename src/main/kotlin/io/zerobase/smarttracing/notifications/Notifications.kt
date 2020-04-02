@@ -1,14 +1,14 @@
 package io.zerobase.smarttracing.notifications
 
-import com.github.mustachejava.MustacheFactory
 import com.google.common.net.MediaType
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
+import org.thymeleaf.TemplateEngine
 
 enum class NotificationMedium {
     EMAIL
 }
 
-class NotificationFactory(private val templateFactory: MustacheFactory) {
+class NotificationFactory(private val templateEngine: TemplateEngine) {
 
 }
 
