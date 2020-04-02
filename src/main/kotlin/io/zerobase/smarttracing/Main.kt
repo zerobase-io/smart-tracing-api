@@ -18,17 +18,25 @@ import javax.servlet.FilterRegistration
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.ses.SesClient
 import com.github.mustachejava.DefaultMustacheFactory
+import io.zerobase.smarttracing.notifications.AmazonEmailSender
+import io.zerobase.smarttracing.notifications.NotificationFactory
+import io.zerobase.smarttracing.notifications.NotificationManager
+import java.net.URI
 import javax.mail.Session
 
 typealias MultiMap<K,V> = Map<K, List<V>>
 
+data class AmazonEmailConfig(val region: Region, val endpoint: URI? = null)
+data class AmazonConfig(val ses: AmazonEmailConfig)
+data class EmailNotificationConfig(val fromAddress: String)
+data class NotificationConfig(val email: EmailNotificationConfig, val templateLocation: String = "notifications")
 data class Config(
         val database: GraphDatabaseFactory = GraphDatabaseFactory(),
         val siteTypeCategories: MultiMap<String, String>,
-        val scannableTypes: List<String>
+        val scannableTypes: List<String>,
+        val aws: AmazonConfig,
+        val notifications: NotificationConfig
 ): Configuration()
-data class SimpleEmailService(val region: Region, val endpoint: URI?)
-data class AWS(val ses: SimpleEmailService)
 
 fun main(vararg args: String) {
     Main().run(*args)
@@ -47,7 +55,6 @@ class Main: Application<Config>() {
         val graph: GraphTraversalSource = config.database.build(env)
 
         val session = Session.getDefaultInstance(Properties())
-        val mustacheFactory = DefaultMustacheFactory()
 
         /**
          * For phone number verification.
@@ -55,18 +62,21 @@ class Main: Application<Config>() {
         val phoneUtil = PhoneNumberUtil.getInstance()
 
         // For emails
-        val sesClient = SesClient.builder().region(Region.US_EAST_1).build()
-        val amazonSES = AmazonSES(sesClient, session, config.appConfig.fromEmail)
+        val sesClientBuilder = SesClient.builder().region(config.aws.ses.region)
+        config.aws.ses.endpoint?.let(sesClientBuilder::endpointOverride)
+        val emailSender = AmazonEmailSender(sesClientBuilder.build(), session, config.notifications.email.fromAddress)
+        val notificationManager = NotificationManager(emailSender)
+        val notificationFactory = NotificationFactory(DefaultMustacheFactory(config.notifications.templateLocation))
 
-        val dao = GraphDao(driver, phoneUtil)
+        val dao = GraphDao(graph, phoneUtil)
 
         env.jersey().register(InvalidPhoneNumberExceptionMapper())
         env.jersey().register(InvalidIdExceptionMapper())
         env.jersey().register(Router(dao))
         env.jersey().register(CreatorFilter())
-        env.jersey().register(OrganizationsResource(dao, config.siteTypeCategories, config.scannableTypes, mustacheFactory, amazonSES))
+        env.jersey().register(OrganizationsResource(dao, config.siteTypeCategories, config.scannableTypes, notificationManager, notificationFactory))
         env.jersey().register(DevicesResource(dao))
-        env.jersey().register(UsersResource(dao, mustacheFactory, amazonSES))
+        env.jersey().register(UsersResource(dao, notificationManager, notificationFactory))
         env.jersey().register(ModelsResource(config.siteTypeCategories, config.scannableTypes))
 
         addCorsFilter(env)

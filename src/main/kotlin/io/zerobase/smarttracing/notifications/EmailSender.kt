@@ -1,6 +1,4 @@
-package io.zerobase.smarttracing.resources
-
-import io.zerobase.smarttracing.models.Attachment
+package io.zerobase.smarttracing.notifications
 
 interface EmailSender {
     fun sendEmail(subject: String,

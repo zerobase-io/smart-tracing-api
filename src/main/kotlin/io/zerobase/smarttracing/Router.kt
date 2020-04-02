@@ -28,7 +28,7 @@ class Router(val dao: GraphDao) {
     @POST
     fun createDevice(req: LegacyCreateDeviceRequest): ApiResponse {
         try {
-            return dao.createDevice(req.fingerprint?.let(::Fingerprint), req.ip).let { DeviceCreatedResponse(it.value) }
+            return dao.createDevice(req.fingerprint?.let(::Fingerprint)).let { DeviceCreatedResponse(it.value) }
         } catch (_: Exception) {
             return ApiResponse(success = false, message = "Sorry, there was an error processing your account, please try again.")
         }

@@ -11,10 +11,6 @@ import org.apache.tinkerpop.gremlin.structure.T
 import org.apache.tinkerpop.gremlin.structure.VertexProperty
 import java.util.*
 
-private fun <T> VertexProperty<T>.getIfPresent(): T? {
-    return if (isPresent) { value() } else { null }
-}
-
 private fun <S, T> Traversal<S, T>.getIfPresent(): T? {
     return tryNext().orElse(null)
 }
@@ -28,7 +24,7 @@ class GraphDao(private val graph: GraphTraversalSource, private val phoneUtil: P
      * Creates a new Device and returns its ID
      */
     @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE", justification = "false positive")
-    fun createDevice(fingerprint: Fingerprint?, ip: String?): DeviceId {
+    fun createDevice(fingerprint: Fingerprint?): DeviceId {
         val id = UUID.randomUUID().toString()
         try {
             val vertex = graph.addV("Device")
@@ -246,39 +242,14 @@ class GraphDao(private val graph: GraphTraversalSource, private val phoneUtil: P
      *
      * @return email of the organization.
      */
-    fun getOrganizationEmail(oid: OrganizationId): String {
-        return driver.session().use {
-            it.writeTransaction { txn ->
-                val result = txn.run(
-                        """
-                        MATCH (o:Organization { id: '${oid.value}' })
-                        RETURN o.email AS email
-                        """.trimIndent()
-                ).single()["email"].asString()
-                return@writeTransaction result?.let { it }
+    fun getOrganization(id: OrganizationId): Organization? {
+        return graph.V(id.value)
+            .propertyMap<String>()
+            .getIfPresent()
+            ?.let {
+                Organization(id=id, name=it["name"]!!, address=it["address"]!!, contactName = it["contactName"]!!,
+                    contactInfo=ContactInfo(email = it["email"], phoneNumber = it["phoneNumber"]))
             }
-        }!!
-    }
-
-    /**
-     * Gets the name for the organization
-     *
-     * @param oid organization id
-     *
-     * @return name of the organization.
-     */
-    fun getOrganizationName(oid: OrganizationId): String {
-        return driver.session().use {
-            it.writeTransaction { txn ->
-                val result = txn.run(
-                        """
-                        MATCH (o:Organization { id: '${oid.value}' })
-                        RETURN o.name AS name
-                        """.trimIndent()
-                ).single()["name"].asString()
-                return@writeTransaction result?.let { it }
-            }
-        }!!
     }
 
     /**
@@ -331,12 +302,11 @@ class GraphDao(private val graph: GraphTraversalSource, private val phoneUtil: P
      */
     fun getUser(id: UserId): User? {
         try {
-            val vertex = graph.V(id.value).has("deleted", false).getIfPresent() ?: return null
+            val vertex = graph.V(id.value).has("deleted", false).propertyMap<String>().getIfPresent() ?: return null
             return User(
                 id = id,
-                name = vertex.property<String>("name").value(),
-                phone = vertex.property<String>("phone").getIfPresent(),
-                email = vertex.property<String>("email").getIfPresent()
+                name = vertex["name"],
+                contactInfo = ContactInfo(phoneNumber = vertex["phone"],  email = vertex["email"])
             )
         } catch (ex: Exception) {
             log.error("error getting user. id={}", ex)

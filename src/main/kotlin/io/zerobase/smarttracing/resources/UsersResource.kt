@@ -2,9 +2,10 @@ package io.zerobase.smarttracing.resources
 
 import io.zerobase.smarttracing.GraphDao
 import io.zerobase.smarttracing.models.*
+import io.zerobase.smarttracing.notifications.NotificationFactory
+import io.zerobase.smarttracing.notifications.NotificationManager
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
-import com.github.mustachejava.MustacheFactory
 
 /**
  * Request data types to simplify coding.
@@ -24,8 +25,8 @@ data class CreateUserRequest(
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 class UsersResource(val dao: GraphDao,
-                    private val mustacheFactory: MustacheFactory,
-                    private val emailSender: EmailSender) {
+                    private val notificationManager: NotificationManager,
+                    private val notificationFactory: NotificationFactory) {
 
     @POST
     @Creator
@@ -46,13 +47,8 @@ class UsersResource(val dao: GraphDao,
     @Path("/{id}")
     @DELETE
     fun deleteUser(@PathParam("id") id: String) {
-        val user = dao.getUser(UserId(id))
-        dao.deleteUser(UserId(id))
-        if (user != null) {
-            val toEmail = user?.email
-            val userDeleteNotification = UserDeleteNotification(user.name ?: "No Name", mustacheFactory)
-            val emailBody = userDeleteNotification.render()
-            toEmail?.let { emailSender.sendEmail("Good luck", it, emailBody) }
+        dao.getUser(UserId(id))?.run {
+            dao.deleteUser(this.id)
         }
     }
 
