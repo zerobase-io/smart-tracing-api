@@ -9,20 +9,24 @@ import io.dropwizard.configuration.SubstitutingSourceProvider
 import io.dropwizard.setup.Bootstrap
 import io.dropwizard.setup.Environment
 import io.zerobase.smarttracing.config.GraphDatabaseFactory
-import io.zerobase.smarttracing.resources.*
-import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource
-import org.eclipse.jetty.servlets.CrossOriginFilter
-import java.util.*
-import javax.servlet.DispatcherType
-import javax.servlet.FilterRegistration
-import software.amazon.awssdk.regions.Region
-import software.amazon.awssdk.services.ses.SesClient
-import com.github.mustachejava.DefaultMustacheFactory
 import io.zerobase.smarttracing.notifications.AmazonEmailSender
 import io.zerobase.smarttracing.notifications.NotificationFactory
 import io.zerobase.smarttracing.notifications.NotificationManager
+import io.zerobase.smarttracing.pdf.DocumentFactory
+import io.zerobase.smarttracing.resources.*
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource
+import org.eclipse.jetty.servlets.CrossOriginFilter
+import org.thymeleaf.TemplateEngine
+import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver
+import org.w3c.tidy.Tidy
+import software.amazon.awssdk.regions.Region
+import software.amazon.awssdk.services.ses.SesClient
 import java.net.URI
+import java.nio.charset.StandardCharsets
+import java.util.*
 import javax.mail.Session
+import javax.servlet.DispatcherType
+import javax.servlet.FilterRegistration
 
 typealias MultiMap<K,V> = Map<K, List<V>>
 
@@ -66,7 +70,28 @@ class Main: Application<Config>() {
         config.aws.ses.endpoint?.let(sesClientBuilder::endpointOverride)
         val emailSender = AmazonEmailSender(sesClientBuilder.build(), session, config.notifications.email.fromAddress)
         val notificationManager = NotificationManager(emailSender)
-        val notificationFactory = NotificationFactory(DefaultMustacheFactory(config.notifications.templateLocation))
+        val notificationFactory = NotificationFactory(TemplateEngine().apply {
+            templateResolvers = setOf(ClassLoaderTemplateResolver().apply {
+                prefix = "/notifications"
+                suffix = ".html"
+                characterEncoding = StandardCharsets.UTF_8.displayName()
+            })
+        })
+
+        val resolver = ClassLoaderTemplateResolver().apply {
+            prefix = "/pdfs"
+            suffix = ".html"
+            characterEncoding = StandardCharsets.UTF_8.displayName()
+        }
+        val templateEngine = TemplateEngine().apply {
+            templateResolvers = setOf(resolver)
+        }
+
+        val documentFactory = DocumentFactory(templateEngine, Tidy().apply {
+            inputEncoding = StandardCharsets.UTF_8.displayName()
+            outputEncoding = StandardCharsets.UTF_8.displayName()
+            xhtml = true
+        })
 
         val dao = GraphDao(graph, phoneUtil)
 

@@ -8,7 +8,6 @@ import io.zerobase.smarttracing.utils.LoggerDelegate
 import org.apache.tinkerpop.gremlin.process.traversal.Traversal
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource
 import org.apache.tinkerpop.gremlin.structure.T
-import org.apache.tinkerpop.gremlin.structure.VertexProperty
 import java.util.*
 
 private fun <S, T> Traversal<S, T>.getIfPresent(): T? {

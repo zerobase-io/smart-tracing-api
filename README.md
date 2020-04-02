@@ -5,7 +5,10 @@ This repository contains the back end for the Zerobase smart tracing platform. R
 Any commands shown in this read-me are written in bash. If you are on Windows or use an alternate shell, like fish, please adjust the commands
 accordingly.
 
-## Set up for the project
+There are other README files throughout the project. They are located in the source folders that most closely align with the
+readme contents.
+
+## Development Setup
 
 ### Kotlin
 The backend is written in Kotlin. While you can work on it in any editor, such as vim or VS Code, it is significantly easier to use an IDE. We recommend [IntelliJ](https://www.jetbrains.com/idea/download/index.html).
@@ -26,11 +29,23 @@ managers, such as `brew` on macOS, for easy updating (recommended way) but can a
 * Follow these installation instructions [here](https://maven.apache.org/install.html)
 * Add the full path to your ~/.bash_profile, ~/.zshrc, or similar.
 
-
 ### Docker
-Docker is used to run a graph database while running the project locally.
+Docker is used to run external services locally for front-end development or tests instead of requiring access to a cloud environment.
+Some of the resources can be run without docker, but some don't really have local install options. Install docker manually by following
+this [guide](https://www.docker.com/get-started) or via a package manager.
 
-* Install docker manually by following this [guide](https://www.docker.com/get-started) or via a package manager.
+## Running Locally for Front-end Development or Testing
+
+### Docker Compose
+We have a docker compose file that will spin up all the pieces necessary and expose the API on your local machine. There are several
+environment variables that can be used to configure it:
+
+* `DB_PORT`: Used if you want to connect to the gremlin server manually and play with the graph.
+* `APP_VERSION`: By default, it will use latest. If you need to run a specific version, or one that isn't in DockerHub yet, set this to the version tag you want.
+* `APP_PORT`: By default, it will be 9000.
+
+### Manually with Docker
+#### Database - Gremlin
 * Pull the Gremlin server image
     ```sh
     $ docker pull tinkerpop/gremlin-server
@@ -46,18 +61,35 @@ Docker is used to run a graph database while running the project locally.
     ```
 By default, there are no credentials for the local install
 
+#### Localstack - AWS Fakes
+Follow their startup documentation: https://github.com/localstack/localstack.
+
+#### App
+```sh
+$ docker run -d --name=zerobase-api \
+    -e WRITE_ENDPOINT=<gremlin-api host> \
+    -e DB_PORT=<gremlin mapped port> \
+    -e AWS_SES_ENDPOINT=<localstack ses http url (including port)>
+    zerobaseio/smart-tracing-api:<version>
+```
+
+### Manually without Docker
 #### Run Gremlin without Docker
 If you're unable to use Docker to run Gremlin, there is an alternative available. The desktop version can be downloaded
 from [here](https://www.apache.org/dyn/closer.lua/tinkerpop/3.4.6/apache-tinkerpop-gremlin-server-3.4.6-bin.zip). The configuration
 instructions are found [here](http://tinkerpop.apache.org/docs/3.4.6/reference/#gremlin-server). The default configuration should
 suffice.
 
-## Project
+#### AWS SES
+Follow the documentation for a non-Docker SES fake. Here's one: https://github.com/csi-lk/aws-ses-local
+
+#### Project
 After cloning the project there are two ways to deploy it locally: using an IDE or via the command line. By default, the app listens on
 port 9000. You can override that with an environment variable of `PORT` if you need to. The `local-config.yml` defaults to `localhost`
-and `8182` for the database. Both can be overriden with environment variables, using `DB_HOST` and `DB_PORT` respectively.
+and `8182` for the database. Both can be overriden with environment variables, using `WRITE_ENDPOINT` and `DB_PORT` respectively.
 
-### Running in an IDE
+**Running in an IDE**
+
 The following directions use Intellij as the IDE, but the steps should be similar if you are using a different IDE.
 
 * If necessary, navigate to File/Project Structure. Update the SDK for the project to JDK11.
@@ -78,7 +110,7 @@ set an environment variable of `DB_PORT` to the port your gremlin server is runn
 
 * Click `OK` and run the configuration you just made.
 
-### Running from the command line.
+**Running from the command line.**
 * From the project's root directory, build the project.
     ```sh
     $ mvn clean install
@@ -93,8 +125,10 @@ set an environment variable of `DB_PORT` to the port your gremlin server is runn
     ```sh
     $ PORT=8888 java -jar target/smart-tracing-api.jar server target/classes/local-config.yml
     ```
+
 ### Debugging / Calling end points
 * Once you're running the project, you can double check if all is well by visiting `http://localhost:8081` in your browser. You
   shoudl see a simple page that exposes metrics and healthcheck results. You can also curl `http://localhost:8081/healthchecks` if
   you prefer the command line.
 * App endpoints are available at `http://localhost:9000`
+

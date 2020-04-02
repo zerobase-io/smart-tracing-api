@@ -9,6 +9,15 @@ database:
     write: ${DB_HOST:-localhost}
   port: ${DB_PORT:-8182}
 
+aws:
+  ses:
+    region: ${REGION:-us-east-1}
+    endpoint: ${FAKE_SES_ENDPOINT:-null}
+
+notifications:
+  email:
+    fromAddress: ${NOTIFICATION_FROM_EMAIL_ADDRESS:-noreply@zerobase.io}
+
 siteTypeCategories:
   BUSINESS:
     - GROCERY

@@ -27,8 +27,14 @@ database:
   enableAwsSigner: ${ENABLE_AWS_SIGNING:-true}
   enableSsl: ${ENABLE_SSL:-true}
 
-appConfig:
-  fromEmail: ${FROM_EMAIL:-""}
+aws:
+  ses:
+    region: ${REGION:-us-east-1}
+    endpoint: ${AWS_SES_ENDPOINT:-null}
+
+notifications:
+  email:
+    fromAddress: ${NOTIFICATION_FROM_EMAIL_ADDRESS:-noreply@zerobase.io}
 
 siteTypeCategories:
   BUSINESS:
