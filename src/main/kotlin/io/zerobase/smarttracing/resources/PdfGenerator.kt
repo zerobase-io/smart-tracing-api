@@ -25,7 +25,7 @@ import java.util.*
  */
 class GeneratePdf {
     @Throws(Exception::class)
-    fun generatePdf(businessname: String, town: String, state: String) {
+    fun generatePdf(businessname: String, town: String, state: String, outputfile: String) {
         val genQR = GenerateQRCode(ZB_LOGO_IMAGE_PATH, QR_CODE_IMAGE_PATH)
         try {
             genQR.generateQRCodeImage(QR_VALUE, QR_WIDTH, QR_HEIGHT)
@@ -73,7 +73,7 @@ class GeneratePdf {
         renderer.setDocumentFromString(xHtml, baseUrl)
         renderer.layout()
         // And finally, we create the PDF:
-        val outputStream: OutputStream = FileOutputStream(OUTPUT_FILE)
+        val outputStream: OutputStream = FileOutputStream(outputfile)
         renderer.createPDF(outputStream)
         outputStream.close()
     }
@@ -109,7 +109,6 @@ class GeneratePdf {
     }
 
     companion object {
-        private const val OUTPUT_FILE = "src/main/resources/pdfconfig/pdfs/zerobase-qr.pdf"
         private const val UTF_8 = "UTF-8"
         private const val QR_CODE_IMAGE_PATH = "src/main/resources/pdfconfig/qr/processed/qr_logo_overlay.png"
         private const val ZB_LOGO_IMAGE_PATH = "src/main/resources/pdfconfig/qr/rawfiles/zerobase_qr_logo.png"
@@ -121,8 +120,9 @@ class GeneratePdf {
             val businesssname = "Test101"
             val town = "Testingtown"
             val state = "Testingstate"
+            val outputfile = args[0]
             try {
-                GeneratePdf().generatePdf(businesssname, town, state)
+                GeneratePdf().generatePdf(businesssname, town, state, outputfile)
             } catch (e: WriterException) {
                 println("Could not generate pdf, WriterException :: " + e.message)
             } catch (e: IOException) {
