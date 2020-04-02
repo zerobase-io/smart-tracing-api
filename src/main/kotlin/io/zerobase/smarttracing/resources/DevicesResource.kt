@@ -31,7 +31,7 @@ class DevicesResource(val dao: GraphDao) {
     fun createDevice(request: CreateDeviceRequest): IdWrapper? {
         val fingerprint = request.fingerprint?.let { Fingerprint(it) }
 
-        val newDeviceId = dao.createDevice(fingerprint, null)
+        val newDeviceId = dao.createDevice(fingerprint)
 
         return IdWrapper(newDeviceId)
     }

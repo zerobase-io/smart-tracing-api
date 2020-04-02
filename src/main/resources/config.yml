@@ -27,6 +27,9 @@ database:
   enableAwsSigner: ${ENABLE_AWS_SIGNING:-true}
   enableSsl: ${ENABLE_SSL:-true}
 
+appConfig:
+  fromEmail: ${FROM_EMAIL:-""}
+
 siteTypeCategories:
   BUSINESS:
     - GROCERY

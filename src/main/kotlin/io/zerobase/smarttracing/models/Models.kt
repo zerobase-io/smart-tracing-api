@@ -16,9 +16,10 @@ inline class ScannableId(@JsonValue override val value: String): Id
 
 data class IdWrapper(val id: Id)
 
-data class User(val id: UserId, val name: String?, val phone: String?, val email: String?)
+data class User(val id: UserId, val name: String?, val contactInfo: ContactInfo)
 
-data class Location(
-    val latitude: Float,
-    val longitude: Float
-)
+data class Location(val latitude: Float, val longitude: Float)
+
+data class ContactInfo(val email: String?, val phoneNumber: String?)
+
+data class Organization(val id: OrganizationId, val name: String, val address: String, val contactName: String, val contactInfo: ContactInfo)

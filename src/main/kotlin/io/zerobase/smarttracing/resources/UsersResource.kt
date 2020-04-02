@@ -2,6 +2,8 @@ package io.zerobase.smarttracing.resources
 
 import io.zerobase.smarttracing.GraphDao
 import io.zerobase.smarttracing.models.*
+import io.zerobase.smarttracing.notifications.NotificationFactory
+import io.zerobase.smarttracing.notifications.NotificationManager
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
 
@@ -22,7 +24,9 @@ data class CreateUserRequest(
 @Path("/users")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-class UsersResource(val dao: GraphDao) {
+class UsersResource(val dao: GraphDao,
+                    private val notificationManager: NotificationManager,
+                    private val notificationFactory: NotificationFactory) {
 
     @POST
     @Creator
@@ -43,8 +47,9 @@ class UsersResource(val dao: GraphDao) {
     @Path("/{id}")
     @DELETE
     fun deleteUser(@PathParam("id") id: String) {
-        dao.deleteUser(UserId(id))
-        // TODO: Add email or something
+        dao.getUser(UserId(id))?.run {
+            dao.deleteUser(this.id)
+        }
     }
 
     @Path("/{id}/summary")

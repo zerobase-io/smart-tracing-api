@@ -15,13 +15,27 @@ import org.eclipse.jetty.servlets.CrossOriginFilter
 import java.util.*
 import javax.servlet.DispatcherType
 import javax.servlet.FilterRegistration
+import software.amazon.awssdk.regions.Region
+import software.amazon.awssdk.services.ses.SesClient
+import com.github.mustachejava.DefaultMustacheFactory
+import io.zerobase.smarttracing.notifications.AmazonEmailSender
+import io.zerobase.smarttracing.notifications.NotificationFactory
+import io.zerobase.smarttracing.notifications.NotificationManager
+import java.net.URI
+import javax.mail.Session
 
 typealias MultiMap<K,V> = Map<K, List<V>>
 
+data class AmazonEmailConfig(val region: Region, val endpoint: URI? = null)
+data class AmazonConfig(val ses: AmazonEmailConfig)
+data class EmailNotificationConfig(val fromAddress: String)
+data class NotificationConfig(val email: EmailNotificationConfig, val templateLocation: String = "notifications")
 data class Config(
         val database: GraphDatabaseFactory = GraphDatabaseFactory(),
         val siteTypeCategories: MultiMap<String, String>,
-        val scannableTypes: List<String>
+        val scannableTypes: List<String>,
+        val aws: AmazonConfig,
+        val notifications: NotificationConfig
 ): Configuration()
 
 fun main(vararg args: String) {
@@ -40,10 +54,19 @@ class Main: Application<Config>() {
     override fun run(config: Config, env: Environment) {
         val graph: GraphTraversalSource = config.database.build(env)
 
+        val session = Session.getDefaultInstance(Properties())
+
         /**
          * For phone number verification.
          */
         val phoneUtil = PhoneNumberUtil.getInstance()
+
+        // For emails
+        val sesClientBuilder = SesClient.builder().region(config.aws.ses.region)
+        config.aws.ses.endpoint?.let(sesClientBuilder::endpointOverride)
+        val emailSender = AmazonEmailSender(sesClientBuilder.build(), session, config.notifications.email.fromAddress)
+        val notificationManager = NotificationManager(emailSender)
+        val notificationFactory = NotificationFactory(DefaultMustacheFactory(config.notifications.templateLocation))
 
         val dao = GraphDao(graph, phoneUtil)
 
@@ -51,9 +74,9 @@ class Main: Application<Config>() {
         env.jersey().register(InvalidIdExceptionMapper())
         env.jersey().register(Router(dao))
         env.jersey().register(CreatorFilter())
-        env.jersey().register(OrganizationsResource(dao, config.siteTypeCategories, config.scannableTypes))
+        env.jersey().register(OrganizationsResource(dao, config.siteTypeCategories, config.scannableTypes, notificationManager, notificationFactory))
         env.jersey().register(DevicesResource(dao))
-        env.jersey().register(UsersResource(dao))
+        env.jersey().register(UsersResource(dao, notificationManager, notificationFactory))
         env.jersey().register(ModelsResource(config.siteTypeCategories, config.scannableTypes))
 
         addCorsFilter(env)

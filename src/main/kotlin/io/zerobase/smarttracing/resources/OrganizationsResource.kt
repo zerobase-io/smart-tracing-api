@@ -9,6 +9,8 @@ import io.zerobase.smarttracing.models.SiteId
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
 import javax.ws.rs.core.Response
+import io.zerobase.smarttracing.notifications.NotificationFactory
+import io.zerobase.smarttracing.notifications.NotificationManager
 
 /**
  * Requests from clients.
@@ -46,7 +48,12 @@ data class SiteResponse(val id: String, val name: String)
 @Path("/organizations")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-class OrganizationsResource(val dao: GraphDao, private val siteTypes: MultiMap<String, String>, private val scanTypes: List<String>) {
+class OrganizationsResource(val dao: GraphDao,
+                            private val siteTypes: MultiMap<String, String>,
+                            private val scanTypes: List<String>,
+                            private val notificationManager: NotificationManager,
+                            notificationFactory: NotificationFactory
+) {
 
     @POST
     @Creator
