@@ -2,15 +2,16 @@ package io.zerobase.smarttracing.resources
 
 import com.google.zxing.WriterException
 import io.dropwizard.util.Resources
+import org.slf4j.LoggerFactory
 import org.thymeleaf.TemplateEngine
 import org.thymeleaf.context.Context
 import org.thymeleaf.templatemode.TemplateMode
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver
 import org.w3c.tidy.Tidy
 import org.xhtmlrenderer.pdf.ITextRenderer
+import sun.jvm.hotspot.HelloWorld
 import java.io.*
 import java.nio.charset.StandardCharsets
-import java.nio.file.FileSystems
 import java.util.*
 
 /**
@@ -25,15 +26,17 @@ import java.util.*
  * /test.pdf
  */
 class PdfGenerator {
+    private val logger: org.slf4j.Logger = LoggerFactory.getLogger(this.javaClass)
+
     fun generatePdf(businessname: String, town: String, state: String, outputfile: String): ByteArray {
         // Generate QR Code
-        val genQR = GenerateQRCode(ZB_LOGO_IMAGE_PATH, QR_CODE_IMAGE_PATH)
+        val genQR = QRCodeGenerator(ZB_LOGO_IMAGE_PATH, QR_CODE_IMAGE_PATH)
         try {
             genQR.generateQRCodeImage(QR_VALUE, QR_WIDTH, QR_HEIGHT)
         } catch (e: WriterException) {
-            println("Could not generate QR Code, WriterException :: " + e.message)
+            logger.info("Could not generate QR Code, WriterException :: " + e.message)
         } catch (e: IOException) {
-            println("Could not generate QR Code, IOException :: " + e.message)
+            logger.info("Could not generate QR Code, IOException :: " + e.message)
         }
 
         // We set-up a Thymeleaf rendering engine. All Thymeleaf templates
@@ -60,7 +63,7 @@ class PdfGenerator {
         // it's good enough for a simple letter.
 
         val baseUrl = Resources.getResource("pdfconfig").toString()
-        print(baseUrl);
+        logger.info("Getting templates from: " + baseUrl);
         val renderedHtmlContent = templateEngine.process("template", context)
         val xHtml = convertToXhtml(renderedHtmlContent)
         val renderer = ITextRenderer()
@@ -68,9 +71,11 @@ class PdfGenerator {
         renderer.layout()
 
         // And finally, we create the PDF:
-        val outputStream: ByteArrayOutputStream = ByteArrayOutputStream()
+        val byteOutputStream = ByteArrayOutputStream()
+        val outputStream: OutputStream = FileOutputStream(outputfile)
         outputStream.use { renderer.createPDF(it) }
-        return outputStream.toByteArray()
+        byteOutputStream.use { renderer.createPDF(it) }
+        return byteOutputStream.toByteArray()
     }
 
     private fun convertToXhtml(html: String): String {
@@ -96,7 +101,6 @@ class PdfGenerator {
         var businessname: String? = null
         var town: String? = null
         var state: String? = null
-
     }
 
     companion object {
