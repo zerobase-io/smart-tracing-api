@@ -42,7 +42,7 @@ Resources:
         BastionSecurityGroupId: { "Fn::ImportValue": !Sub '${InfrastructureStackName}-BastionSecurityGroupId' }
         Environment: !Ref Environment
         InstanceType: !Ref DatabaseMasterInstanceSize
-        ReplicaInstanceSize: !Ref DatabaseReplicaInstanceSize
+        ReplicaInstanceType: !Ref DatabaseReplicaInstanceSize
         ReplicaCount: !Ref DatabaseReplicaCount
         SubnetIds: { "Fn::ImportValue":  !Sub '${InfrastructureStackName}-DatabaseSubnetIds' }
         VpcId: { "Fn::ImportValue": !Sub '${InfrastructureStackName}-VpcId' }

@@ -38,6 +38,19 @@ Parameters:
     - db.r4.2xlarge
     - db.r4.4xlarge
     - db.r4.8xlarge
+  ReplicaInstanceType:
+    Type: String
+    AllowedValues:
+    - db.r5.large
+    - db.r5.xlarge
+    - db.r5.2xlarge
+    - db.r5.4xlarge
+    - db.r5.12xlarge
+    - db.r4.large
+    - db.r4.xlarge
+    - db.r4.2xlarge
+    - db.r4.4xlarge
+    - db.r4.8xlarge
   QueryTimeout:
     Type: Number
     Description: Timeout in seconds
@@ -140,7 +153,7 @@ Resources:
     Condition: EnableFirstReplica
     Properties:
       DBClusterIdentifier: !Ref Cluster
-      DBInstanceClass: !Ref InstanceType
+      DBInstanceClass: !Ref ReplicaInstanceType
       Tags:
       - Key: Name
         Value: smart-tracing-api-graph-db
@@ -161,7 +174,7 @@ Resources:
     Condition: EnableSecondReplica
     Properties:
       DBClusterIdentifier: !Ref Cluster
-      DBInstanceClass: !Ref InstanceType
+      DBInstanceClass: !Ref ReplicaInstanceType
       Tags:
       - Key: Name
         Value: smart-tracing-api-graph-db
