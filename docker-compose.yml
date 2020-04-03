@@ -26,5 +26,6 @@ services:
     - DB_PORT=8182
     - AWS_SES_ENDPOINT=http://aws:4579
     - PORT=${APP_PORT:-9000}
+    - CORS_ALLOWED_ORIGINS=*
 
 

@@ -3,6 +3,7 @@ server:
   applicationConnectors:
   - type: http
     port: ${PORT:-9000}
+allowedOrigins: '*'
 
 database:
   endpoints:
