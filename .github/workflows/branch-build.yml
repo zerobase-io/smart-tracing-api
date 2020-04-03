@@ -1,4 +1,4 @@
-name: Build and deploy to staging
+name: Build non-master branches
 on:
   push:
     branches-ignore: master
