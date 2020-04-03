@@ -43,7 +43,8 @@ data class Config(
         val siteTypeCategories: MultiMap<String, String>,
         val scannableTypes: List<String>,
         val aws: AmazonConfig,
-        val notifications: NotificationConfig
+        val notifications: NotificationConfig,
+        val allowedOrigins: List<String>
 ): Configuration()
 
 fun main(vararg args: String) {
@@ -110,16 +111,16 @@ class Main: Application<Config>() {
         env.jersey().register(UsersResource(dao, notificationManager, notificationFactory))
         env.jersey().register(ModelsResource(config.siteTypeCategories, config.scannableTypes))
 
-        addCorsFilter(env)
+        addCorsFilter(config.allowedOrigins, env)
     }
 
-    private fun addCorsFilter(env: Environment) {
+    private fun addCorsFilter(allowedOrigins: List<String>, env: Environment) {
         val cors: FilterRegistration.Dynamic = env.servlets().addFilter("CORS", CrossOriginFilter::class.java)
 
         // Configure CORS parameters
 
         // Configure CORS parameters
-        cors.setInitParameter(CrossOriginFilter.ALLOWED_ORIGINS_PARAM, "*")
+        cors.setInitParameter(CrossOriginFilter.ALLOWED_ORIGINS_PARAM, allowedOrigins.joinToString(separator = ","))
         cors.setInitParameter(CrossOriginFilter.ALLOWED_HEADERS_PARAM, "X-Requested-With,Content-Type,Accept,Origin,Authorization")
         cors.setInitParameter(CrossOriginFilter.ALLOWED_METHODS_PARAM, "OPTIONS,GET,PUT,POST,DELETE,HEAD")
         cors.setInitParameter(CrossOriginFilter.ALLOW_CREDENTIALS_PARAM, "true")

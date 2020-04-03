@@ -67,4 +67,5 @@ Resources:
         WriteEndpoint: !GetAtt DatabaseStack.Outputs.WriteEndpoint
         ReadEndpoint: !GetAtt DatabaseStack.Outputs.ReadEndpoint
         DatabasePort: !GetAtt DatabaseStack.Outputs.ClusterPort
+        DomainSuffix:  {"Fn::ImportValue": !Sub '${InfrastructureStackName}-DomainSuffix'}
 ...
