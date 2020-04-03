@@ -127,7 +127,7 @@ class Main : Application<Config>() {
         )
         val notificationFactory = NotificationFactory(TemplateEngine().apply {
             templateResolvers = setOf(ClassLoaderTemplateResolver().apply {
-                prefix = "/notifications"
+                prefix = "/notifications/"
                 characterEncoding = StandardCharsets.UTF_8.displayName()
             })
         }, documentFactory, qrCodeGenerator)
