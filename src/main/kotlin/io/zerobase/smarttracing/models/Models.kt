@@ -22,4 +22,5 @@ data class Location(val latitude: Float, val longitude: Float)
 
 data class ContactInfo(val email: String?, val phoneNumber: String?)
 
-data class Organization(val id: OrganizationId, val name: String, val address: String, val contactName: String, val contactInfo: ContactInfo)
+data class Address(val premise: String, val thoroughfare: String, val locality: String, val administrativeArea: String, val postalCode: String, val country: String)
+data class Organization(val id: OrganizationId, val name: String, val address: Address, val contactName: String, val contactInfo: ContactInfo)

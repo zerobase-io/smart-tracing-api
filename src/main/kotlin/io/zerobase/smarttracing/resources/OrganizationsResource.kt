@@ -2,10 +2,7 @@ package io.zerobase.smarttracing.resources
 
 import io.zerobase.smarttracing.GraphDao
 import io.zerobase.smarttracing.MultiMap
-import io.zerobase.smarttracing.models.IdWrapper
-import io.zerobase.smarttracing.models.Location
-import io.zerobase.smarttracing.models.OrganizationId
-import io.zerobase.smarttracing.models.SiteId
+import io.zerobase.smarttracing.models.*
 import io.zerobase.smarttracing.notifications.NotificationFactory
 import io.zerobase.smarttracing.notifications.NotificationManager
 import javax.ws.rs.*
@@ -24,7 +21,7 @@ data class Contact(
 data class CreateOrganizationRequest(
     val name: String,
     val contactInfo: Contact,
-    val address: String,
+    val address: Address,
     val hasTestingFacilities: Boolean?,
     val hasMultipleSites: Boolean?
 )
@@ -50,9 +47,7 @@ data class SiteResponse(val id: String, val name: String)
 @Produces(MediaType.APPLICATION_JSON)
 class OrganizationsResource(val dao: GraphDao,
                             private val siteTypes: MultiMap<String, String>,
-                            private val scanTypes: List<String>,
-                            private val notificationManager: NotificationManager,
-                            notificationFactory: NotificationFactory
+                            private val scanTypes: List<String>
 ) {
 
     @POST
