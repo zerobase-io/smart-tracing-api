@@ -1,0 +1,26 @@
+[
+    {
+        "ParameterKey": "Environment",
+        "ParameterValue": "prod"
+    },
+    {
+        "ParameterKey": "InfrastructureStackName",
+        "ParameterValue": "staging-infrastructure"
+    },
+    {
+        "ParameterKey": "TaskCount",
+        "ParameterValue": "6"
+    },
+    {
+        "ParameterKey": "DatabaseMasterInstanceSize",
+        "ParameterValue": "db.r5.xlarge"
+    },
+    {
+        "ParameterKey": "DatabaseReplicaInstanceSize",
+        "ParameterValue": "db.r5.xlarge"
+    },
+    {
+        "ParameterKey": "DatabaseReplicaCount",
+        "ParameterValue": "1"
+    }
+]

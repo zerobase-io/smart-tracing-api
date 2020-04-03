@@ -14,6 +14,22 @@ Parameters:
     Type: String
   AppVersion:
     Type: String
+  TaskCount:
+    Type: Number
+    MinValue: 1
+    MaxValue: 6
+    Default: 2
+  DatabaseMasterInstanceSize:
+    Type: String
+    Default: db.r5.large
+  DatabaseReplicaInstanceSize:
+    Type: String
+    Default: db.r5.large
+  DatabaseReplicaCount:
+    Type: Number
+    MinValue: 0
+    MaxValue: 2
+    Default: 0
 
 Resources:
   DatabaseStack:
@@ -25,8 +41,9 @@ Resources:
         AppSecurityGroupId: { "Fn::ImportValue": !Sub '${InfrastructureStackName}-EcsClusterSecurityGroupId' }
         BastionSecurityGroupId: { "Fn::ImportValue": !Sub '${InfrastructureStackName}-BastionSecurityGroupId' }
         Environment: !Ref Environment
-        InstanceType: db.r4.large
-        ReplicaCount: 0
+        InstanceType: !Ref DatabaseMasterInstanceSize
+        ReplicaInstanceSize: !Ref DatabaseReplicaInstanceSize
+        ReplicaCount: !Ref DatabaseReplicaCount
         SubnetIds: { "Fn::ImportValue":  !Sub '${InfrastructureStackName}-DatabaseSubnetIds' }
         VpcId: { "Fn::ImportValue": !Sub '${InfrastructureStackName}-VpcId' }
 
