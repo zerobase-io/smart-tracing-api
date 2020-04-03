@@ -1,5 +1,7 @@
 package io.zerobase.smarttracing
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.google.i18n.phonenumbers.NumberParseException
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
@@ -147,7 +149,7 @@ class GraphDao(
                 .property("creationTimestamp", System.currentTimeMillis())
             phone?.also { v.property("phone", it) }
             v.next()
-            return OrganizationId(id)
+            return Organization(OrganizationId(id), name, address, contactName, ContactInfo(email, phone))
         } catch (ex: Exception) {
             log.error("Error creating organization. name={}", name, ex)
             throw EntityCreationException("Error creating organization", ex)
@@ -178,8 +180,8 @@ class GraphDao(
      * @param email contact email of site manager
      * @param contactName contact name of site manager
      */
-    fun createSite(organizationId: OrganizationId, name: String, category: String, subcategory: String, lat: Float?, long: Float?,
-                   testing: Boolean, phone: String?, email: String?, contactName: String?): SiteId {
+    fun createSite(organizationId: OrganizationId, name: String? = null, category: String, subcategory: String, lat: Float? = null, long: Float? = null,
+                   testing: Boolean = false, phone: String? = null, email: String? = null, contactName: String? = null): SiteId {
         val id = UUID.randomUUID().toString()
         try {
             val v = graph.addV("Site")
@@ -188,14 +190,14 @@ class GraphDao(
                 .property("subcategory", subcategory)
                 .property("testing", testing)
                 .property("creationTimestamp", System.currentTimeMillis())
-                lat?.also { v.property("latitude", it) }
-                long?.also { v.property("longitude", it) }
-                lat?.also { v.property("latitude", it) }
-                long?.also { v.property("longitude", it) }
-                contactName?.also { v.property("contactName", it) }
-                phone?.also { v.property("phone", it) }
-                email?.also { v.property("email", it) }
-                v.next()
+            lat?.also { v.property("latitude", it) }
+            long?.also { v.property("longitude", it) }
+            lat?.also { v.property("latitude", it) }
+            long?.also { v.property("longitude", it) }
+            contactName?.also { v.property("contactName", it) }
+            phone?.also { v.property("phone", it) }
+            email?.also { v.property("email", it) }
+            v.next()
             graph.addE("OWNS").from(graph.V(organizationId.value)).to(graph.V(id))
             return SiteId(id)
         } catch (ex: Exception) {

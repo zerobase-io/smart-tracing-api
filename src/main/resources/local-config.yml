@@ -13,15 +13,24 @@ logging:
     # Enable errors from body processing
     io.dropwizard.jersey.jackson.JsonProcessingExceptionMapper: DEBUG
 
+logging:
+  level: ${ROOT_LOG_LEVEL:-INFO}
+  loggers:
+    io.zerobase: DEBUG
+    # Enable errors from body processing
+    io.dropwziard.jersey.jackson.JsonProcessingExceptionMapper: DEBUG
+
 database:
   endpoints:
-    write: ${DB_HOST:-localhost}
+    write: ${DB_HOST:-127.0.0.1}
   port: ${DB_PORT:-8182}
 
 aws:
   ses:
     region: ${REGION:-us-east-1}
     endpoint: ${FAKE_SES_ENDPOINT:-null}
+
+baseQrCodeLink: http://127.0.0.1:8080/s/
 
 notifications:
   email:

@@ -24,9 +24,7 @@ data class CreateUserRequest(
 @Path("/users")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-class UsersResource(val dao: GraphDao,
-                    private val notificationManager: NotificationManager,
-                    private val notificationFactory: NotificationFactory) {
+class UsersResource(val dao: GraphDao) {
 
     @POST
     @Creator
