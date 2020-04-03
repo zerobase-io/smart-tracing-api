@@ -14,7 +14,10 @@ private fun <S, T> Traversal<S, T>.getIfPresent(): T? {
     return tryNext().orElse(null)
 }
 
-class GraphDao(private val graph: GraphTraversalSource, private val phoneUtil: PhoneNumberUtil) {
+class GraphDao(
+    private val graph: GraphTraversalSource,
+    private val phoneUtil: PhoneNumberUtil
+) {
     companion object {
         private val log by LoggerDelegate()
     }
@@ -120,25 +123,30 @@ class GraphDao(private val graph: GraphTraversalSource, private val phoneUtil: P
      *
      * @throws exception if phone number is invalid.
      */
-    fun createOrganization(name: String, phone: String, email: String, contactName: String, address: String,
+    fun createOrganization(name: String, phone: String?, email: String, contactName: String, address: Address,
                            hasTestingFacilities: Boolean, multiSite: Boolean): OrganizationId {
 
         validatePhoneNumber(phone)
 
         val id = UUID.randomUUID().toString()
         try {
-            graph.addV("Organization")
+            val v = graph.addV("Organization")
                 .property(T.id, id)
                 .property("name", name)
-                .property("address", address)
+                .property("premise", address.premise)
+                .property("thoroughfare", address.thoroughfare)
+                .property("locality", address.locality)
+                .property("administrativeArea", address.administrativeArea)
+                .property("postalCode", address.postalCode)
+                .property("country", address.country)
                 .property("contactName", contactName)
-                .property("phone", phone)
                 .property("email", email)
                 .property("verified", false)
                 .property("hasTestingFacilities", hasTestingFacilities)
                 .property("multisite", multiSite)
                 .property("creationTimestamp", System.currentTimeMillis())
-                .next()
+            phone?.also { v.property("phone", it) }
+            v.next()
             return OrganizationId(id)
         } catch (ex: Exception) {
             log.error("Error creating organization. name={}", name, ex)
@@ -170,25 +178,25 @@ class GraphDao(private val graph: GraphTraversalSource, private val phoneUtil: P
      * @param email contact email of site manager
      * @param contactName contact name of site manager
      */
-    fun createSite(organizationId: OrganizationId, name: String, category: String, subcategory: String, lat: Float, long: Float,
+    fun createSite(organizationId: OrganizationId, name: String, category: String, subcategory: String, lat: Float?, long: Float?,
                    testing: Boolean, phone: String?, email: String?, contactName: String?): SiteId {
         val id = UUID.randomUUID().toString()
         try {
-            val siteVertex = graph.addV("Site")
+            val v = graph.addV("Site")
                 .property(T.id, id)
-                .property("latitude", lat)
-                .property("longitude", long)
                 .property("category", category)
                 .property("subcategory", subcategory)
-                .property("latitude", lat)
-                .property("longitude", long)
-                .property("contactName", contactName)
-                .property("phone", phone)
-                .property("email", email)
                 .property("testing", testing)
                 .property("creationTimestamp", System.currentTimeMillis())
-                .next()
-            graph.addE("OWNS").from(graph.V(organizationId.value)).to(siteVertex)
+                lat?.also { v.property("latitude", it) }
+                long?.also { v.property("longitude", it) }
+                lat?.also { v.property("latitude", it) }
+                long?.also { v.property("longitude", it) }
+                contactName?.also { v.property("contactName", it) }
+                phone?.also { v.property("phone", it) }
+                email?.also { v.property("email", it) }
+                v.next()
+            graph.addE("OWNS").from(graph.V(organizationId.value)).to(graph.V(id))
             return SiteId(id)
         } catch (ex: Exception) {
             log.error("error creating site. organization={} name={} category={}-{} testing={}", id, name, category, subcategory, testing, ex)
@@ -246,8 +254,16 @@ class GraphDao(private val graph: GraphTraversalSource, private val phoneUtil: P
             .propertyMap<String>()
             .getIfPresent()
             ?.let {
-                Organization(id=id, name=it["name"]!!, address=it["address"]!!, contactName = it["contactName"]!!,
-                    contactInfo=ContactInfo(email = it["email"], phoneNumber = it["phoneNumber"]))
+                Organization(
+                    id=id,
+                    name=it["name"]!!,
+                    address=Address(
+                        it["premise"]!!, it["thoroughfare"]!!,
+                        it["locality"]!!, it["administrativeArea"]!!, it["postalCode"]!!, it["country"]!!
+                    ),
+                    contactName = it["contactName"]!!,
+                    contactInfo=ContactInfo(email = it["email"], phoneNumber = it["phoneNumber"])
+                )
             }
     }
 
@@ -313,7 +329,10 @@ class GraphDao(private val graph: GraphTraversalSource, private val phoneUtil: P
         }
     }
 
-    private fun validatePhoneNumber(phone: String) {
+    private fun validatePhoneNumber(phone: String?) {
+        if (phone == null) {
+            return
+        }
         try {
             // ZZ as the region code forces E.164
             val parsedPhoneNumber = phoneUtil.parse(phone, "ZZ")
