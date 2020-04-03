@@ -1,5 +1,9 @@
 package io.zerobase.smarttracing
 
+import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.databind.DeserializationContext
+import com.fasterxml.jackson.databind.JsonDeserializer
+import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import io.dropwizard.Application
@@ -48,7 +52,9 @@ fun main(vararg args: String) {
 
 class Main: Application<Config>() {
     override fun initialize(bootstrap: Bootstrap<Config>) {
-        bootstrap.objectMapper.registerModule(KotlinModule())
+        bootstrap.objectMapper.registerModules(KotlinModule(), SimpleModule().addDeserializer(Region::class.java, object: JsonDeserializer<Region>() {
+            override fun deserialize(p: JsonParser, ctxt: DeserializationContext): Region = Region.of(p.valueAsString)
+        }))
         bootstrap.configurationSourceProvider = SubstitutingSourceProvider(
                 bootstrap.configurationSourceProvider,
                 EnvironmentVariableSubstitutor(false)

@@ -29,7 +29,7 @@ database:
 
 aws:
   ses:
-    region: ${REGION:-us-east-1}
+    region: ${AWS_SES_REGION:-us-east-1}
     endpoint: ${AWS_SES_ENDPOINT:-null}
 
 notifications:
