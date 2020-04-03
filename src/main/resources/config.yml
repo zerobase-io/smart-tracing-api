@@ -29,6 +29,8 @@ database:
   enableAwsSigner: ${ENABLE_AWS_SIGNING:-true}
   enableSsl: ${ENABLE_SSL:-true}
 
+baseQrCodeLink: ${BASE_LINK}
+
 aws:
   ses:
     region: ${AWS_SES_REGION:-us-east-1}
@@ -42,6 +44,7 @@ siteTypeCategories:
   BUSINESS:
     - GROCERY
     - RESTAURANT
+    - OTHER
   FINANCIAL:
     - BANK
   HEALTH:

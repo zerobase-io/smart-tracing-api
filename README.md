@@ -8,6 +8,30 @@ accordingly.
 There are other README files throughout the project. They are located in the source folders that most closely align with the
 readme contents.
 
+## Architecture Notes
+* We are leveraging the type system as much as possible. We don't want stringly typed things and why write our own validations when we can
+  just use what's already there?
+  * Inline Types - These are mostly just string-wrapper classes provide some context as they are passed around
+  * Unsigned Numbers - There are a whole bunch of things that want numbers no less than 0
+* We are trying to avoid coupling as much as possible. To this end, the rest endpoints don't do anything but
+  execute database operations and then fire events to trigger any additional behaviors. This design allows us to add
+  new behaviors without having to constant touch and bloat the rest resources.
+* Dependency injection is your friend. Learn to love it. It's a huge win on testing, among other things.
+* There are 2 levels of automated testing relevant to this project, and I'm going to use Google's terms: small and medium. Both have their
+  place.
+  * **Small Tests** - These are usually referred to as "unit tests". They narrowly test a specific class or method. Everything is mocked.
+    These tests are great for complex pieces and validating individual behaviors, but has at least 2 main problems:are limited in verifying the app is functioning
+    - They don't verify the service is working as it should. You can have extremely robust small test suites that validate each piece and
+      still have a broken app that won't start.
+    - They make refactoring the internals painful. Since all interactions are mocked in small tests, if you change any of the things that
+      were mocked, you have to rewire all the tests. Sometimes, that's easy using IDEs and tooling and sometimes it's extremely painful
+      because the refactor isn't that simple.
+  * **Medium Tests** - These are service level tests. Medium tests, unlike small tests, have access to resources on localhost. This allows
+    for a local database to be used. This type of test provides a greater confidence that the app will work when deployed because to run,
+    the app must be able to turn on, wire up all the pieces (like database connections), and produce the correct API outputs based on the
+    inputs. This type of test allows easy refactoring of the internals because it verifies that the API contract is maintained, regardless
+    of internal implementation details.
+
 ## Development Setup
 
 ### Kotlin

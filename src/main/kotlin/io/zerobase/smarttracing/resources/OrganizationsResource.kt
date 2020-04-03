@@ -1,10 +1,10 @@
 package io.zerobase.smarttracing.resources
 
+import com.google.common.eventbus.EventBus
 import io.zerobase.smarttracing.GraphDao
 import io.zerobase.smarttracing.MultiMap
 import io.zerobase.smarttracing.models.*
 import io.zerobase.smarttracing.notifications.NotificationFactory
-import io.zerobase.smarttracing.notifications.NotificationManager
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
 import javax.ws.rs.core.Response
@@ -30,8 +30,8 @@ data class CreateSiteRequest(
     val name: String?,
     val category: String,
     val subcategory: String,
-    val location: Location,
-    val isTesting: Boolean,
+    val location: Location?,
+    val isTesting: Boolean = false,
     val siteManagerContactInfo: Contact?
 )
 
@@ -45,9 +45,10 @@ data class SiteResponse(val id: String, val name: String)
 @Path("/organizations")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-class OrganizationsResource(val dao: GraphDao,
+class OrganizationsResource(private val dao: GraphDao,
                             private val siteTypes: MultiMap<String, String>,
-                            private val scanTypes: List<String>
+                            private val scanTypes: List<String>,
+                            private val eventBus: EventBus
 ) {
 
     @POST
@@ -61,7 +62,15 @@ class OrganizationsResource(val dao: GraphDao,
         val hasTestingFacilities = request.hasTestingFacilities ?: false
         val hasMultipleSites = request.hasMultipleSites ?: true
 
-        return dao.createOrganization(name, phone, email, contactName, address, hasTestingFacilities, hasMultipleSites).let(::IdWrapper)
+        val organization = dao.createOrganization(name, phone, email, contactName, address, hasTestingFacilities, hasMultipleSites)
+
+        if (!hasTestingFacilities && !hasMultipleSites) {
+            val siteId = dao.createSite(organization.id, category = "BUSINESS", subcategory = "OTHER")
+            val scannableId = dao.createScannable(organization.id, siteId, "QR_CODE", false)
+            eventBus.post(SimpleOrganizationCreated(organization, scannableId))
+        }
+
+        return IdWrapper(organization.id)
     }
 
     @Path("/{id}/sites")
@@ -71,8 +80,8 @@ class OrganizationsResource(val dao: GraphDao,
         val name = request.name ?: ""
         val category = request.category
         val subcategory = request.subcategory
-        val latitude = request.location.latitude
-        val longitude = request.location.longitude
+        val latitude = request.location?.latitude
+        val longitude = request.location?.longitude
         val isTesting = request.isTesting
 
         if (!siteTypes.containsKey(category)) {
