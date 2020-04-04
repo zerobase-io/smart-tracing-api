@@ -13,13 +13,6 @@ logging:
     # Enable errors from body processing
     io.dropwizard.jersey.jackson.JsonProcessingExceptionMapper: DEBUG
 
-logging:
-  level: ${ROOT_LOG_LEVEL:-INFO}
-  loggers:
-    io.zerobase: DEBUG
-    # Enable errors from body processing
-    io.dropwziard.jersey.jackson.JsonProcessingExceptionMapper: DEBUG
-
 database:
   endpoints:
     write: ${DB_HOST:-127.0.0.1}
