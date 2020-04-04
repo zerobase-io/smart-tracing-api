@@ -16,19 +16,3 @@ services:
     environment:
     - SERVICES=ses
     - DEBUG=${AWS_DEBUG:-false}
-
-#  app:
-#    image: zerobaseio/smart-tracing-api:${APP_VERSION:-latest}
-#    ports:
-#    - ${APP_PORT:-9000}:9000
-#    depends_on:
-#    - database
-#    - aws
-#    environment:
-#    - WRITE_ENDPOINT=database
-#    - READ_ENDPOINT=database
-#    - DB_PORT=8182
-#    - AWS_SES_ENDPOINT=http://aws:4579
-#    - PORT=9000
-#    - BASE_LINK=${BASE_LINK:-http://staging.zerobase.io}
-

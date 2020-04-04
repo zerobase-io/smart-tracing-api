@@ -18,7 +18,6 @@ data class Contact(
     val contactName: String
 )
 
-
 data class CreateOrganizationRequest(
     val name: String,
     val contactInfo: Contact,

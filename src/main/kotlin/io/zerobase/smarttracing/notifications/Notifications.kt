@@ -61,8 +61,8 @@ class SimpleBusinessOnboarding(
             NotificationMedium.EMAIL -> {
                 return templateEngine.process("simple-business-onboarding/main.html", Context(Locale.US, mapOf(
                     "name" to organization.name,
-                    "city" to organization.address.city,
-                    "state" to organization.address.administrative
+                    "locality" to organization.address.locality,
+                    "administrativeArea" to organization.address.administrativeArea
                 )))
             }
         }
