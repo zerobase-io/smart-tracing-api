@@ -56,7 +56,7 @@ data class Config(
         val scannableTypes: List<String>,
         val aws: AmazonConfig,
         val notifications: NotificationConfig,
-        val baseQrCodeLink: URI
+        val baseQrCodeLink: URI,
         val allowedOrigins: List<String>
 ): Configuration()
 
@@ -103,7 +103,7 @@ class Main : Application<Config>() {
             templateResolvers = setOf(resolver)
         }
 
-        val dao = GraphDao(graph, phoneUtil, env.objectMapper)
+        val dao = GraphDao(graph, phoneUtil)
 
         val eventBus = AsyncEventBus(
             saneThreadPool("default-event-bus"),
@@ -138,7 +138,6 @@ class Main : Application<Config>() {
 
         env.jersey().register(InvalidPhoneNumberExceptionMapper())
         env.jersey().register(InvalidIdExceptionMapper())
-        env.jersey().register(Router(dao))
         env.jersey().register(CreatorFilter())
         env.jersey().register(OrganizationsResource(dao, config.siteTypeCategories, config.scannableTypes, eventBus))
         env.jersey().register(DevicesResource(dao))
