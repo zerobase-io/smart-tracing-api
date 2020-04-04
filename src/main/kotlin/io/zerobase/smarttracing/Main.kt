@@ -97,7 +97,6 @@ class Main : Application<Config>() {
         val emailSender = AmazonEmailSender(sesClientBuilder.build(), session, config.notifications.email.fromAddress)
 
         val resolver = ClassLoaderTemplateResolver().apply {
-            prefix = "/pdfs"
             suffix = ".html"
             characterEncoding = StandardCharsets.UTF_8.displayName()
         }
