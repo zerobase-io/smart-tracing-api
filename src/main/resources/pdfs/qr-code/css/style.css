@@ -1,22 +1,14 @@
 body {
-    font-family: sans-serif;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 12px;
     text-align: center;
     outline: 100px solid #1C6EA4;
     outline-offset: -18px;
     color: #1b2935;
 }
-h1 {
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    font-size: 50px;
-    font-style: normal;
-    font-variant: normal;
-    font-weight: 700;
-    line-height: 45px;
-}
 h2 {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    font-size: 22px;
+    font-size: 28px;
     font-style: normal;
     font-variant: normal;
     font-weight: 200;
@@ -33,7 +25,7 @@ h3 {
 }
 p {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    font-size: 18px;
+    font-size: 20px;
     font-style: normal;
     font-variant: normal;
     font-weight: 400;
@@ -69,7 +61,7 @@ ol {
     @bottom-left {
         content: element(footer);
         vertical-align: top;
-        padding-top: 10px;
+        padding-top: 0px;
     }
 
     @top-right {
@@ -79,15 +71,21 @@ ol {
     }
 
     margin-top: 3.3cm;
-    margin-left: 1cm;
-    margin-right: 1cm;
-    margin-bottom: 3.3cm;
+    margin-left: 0.5cm;
+    margin-right: 0.5cm;
+    margin-bottom: 5cm;
 
     size: A4 portrait;
 }
 
 div.header {
     position: running(header);
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 38px;
+    font-style: normal;
+    font-variant: normal;
+    font-weight: 700;
+    line-height: 45px;
 }
 
 div.center {
@@ -100,6 +98,7 @@ div.footer {
     display: block;
     margin-top: 0.5cm;
     position: running(footer);
+
 }
 
 #pagenumber:before {
@@ -119,7 +118,7 @@ div.footer {
 }
 
 .logo {
-    width: 200px;
+    width: 300px;
 }
 
 .footer {
@@ -165,7 +164,7 @@ hr {
 }
 
 .next-page {
-    page-break-before: always
+    page-break-before: always;
 }
 
 .qr-code {
@@ -173,4 +172,8 @@ hr {
   margin-left: auto;
   margin-right: auto;
   width: 70%;
+}
+
+.tag-line {
+  font-size: 23px;
 }

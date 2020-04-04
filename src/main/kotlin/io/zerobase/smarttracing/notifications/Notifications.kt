@@ -1,5 +1,6 @@
 package io.zerobase.smarttracing.notifications
 
+import com.google.common.io.Resources
 import com.google.common.net.MediaType
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import io.zerobase.smarttracing.models.ContactInfo
@@ -7,9 +8,16 @@ import io.zerobase.smarttracing.models.Organization
 import io.zerobase.smarttracing.models.ScannableId
 import io.zerobase.smarttracing.pdf.DocumentFactory
 import io.zerobase.smarttracing.qr.QRCodeGenerator
+import org.apache.http.util.Args
 import org.thymeleaf.TemplateEngine
 import org.thymeleaf.context.Context
+import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver
+import org.w3c.tidy.Tidy
+import java.lang.Exception
+import java.net.URI
+import java.nio.charset.StandardCharsets
 import java.util.*
+import javax.ws.rs.core.UriBuilder
 
 data class NotificationRequest(val notification: Notification, val contactInfo: ContactInfo)
 
@@ -40,8 +48,8 @@ class SimpleBusinessOnboarding(
     private val templateEngine: TemplateEngine,
     private val documentFactory: DocumentFactory,
     private val qrCodeGenerator: QRCodeGenerator,
-    val organization: Organization,
-    val qrCodeId: ScannableId
+    private val organization: Organization,
+    private val qrCodeId: ScannableId
 ) : Notification() {
     override val subject = "Welcome to Zerobase!"
     override val attachments: List<Attachment> by lazy {
@@ -67,4 +75,7 @@ class SimpleBusinessOnboarding(
             }
         }
     }
+
+
+
 }
