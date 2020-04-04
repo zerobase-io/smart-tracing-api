@@ -58,7 +58,7 @@ Docker is used to run external services locally for front-end development or tes
 Some of the resources can be run without docker, but some don't really have local install options. Install docker manually by following
 this [guide](https://www.docker.com/get-started) or via a package manager.
 
-## Running Locally for Front-end Development or Testing
+## Running Locally
 
 ### Docker Compose
 We have a docker compose file that will spin up all the pieces necessary and expose the API on your local machine. There are several
@@ -66,7 +66,17 @@ environment variables that can be used to configure it:
 
 * `DB_PORT`: Used if you want to connect to the gremlin server manually and play with the graph.
 * `APP_VERSION`: By default, it will use latest. If you need to run a specific version, or one that isn't in DockerHub yet, set this to the version tag you want.
-* `APP_PORT`: By default, it will be 9000.
+* `APP_PORT**: By default, it will be 9000.
+
+#### Not changing the backend
+To run the backend when not intending to work on it (useful if you are working only on the front end or testing it) you can pull it in from dockerhub with
+
+    docker-compose -f docker-compose-full-stack.yml upp app
+
+Alternately, run *just dependencies* from docker-compose and build/develop on your machine
+
+    $ mvn clean install
+    $ docker-compose -f ./docker-compose-dependnecies.yml up database aws
 
 ### Manually with Docker
 #### Database - Gremlin
@@ -108,7 +118,7 @@ suffice.
 Follow the documentation for a non-Docker SES fake. Here's one: https://github.com/csi-lk/aws-ses-local
 
 #### Project
-After cloning the project there are two ways to deploy it locally: using an IDE or via the command line. By default, the app listens on
+After cloning the project there are multiple ways to deploy it locally: from dockerhub, using an IDE or via the command line. There is also a docker-compose for setting up all dependencies. By default, the app listens on
 port 9000. You can override that with an environment variable of `PORT` if you need to. The `local-config.yml` defaults to `localhost`
 and `8182` for the database. Both can be overriden with environment variables, using `WRITE_ENDPOINT` and `DB_PORT` respectively.
 
@@ -139,16 +149,24 @@ set an environment variable of `DB_PORT` to the port your gremlin server is runn
     ```sh
     $ mvn clean install
     ```
-* Set the environment variables (if needed), either as an export or inline, and run the jar.
-    * Export
-        ```sh
-        $ export DB_PORT=12345
-        $ java -jar target/smart-tracing-api.jar server target/classes/local-config.yml
-        ```
-    * Inline
+    
+    Alternately, to do a build with fewer checks
     ```sh
-    $ PORT=8888 java -jar target/smart-tracing-api.jar server target/classes/local-config.yml
+      mvn package -Dbasepom.check.skip-all
     ```
+
+* Set the environment variables (if needed), either as an export or inline, and run the jar.
+
+  You should not have to set environment variables at all if running the default configuration for dependencies via `docker-compose-dependencies`
+    * Export
+      ```sh
+-       $ export DB_PORT=12345
+        $ java -jar target/smart-tracing-api.jar server target/classes/local-config.yml
+      ```
+    * Inline
+      ```sh
+        $ DB_PORT=12345 java -jar target/smart-tracing-api.jar server target/classes/local-config.yml
+      ```
 
 ### Debugging / Calling end points
 * Once you're running the project, you can double check if all is well by visiting `http://localhost:8081` in your browser. You
