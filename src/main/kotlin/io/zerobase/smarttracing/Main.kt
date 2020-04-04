@@ -64,30 +64,6 @@ data class Config(
 
 fun main(vararg args: String) {
     Main().run(*args)
-    val qrCodeGenerator = QRCodeGenerator(
-        baseLink = UriBuilder.fromUri(URI.create("https://zerobase.io/")),
-        logo = Resources.getResource("qr/qr-code-logo.png")
-    )
-    val qrCodeId = ScannableId("qr01")
-    val resolver = ClassLoaderTemplateResolver().apply {
-        prefix = "/pdfs/qr-code/" // updating this to reference prefix when in jar in relation to where this code will be
-        suffix = ".html"
-        characterEncoding = StandardCharsets.UTF_8.displayName()
-    }
-    val templateEngine = TemplateEngine().apply {
-        templateResolvers = setOf(resolver)
-    }
-    val documentFactory = DocumentFactory(templateEngine, Tidy().apply {
-        inputEncoding = StandardCharsets.UTF_8.displayName()
-        outputEncoding = StandardCharsets.UTF_8.displayName()
-        xhtml = true
-    })
-    try{
-        qrCodeGenerator.generate(qrCodeId.value).let(documentFactory::siteOnboarding).render()
-    } catch (e: Exception) {
-        throw Exception(e)
-    }
-
 }
 
 class Main : Application<Config>() {

@@ -7,19 +7,24 @@
     </head>
 
     <body>
-        <div class='header' th:include="header::header"></div>
+        <div class='header'>
+            <h1>COVID-19 CHECK-IN</h1>
+        </div>
 
-        <div th:include="letterhead::letterhead"></div>
+        <div>
+            <hr>
+            <h2>Please help our community by anonymously checking in.* It takes just a few seconds. <strong>You could save a life.</strong></h2>
+        </div>
         <h2><strong>Scan QR or visit <u>www.zerobase.io</u></strong></h2>
 
-        <br>
+        <br/>
 
         <img class="qr-code" th:src="${qrCode}" alt="logo">
-        <h2> Together with [], you are doing your part to help keep [] safe.</h2>
+        <h2> Together with <span th:text="${organizationName}"/>, you are doing your part to help keep <span th:text="${administrativeArea}"/> safe.</h2>
 
         <div class="next-page"> </div>
 
-        <div class='footer' th:include="footer::footer"></div>
+        <div class='footer' th:include="pdfs/common/footer::footer"></div>
 
     </body>
 

@@ -56,7 +56,7 @@ class SimpleBusinessOnboarding(
         listOf(
             Attachment(
                 name = "QR Code Poster.pdf",
-                data = qrCodeGenerator.generate(qrCodeId.value).let(documentFactory::siteOnboarding).render(),
+                data = qrCodeGenerator.generate(qrCodeId.value).let { documentFactory.siteOnboarding(organization, it) }.render(),
                 contentType = MediaType.PDF
             ),
             // TODO: Load the onboarding PDF from a remote source like s3
