@@ -3,7 +3,6 @@ package io.zerobase.smarttracing.notifications
 import com.google.common.eventbus.AllowConcurrentEvents
 import com.google.common.eventbus.Subscribe
 import io.zerobase.smarttracing.models.ContactInfo
-import io.zerobase.smarttracing.models.Event
 import io.zerobase.smarttracing.models.SimpleOrganizationCreated
 import io.zerobase.smarttracing.utils.LoggerDelegate
 
