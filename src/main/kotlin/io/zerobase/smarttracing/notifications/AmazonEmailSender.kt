@@ -53,11 +53,6 @@ class AmazonEmailSender(
 
             message.writeTo(outStream)
 
-            val arr = outStream.toByteArray()
-            val data = SdkBytes.fromByteArray(arr)
-            val rawMessage = RawMessage.builder().data(data).build()
-            val rawEmailRequest = SendRawEmailRequest.builder().rawMessage(rawMessage).build()
-
             client.sendRawEmail {
                 it.bytes(outStream.toByteArray())
             }
