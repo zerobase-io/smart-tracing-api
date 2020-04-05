@@ -111,7 +111,7 @@ class Main : Application<Config>() {
             SubscriberExceptionHandler { exception, context ->
                 log.warn(
                     "event handler failed. bus={} handler={}.{} event={}",
-                    context.eventBus.identifier(), context.subscriber::class, context.subscriberMethod.name, exception
+                    context.eventBus.identifier(), context.subscriber::class, context.subscriberMethod.name, context.event, exception
                 )
             }
         )
