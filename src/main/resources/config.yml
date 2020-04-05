@@ -40,14 +40,19 @@ notifications:
 
 siteTypeCategories:
   BUSINESS:
-    - GROCERY
-    - RESTAURANT
+  - GROCERY
+  - RESTAURANT
+  - OTHER
   FINANCIAL:
-    - BANK
+  - BANK
+  - OTHER
   HEALTH:
-    - DOCTOR_OFFICE
-    - HOSPITAL
-    - PHARMACY
+  - DOCTOR_OFFICE
+  - HOSPITAL
+  - PHARMACY
+  - OTHER
+  OTHER:
+  - OTHER
 
 scannableTypes:
-  - QR_CODE
+- QR_CODE
