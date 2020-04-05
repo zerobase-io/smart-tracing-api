@@ -9,6 +9,6 @@
     },
     {
         "ParameterKey": "AllowedOrigins",
-        "ParameterValue": "*"
+        "ParameterValue": "'*'"
     }
 ]
