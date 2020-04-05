@@ -11,7 +11,7 @@ logging:
   loggers:
     io.zerobase: DEBUG
     # Enable errors from body processing
-    io.dropwziard.jersey.jackson.JsonProcessingExceptionMapper: DEBUG
+    io.dropwizard.jersey.jackson.JsonProcessingExceptionMapper: DEBUG
 
 database:
   endpoints:
