@@ -70,10 +70,10 @@ ol {
         padding-bottom: 10px;
     }
 
-    margin-top: 5cm;
-    margin-left: 0.5cm;
-    margin-right: 0.5cm;
-    margin-bottom: 5cm;
+   margin-top: 4cm;
+   margin-left: 2.54cm;
+   margin-right: 2.54cm;
+   margin-bottom: 5cm;
 
     size: A4 portrait;
 }
@@ -81,11 +81,12 @@ ol {
 div.header {
     position: running(header);
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    font-size: 38px;
+    font-size: 25px;
     font-style: normal;
     font-variant: normal;
     font-weight: 700;
     line-height: 45px;
+    margin-top: 2cm;
 }
 
 div.center {

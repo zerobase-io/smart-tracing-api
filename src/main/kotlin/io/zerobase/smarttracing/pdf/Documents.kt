@@ -36,12 +36,8 @@ sealed class Document(private val templateEngine: TemplateEngine, private val xh
     fun render(): ByteArray {
         log.debug("rendering document: {}", this::class)
         val generalContextMap = mutableMapOf<String, Any>()
-        generalContextMap.put("stylesheet",Resources.getResource("pdfs/$name/css/style.css"))
-        generalContextMap.put("letterheadlogo", Resources.getResource("pdfs/common/img/logo.png"))
         context.setVariables(generalContextMap)
 
-        log.debug("stylesheet path {}",context.getVariable("stylesheet"))
-        log.debug("letter head logo {}", context.getVariable("letterheadlogo"))
         // template engine parses; don't need template location because that's already set in main with prefix
         val html = templateEngine.process("pdfs/$name/main", context)
         val xhtml = convertToXhtml(html)

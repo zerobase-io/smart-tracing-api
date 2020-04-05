@@ -8,11 +8,19 @@ body {
 }
 h2 {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 30px;
+    font-style: normal;
+    font-variant: normal;
+    font-weight: 200;
+    line-height: 36px;
+}
+h3 {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 28px;
     font-style: normal;
     font-variant: normal;
     font-weight: 200;
-    line-height: 29px;
+    line-height: 36px;
 }
 p {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -21,7 +29,7 @@ p {
     font-variant: normal;
     font-weight: 400;
     line-height: 29px;
-    margin-bottom: 0px;
+    margin-top: -10px;
 }
 @page {
 
@@ -37,10 +45,10 @@ p {
         padding-bottom: 10px;
     }
 
-    margin-top: 3.1cm;
-    margin-left: 0.5cm;
-    margin-right: 0.5cm;
-    margin-bottom: 4cm;
+    margin-top: 3.3cm;
+    margin-left: 1cm;
+    margin-right: 1cm;
+    margin-bottom: 3.3cm;
 
     size: A4 portrait;
 }
@@ -48,7 +56,7 @@ p {
 div.header {
     position: running(header);
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    font-size: 38px;
+    font-size: 30px;
     font-style: normal;
     font-variant: normal;
     font-weight: 700;
@@ -63,7 +71,6 @@ div.center {
 
 div.footer {
     display: block;
-    margin-top: 0.5cm;
     position: running(footer);
 }
 .logo {
@@ -97,6 +104,7 @@ hr {
 }
 .qr-code {
   display: block;
+  margin-top: -30px;
   margin-left: auto;
   margin-right: auto;
   width: 70%;

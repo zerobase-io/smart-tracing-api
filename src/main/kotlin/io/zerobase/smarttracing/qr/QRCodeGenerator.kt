@@ -35,7 +35,7 @@ class QRCodeGenerator(private val baseLink: UriBuilder,
         val combined = BufferedImage(qrcode.width, qrcode.height, BufferedImage.TYPE_INT_ARGB)
         val g2 = combined.graphics as Graphics2D
         g2.drawImage(qrcode, 0, 0, null)
-        val overlayTransparency = .9f
+        val overlayTransparency = 1f
         g2.composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, overlayTransparency)
         g2.drawImage(overlay, (deltaWidth / 2f).roundToInt(), (deltaHeight / 2f).roundToInt(), null)
         val outputStream = ByteArrayOutputStream()
