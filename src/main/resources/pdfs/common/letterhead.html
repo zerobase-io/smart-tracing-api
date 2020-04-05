@@ -1,14 +1,8 @@
 <div th:fragment="letterhead">
     <div>
-        <div>
-            <img class="logo" src="img/logo.png" alt="logo">
-        </div>
-        <div class="tag-line">
-            <strong>Anonymous. Effective. Accessible to all.</strong>
-        </div>
-        <p>*we put your privacy first. For more information, visit <u>www.zerobase.io/privacy</u></p>
-        <div class="page-count">
-            Page <span id="pagenumber"></span> of <span id="pagecount"></span>
-        </div>
+        <img class="logo" th:src="${letterheadlogo}" alt="logo">
+    </div>
+    <div class="tag-line">
+        <strong>Anonymous. Effective. Accessible to all.</strong>
     </div>
 </div>
