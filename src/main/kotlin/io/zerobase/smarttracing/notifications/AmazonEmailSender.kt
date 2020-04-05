@@ -1,9 +1,11 @@
 package io.zerobase.smarttracing.notifications
 
+import io.zerobase.smarttracing.utils.LoggerDelegate
 import software.amazon.awssdk.core.SdkBytes
 import software.amazon.awssdk.services.ses.SesClient
 import software.amazon.awssdk.services.ses.model.RawMessage
 import software.amazon.awssdk.services.ses.model.SendRawEmailRequest
+import software.amazon.awssdk.services.ses.model.SendRawEmailRequest.Builder as RawEmailRequestBuilder
 import java.io.ByteArrayOutputStream
 import java.nio.charset.StandardCharsets
 import javax.activation.DataHandler
@@ -15,17 +17,27 @@ import javax.mail.internet.MimeMessage
 import javax.mail.internet.MimeMultipart
 import javax.mail.util.ByteArrayDataSource
 
+fun RawEmailRequestBuilder.bytes(bytes: ByteArray): RawEmailRequestBuilder {
+    return rawMessage {
+        it.data(SdkBytes.fromByteArray(bytes))
+    }
+}
+
 class AmazonEmailSender(
     private val client: SesClient,
     private val session: Session,
     private val fromAddress: String
 ) : EmailSender {
+    companion object {
+        val log by LoggerDelegate()
+    }
 
     override fun sendEmail(subject: String,
                            toAddress: String, body: String,
                            contentType: String,
-                           attachment: Attachment?) {
-        if (attachment == null) {
+                           attachments: List<Attachment>) {
+        if (attachments.isEmpty()) {
+            log.debug("no attachments detected. using simple email api...")
             client.sendEmail {
                 it.destination { d -> d.toAddresses(toAddress) }
                     .source(fromAddress)
@@ -34,42 +46,41 @@ class AmazonEmailSender(
                         .body { b -> b.html { c -> c.charset(StandardCharsets.UTF_8.displayName()) } } }
             }
         } else {
-            val message = buildRawMessage(subject, toAddress, body, contentType, attachment)
+            log.debug("email has {} attachment(s), using raw mail api...", attachments.size)
+            val message = buildRawMessage(subject, toAddress, body, contentType, attachments)
 
             val outStream = ByteArrayOutputStream()
 
             message.writeTo(outStream)
 
-            val arr = outStream.toByteArray()
-            val data = SdkBytes.fromByteArray(arr)
-            val rawMessage = RawMessage.builder().data(data).build()
-            val rawEmailRequest = SendRawEmailRequest.builder().rawMessage(rawMessage).build()
-
-            client.sendRawEmail(rawEmailRequest)
+            client.sendRawEmail {
+                it.bytes(outStream.toByteArray())
+            }
         }
     }
 
-    private fun buildRawMessage(subject: String, toAddress: String, body: String, contentType: String, attachment: Attachment): MimeMessage {
+    private fun buildRawMessage(subject: String, toAddress: String, body: String, contentType: String, attachments: List<Attachment>): MimeMessage {
         val message = MimeMessage(session)
 
         message.setSubject(subject, "UTF-8")
         message.setFrom(InternetAddress(fromAddress))
         message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toAddress))
 
-        val msgBody = MimeBodyPart()
-
-        msgBody.setContent(body, contentType)
-
         val msg = MimeMultipart("mixed")
 
-        message.setContent(msg)
+        val mainBody = MimeBodyPart()
+        mainBody.setContent(body, contentType)
+        msg.addBodyPart(mainBody)
 
-        msg.addBodyPart(msgBody)
-        val bds = ByteArrayDataSource(attachment.array, attachment.name)
-        val att = MimeBodyPart()
-        att.dataHandler = DataHandler(bds, attachment.contentType.toString())
-        att.fileName = attachment.name
-        msg.addBodyPart(att)
+        attachments.forEach {
+            val bds = ByteArrayDataSource(it.data, it.contentType.toString())
+            val att = MimeBodyPart()
+            att.dataHandler = DataHandler(bds)
+            att.fileName = it.name
+            msg.addBodyPart(att)
+        }
+
+        message.setContent(msg)
         return message
     }
 }

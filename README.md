@@ -8,6 +8,30 @@ accordingly.
 There are other README files throughout the project. They are located in the source folders that most closely align with the
 readme contents.
 
+## Architecture Notes
+* We are leveraging the type system as much as possible. We don't want stringly typed things and why write our own validations when we can
+  just use what's already there?
+  * Inline Types - These are mostly just string-wrapper classes provide some context as they are passed around
+  * Unsigned Numbers - There are a whole bunch of things that want numbers no less than 0
+* We are trying to avoid coupling as much as possible. To this end, the rest endpoints don't do anything but
+  execute database operations and then fire events to trigger any additional behaviors. This design allows us to add
+  new behaviors without having to constant touch and bloat the rest resources.
+* Dependency injection is your friend. Learn to love it. It's a huge win on testing, among other things.
+* There are 2 levels of automated testing relevant to this project, and I'm going to use Google's terms: small and medium. Both have their
+  place.
+  * **Small Tests** - These are usually referred to as "unit tests". They narrowly test a specific class or method. Everything is mocked.
+    These tests are great for complex pieces and validating individual behaviors, but has at least 2 main problems:are limited in verifying the app is functioning
+    - They don't verify the service is working as it should. You can have extremely robust small test suites that validate each piece and
+      still have a broken app that won't start.
+    - They make refactoring the internals painful. Since all interactions are mocked in small tests, if you change any of the things that
+      were mocked, you have to rewire all the tests. Sometimes, that's easy using IDEs and tooling and sometimes it's extremely painful
+      because the refactor isn't that simple.
+  * **Medium Tests** - These are service level tests. Medium tests, unlike small tests, have access to resources on localhost. This allows
+    for a local database to be used. This type of test provides a greater confidence that the app will work when deployed because to run,
+    the app must be able to turn on, wire up all the pieces (like database connections), and produce the correct API outputs based on the
+    inputs. This type of test allows easy refactoring of the internals because it verifies that the API contract is maintained, regardless
+    of internal implementation details.
+
 ## Development Setup
 
 ### Kotlin
@@ -34,7 +58,7 @@ Docker is used to run external services locally for front-end development or tes
 Some of the resources can be run without docker, but some don't really have local install options. Install docker manually by following
 this [guide](https://www.docker.com/get-started) or via a package manager.
 
-## Running Locally for Front-end Development or Testing
+## Running Locally
 
 ### Docker Compose
 We have a docker compose file that will spin up all the pieces necessary and expose the API on your local machine. There are several
@@ -42,7 +66,17 @@ environment variables that can be used to configure it:
 
 * `DB_PORT`: Used if you want to connect to the gremlin server manually and play with the graph.
 * `APP_VERSION`: By default, it will use latest. If you need to run a specific version, or one that isn't in DockerHub yet, set this to the version tag you want.
-* `APP_PORT`: By default, it will be 9000.
+* `APP_PORT**: By default, it will be 9000.
+
+#### Not changing the backend
+To run the backend when not intending to work on it (useful if you are working only on the front end or testing it) you can pull it in from dockerhub with
+
+    docker-compose -f docker-compose-full-stack.yml upp app
+
+Alternately, run *just dependencies* from docker-compose and build/develop on your machine
+
+    $ mvn clean install
+    $ docker-compose -f ./docker-compose-dependnecies.yml up database aws
 
 ### Manually with Docker
 #### Database - Gremlin
@@ -84,7 +118,7 @@ suffice.
 Follow the documentation for a non-Docker SES fake. Here's one: https://github.com/csi-lk/aws-ses-local
 
 #### Project
-After cloning the project there are two ways to deploy it locally: using an IDE or via the command line. By default, the app listens on
+After cloning the project there are multiple ways to deploy it locally: from dockerhub, using an IDE or via the command line. There is also a docker-compose for setting up all dependencies. By default, the app listens on
 port 9000. You can override that with an environment variable of `PORT` if you need to. The `local-config.yml` defaults to `localhost`
 and `8182` for the database. Both can be overriden with environment variables, using `WRITE_ENDPOINT` and `DB_PORT` respectively.
 
@@ -115,16 +149,24 @@ set an environment variable of `DB_PORT` to the port your gremlin server is runn
     ```sh
     $ mvn clean install
     ```
-* Set the environment variables (if needed), either as an export or inline, and run the jar.
-    * Export
-        ```sh
-        $ export DB_PORT=12345
-        $ java -jar target/smart-tracing-api.jar server target/classes/local-config.yml
-        ```
-    * Inline
+    
+    Alternately, to do a build with fewer checks
     ```sh
-    $ PORT=8888 java -jar target/smart-tracing-api.jar server target/classes/local-config.yml
+      mvn package -Dbasepom.check.skip-all
     ```
+
+* Set the environment variables (if needed), either as an export or inline, and run the jar.
+
+  You should not have to set environment variables at all if running the default configuration for dependencies via `docker-compose-dependencies`
+    * Export
+      ```sh
+-       $ export DB_PORT=12345
+        $ java -jar target/smart-tracing-api.jar server target/classes/local-config.yml
+      ```
+    * Inline
+      ```sh
+        $ DB_PORT=12345 java -jar target/smart-tracing-api.jar server target/classes/local-config.yml
+      ```
 
 ### Debugging / Calling end points
 * Once you're running the project, you can double check if all is well by visiting `http://localhost:8081` in your browser. You

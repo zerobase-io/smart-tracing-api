@@ -19,7 +19,7 @@ logging:
   level: ${ROOT_LOG_LEVEL:-INFO}
   loggers:
     # Enable errors from body processing
-    io.dropwziard.jersey.jackson.JsonProcessingExceptionMapper: DEBUG
+    io.dropwizard.jersey.jackson.JsonProcessingExceptionMapper: DEBUG
 
 database:
   endpoints:
@@ -28,6 +28,8 @@ database:
   port: ${DB_PORT}
   enableAwsSigner: ${ENABLE_AWS_SIGNING:-true}
   enableSsl: ${ENABLE_SSL:-true}
+
+baseQrCodeLink: ${BASE_LINK}
 
 aws:
   ses:

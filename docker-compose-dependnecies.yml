@@ -1,0 +1,18 @@
+version: "3.7"
+
+services:
+
+  database:
+    image: tinkerpop/gremlin-server:latest
+    ports:
+    - ${DB_PORT:-8182}:8182
+    volumes:
+    - ./src/test/resources/tinkergraph-overrides.properties:/opt/gremlin-server/conf/tinkergraph-empty.properties
+
+  aws:
+    image: localstack/localstack:latest
+    ports:
+    - ${SES_PORT:-4579}:4579
+    environment:
+    - SERVICES=ses
+    - DEBUG=${AWS_DEBUG:-false}

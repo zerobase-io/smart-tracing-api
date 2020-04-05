@@ -14,6 +14,10 @@ private fun <S, T> Traversal<S, T>.getIfPresent(): T? {
     return tryNext().orElse(null)
 }
 
+private fun <S, T> Traversal<S, T>.execute(): T? {
+    return next()
+}
+
 class GraphDao(
     private val graph: GraphTraversalSource,
     private val phoneUtil: PhoneNumberUtil
@@ -33,7 +37,7 @@ class GraphDao(
                     .property(T.id, id)
                     .property("fingerprint", fingerprint?.value ?: "none")
                     .property("creationTimestamp", System.currentTimeMillis())
-                    .getIfPresent()
+                    .execute()
             return vertex?.run { DeviceId(id) } ?: throw EntityCreationException("Failed to save device")
         } catch (ex: Exception) {
             log.error("error creating device. fingerprint={}", fingerprint, ex)
@@ -71,7 +75,7 @@ class GraphDao(
                 .from(graph.V(deviceId.value))
                 .property("latitude", loc.latitude)
                 .property("longitude", loc.longitude)
-                .next()
+                .execute()
     }
 
     fun recordPeerToPeerScan(scanner: DeviceId, scanned: DeviceId, loc: Location?): ScanId {
@@ -84,7 +88,7 @@ class GraphDao(
                     .property("timestamp", System.currentTimeMillis())
                     .property("latitude", loc?.latitude)
                     .property("longitude", loc?.longitude)
-                    .next()
+                    .execute()
             return ScanId(scanId)
         } catch (ex: Exception) {
             log.error("error creating p2p scan. scanner={} scanned={}", scanner, scanned, ex)
@@ -100,7 +104,7 @@ class GraphDao(
                     .to(graph.V(site.value))
                     .property(T.id, id)
                     .property("timestamp", System.currentTimeMillis())
-                    .next()
+                    .execute()
             return ScanId(id)
         } catch (ex: Exception) {
             log.error("error creating site scan. device={} site={}", device, site, ex)
@@ -124,7 +128,7 @@ class GraphDao(
      * @throws exception if phone number is invalid.
      */
     fun createOrganization(name: String, phone: String?, email: String, contactName: String, address: Address,
-                           hasTestingFacilities: Boolean, multiSite: Boolean): OrganizationId {
+                           hasTestingFacilities: Boolean, multiSite: Boolean): Organization {
 
         validatePhoneNumber(phone)
 
@@ -146,8 +150,9 @@ class GraphDao(
                 .property("multisite", multiSite)
                 .property("creationTimestamp", System.currentTimeMillis())
             phone?.also { v.property("phone", it) }
-            v.next()
-            return OrganizationId(id)
+            v.execute()
+
+            return Organization(OrganizationId(id), name, address, contactName, ContactInfo(email, phone))
         } catch (ex: Exception) {
             log.error("Error creating organization. name={}", name, ex)
             throw EntityCreationException("Error creating organization", ex)
@@ -161,7 +166,7 @@ class GraphDao(
      * @param state the value for the multi-site flag
      */
     fun setMultiSite(id: OrganizationId, state: Boolean) {
-        graph.V(id.value).property("multisite", state).getIfPresent()
+        graph.V(id.value).property("multisite", state).execute()
     }
 
     /**
@@ -178,8 +183,8 @@ class GraphDao(
      * @param email contact email of site manager
      * @param contactName contact name of site manager
      */
-    fun createSite(organizationId: OrganizationId, name: String, category: String, subcategory: String, lat: Float?, long: Float?,
-                   testing: Boolean, phone: String?, email: String?, contactName: String?): SiteId {
+    fun createSite(organizationId: OrganizationId, name: String? = null, category: String, subcategory: String, lat: Float? = null, long: Float? = null,
+                   testing: Boolean = false, phone: String? = null, email: String? = null, contactName: String? = null): SiteId {
         val id = UUID.randomUUID().toString()
         try {
             val v = graph.addV("Site")
@@ -188,14 +193,14 @@ class GraphDao(
                 .property("subcategory", subcategory)
                 .property("testing", testing)
                 .property("creationTimestamp", System.currentTimeMillis())
-                lat?.also { v.property("latitude", it) }
-                long?.also { v.property("longitude", it) }
-                lat?.also { v.property("latitude", it) }
-                long?.also { v.property("longitude", it) }
-                contactName?.also { v.property("contactName", it) }
-                phone?.also { v.property("phone", it) }
-                email?.also { v.property("email", it) }
-                v.next()
+            lat?.also { v.property("latitude", it) }
+            long?.also { v.property("longitude", it) }
+            lat?.also { v.property("latitude", it) }
+            long?.also { v.property("longitude", it) }
+            contactName?.also { v.property("contactName", it) }
+            phone?.also { v.property("phone", it) }
+            email?.also { v.property("email", it) }
+            v.execute()
             graph.addE("OWNS").from(graph.V(organizationId.value)).to(graph.V(id))
             return SiteId(id)
         } catch (ex: Exception) {
@@ -234,7 +239,7 @@ class GraphDao(
             graph.addV("Scannable").property(T.id, id).property("type", type).property("singleUse", singleUse)
                 .property("active", true).addE("OWNS")
                 .from(graph.V(sid.value))
-                .next()
+                .execute()
             return ScannableId(id)
         } catch (ex: Exception) {
             log.error("error creating scannable. organization={} site={} type={}", oid, sid, type)
@@ -286,7 +291,7 @@ class GraphDao(
                 .property(T.id, id).property("name", name).property("phone", phone).property("email", email)
                 .property("deleted", false)
                 .addE("OWNS").from(deviceVertex)
-                .next()
+                .execute()
             return UserId(id)
         } catch (ex: Exception) {
             log.error("error creating user for device. device={}", deviceId, ex)
@@ -301,7 +306,7 @@ class GraphDao(
      */
     fun deleteUser(id: UserId) {
         try {
-            graph.V(id.value).property("deleted", true).getIfPresent()
+            graph.V(id.value).property("deleted", true).execute()
         } catch (ex: Exception) {
             log.error("failed to delete user. id={}", id, ex)
             throw ex

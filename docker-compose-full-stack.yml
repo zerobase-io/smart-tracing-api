@@ -5,10 +5,14 @@ services:
   database:
     image: tinkerpop/gremlin-server:latest
     ports:
-    - ${DB_PORT:-8182}
+    - ${DB_PORT:-8182}:8182
+    volumes:
+    - ./src/test/resources/tinkergraph-overrides.properties:/opt/gremlin-server/conf/tinkergraph-empty.properties
 
   aws:
     image: localstack/localstack:latest
+    ports:
+    - ${SES_PORT:-4579}:4579
     environment:
     - SERVICES=ses
     - DEBUG=${AWS_DEBUG:-false}
@@ -16,7 +20,7 @@ services:
   app:
     image: zerobaseio/smart-tracing-api:${APP_VERSION:-latest}
     ports:
-    - ${APP_PORT:-9000}
+    - ${APP_PORT:-9000}:9000
     depends_on:
     - database
     - aws
@@ -25,7 +29,7 @@ services:
     - READ_ENDPOINT=database
     - DB_PORT=8182
     - AWS_SES_ENDPOINT=http://aws:4579
-    - PORT=${APP_PORT:-9000}
-    - CORS_ALLOWED_ORIGINS=*
-
+    - PORT=9000
+    - BASE_LINK=${BASE_LINK:-http://staging.zerobase.io}
+    - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS:-*}
 

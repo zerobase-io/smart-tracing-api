@@ -3,6 +3,7 @@ package io.zerobase.smarttracing.qr
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
 import com.google.zxing.client.j2se.MatrixToImageWriter
+import com.google.zxing.qrcode.QRCodeWriter
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import io.zerobase.smarttracing.utils.LoggerDelegate
 import java.awt.AlphaComposite
@@ -13,12 +14,14 @@ import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
 import java.net.URL
 import javax.imageio.ImageIO
+import javax.ws.rs.core.UriBuilder
 import kotlin.math.roundToInt
 import com.google.zxing.Writer as BarcodeWriter
 
 
-class QRCodeGenerator(private val logo: URL,
-                      private val writer: BarcodeWriter,
+class QRCodeGenerator(private val baseLink: UriBuilder,
+                      private val logo: URL,
+                      private val writer: BarcodeWriter = QRCodeWriter(),
                       private val options: Map<EncodeHintType, Any> = mapOf(EncodeHintType.ERROR_CORRECTION to ErrorCorrectionLevel.H)
 ) {
     companion object {
@@ -32,7 +35,7 @@ class QRCodeGenerator(private val logo: URL,
         val combined = BufferedImage(qrcode.width, qrcode.height, BufferedImage.TYPE_INT_ARGB)
         val g2 = combined.graphics as Graphics2D
         g2.drawImage(qrcode, 0, 0, null)
-        val overlayTransparency = .9f
+        val overlayTransparency = 1f
         g2.composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, overlayTransparency)
         g2.drawImage(overlay, (deltaWidth / 2f).roundToInt(), (deltaHeight / 2f).roundToInt(), null)
         val outputStream = ByteArrayOutputStream()
@@ -56,8 +59,8 @@ class QRCodeGenerator(private val logo: URL,
         }
     }
 
-    fun generate(text: String, width: Int, height: Int): ByteArray {
-        val bitMatrix = writer.encode(text, BarcodeFormat.QR_CODE, width, height, options)
+    fun generate(codeId: String, width: Int = 1000, height: Int = 1000): ByteArray {
+        val bitMatrix = writer.encode(baseLink.build(codeId).toString(), BarcodeFormat.QR_CODE, width, height, options)
         val image = MatrixToImageWriter.toBufferedImage(bitMatrix)
         val overlay = ImageIO.read(logo)
         val scaledWidth = (image.width * 2 / 9f).roundToInt()
