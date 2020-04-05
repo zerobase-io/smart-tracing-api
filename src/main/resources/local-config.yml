@@ -11,7 +11,7 @@ logging:
   loggers:
     io.zerobase: DEBUG
     # Enable errors from body processing
-    io.dropwziard.jersey.jackson.JsonProcessingExceptionMapper: DEBUG
+    io.dropwizard.jersey.jackson.JsonProcessingExceptionMapper: DEBUG
 
 database:
   endpoints:
@@ -21,7 +21,7 @@ database:
 aws:
   ses:
     region: ${REGION:-us-east-1}
-    endpoint: ${FAKE_SES_ENDPOINT:-null}
+    endpoint: ${FAKE_SES_ENDPOINT:-http://127.0.0.1:4579}
 
 baseQrCodeLink: http://127.0.0.1:8080/s/
 

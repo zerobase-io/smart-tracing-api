@@ -97,7 +97,6 @@ class Main : Application<Config>() {
         val emailSender = AmazonEmailSender(sesClientBuilder.build(), session, config.notifications.email.fromAddress)
 
         val resolver = ClassLoaderTemplateResolver().apply {
-            prefix = "/pdfs"
             suffix = ".html"
             characterEncoding = StandardCharsets.UTF_8.displayName()
         }
@@ -112,7 +111,7 @@ class Main : Application<Config>() {
             SubscriberExceptionHandler { exception, context ->
                 log.warn(
                     "event handler failed. bus={} handler={}.{} event={}",
-                    context.eventBus.identifier(), context.subscriber::class, context.subscriberMethod.name, exception
+                    context.eventBus.identifier(), context.subscriber::class, context.subscriberMethod.name, context.event, exception
                 )
             }
         )
@@ -127,13 +126,7 @@ class Main : Application<Config>() {
             baseLink = UriBuilder.fromUri(config.baseQrCodeLink),
             logo = Resources.getResource("qr/qr-code-logo.png")
         )
-        val notificationFactory = NotificationFactory(TemplateEngine().apply {
-            templateResolvers = setOf(ClassLoaderTemplateResolver().apply {
-                prefix = "/notifications/"
-                characterEncoding = StandardCharsets.UTF_8.displayName()
-            })
-        }, documentFactory, qrCodeGenerator)
-
+        val notificationFactory = NotificationFactory(templateEngine, documentFactory, qrCodeGenerator)
         val notificationManager = NotificationManager(emailSender, notificationFactory)
 
         eventBus.register(notificationManager)

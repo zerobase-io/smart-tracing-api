@@ -1,5 +1,6 @@
 package io.zerobase.smarttracing.notifications
 
+import io.zerobase.smarttracing.utils.LoggerDelegate
 import software.amazon.awssdk.core.SdkBytes
 import software.amazon.awssdk.services.ses.SesClient
 import software.amazon.awssdk.services.ses.model.RawMessage
@@ -27,12 +28,16 @@ class AmazonEmailSender(
     private val session: Session,
     private val fromAddress: String
 ) : EmailSender {
+    companion object {
+        val log by LoggerDelegate()
+    }
 
     override fun sendEmail(subject: String,
                            toAddress: String, body: String,
                            contentType: String,
                            attachments: List<Attachment>) {
         if (attachments.isEmpty()) {
+            log.debug("no attachments detected. using simple email api...")
             client.sendEmail {
                 it.destination { d -> d.toAddresses(toAddress) }
                     .source(fromAddress)
@@ -41,16 +46,12 @@ class AmazonEmailSender(
                         .body { b -> b.html { c -> c.charset(StandardCharsets.UTF_8.displayName()) } } }
             }
         } else {
+            log.debug("email has {} attachment(s), using raw mail api...", attachments.size)
             val message = buildRawMessage(subject, toAddress, body, contentType, attachments)
 
             val outStream = ByteArrayOutputStream()
 
             message.writeTo(outStream)
-
-            val arr = outStream.toByteArray()
-            val data = SdkBytes.fromByteArray(arr)
-            val rawMessage = RawMessage.builder().data(data).build()
-            val rawEmailRequest = SendRawEmailRequest.builder().rawMessage(rawMessage).build()
 
             client.sendRawEmail {
                 it.bytes(outStream.toByteArray())
@@ -72,9 +73,9 @@ class AmazonEmailSender(
         msg.addBodyPart(mainBody)
 
         attachments.forEach {
-            val bds = ByteArrayDataSource(it.data, it.name)
+            val bds = ByteArrayDataSource(it.data, it.contentType.toString())
             val att = MimeBodyPart()
-            att.dataHandler = DataHandler(bds, it.contentType.toString())
+            att.dataHandler = DataHandler(bds)
             att.fileName = it.name
             msg.addBodyPart(att)
         }
