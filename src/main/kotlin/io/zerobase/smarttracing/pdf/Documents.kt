@@ -18,7 +18,6 @@ import kotlin.collections.HashMap
 
 class DocumentFactory(private val templateEngine: TemplateEngine, private val xhtmlConverter: Tidy) {
     fun siteOnboarding(organization: Organization, qrCode: ByteArray): SiteOnboarding = SiteOnboarding(organization, qrCode, templateEngine, xhtmlConverter)
-    fun siteOnboardingWelcome(organization: Organization): SiteOnboardingWelcome = SiteOnboardingWelcome(organization, templateEngine, xhtmlConverter)
 }
 
 sealed class Document(private val templateEngine: TemplateEngine, private val xhtmlConverter: Tidy) {
@@ -78,22 +77,6 @@ class SiteOnboarding internal constructor(
 
         Context(Locale.US, mapOf(
             "qrCode" to tempPath.toUri().toString(),
-            "organizationName" to organization.name,
-            "administrativeArea" to organization.address.administrativeArea)
-        )
-    }
-}
-@SuppressFBWarnings("EI_EXPOSE_REP2")
-// used this to essentially create the body of email; but we will get rid of this since want to put things in notifications
-class SiteOnboardingWelcome internal constructor(
-    private val organization: Organization,
-    templateEngine: TemplateEngine,
-    xhtmlConverter: Tidy
-) : Document(templateEngine, xhtmlConverter) {
-    override val name: String = "welcome-letter"
-    override val context: Context by lazy {
-        log.debug("creating welcome letter")
-        Context(Locale.US, mapOf(
             "organizationName" to organization.name,
             "administrativeArea" to organization.address.administrativeArea)
         )

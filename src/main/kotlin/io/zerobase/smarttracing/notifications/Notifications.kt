@@ -32,7 +32,6 @@ class NotificationFactory(
 ) {
     fun simpleBusinessOnboarding(organization: Organization, defaultQrCode: ScannableId)
         = SimpleBusinessOnboarding(templateEngine, documentFactory, qrCodeGenerator, organization, defaultQrCode)
-
 }
 
 @SuppressFBWarnings("EI_EXPOSE_REP", "EI_EXPOSE_REP2")
@@ -68,7 +67,7 @@ class SimpleBusinessOnboarding(
         when (medium) {
             NotificationMedium.EMAIL -> {
                 return templateEngine.process("notifications/simple-business-onboarding/main.html", Context(Locale.US, mapOf(
-                    "name" to organization.name,
+                    "organizationName" to organization.name,
                     "locality" to organization.address.locality,
                     "administrativeArea" to organization.address.administrativeArea
                 )))
