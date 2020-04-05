@@ -70,9 +70,7 @@ class SimpleBusinessOnboarding(
                 return templateEngine.process("notifications/simple-business-onboarding/main.html", Context(Locale.US, mapOf(
                     "name" to organization.name,
                     "locality" to organization.address.locality,
-                    "administrativeArea" to organization.address.administrativeArea,
-                    "stylesheet" to Resources.getResource("notifications/simple-business-onboarding/css/style.css"),
-                    "letterheadlogo" to Resources.getResource("pdfs/common/img/logo.png")
+                    "administrativeArea" to organization.address.administrativeArea
                 )))
             }
         }

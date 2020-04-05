@@ -17,7 +17,6 @@ import io.dropwizard.configuration.SubstitutingSourceProvider
 import io.dropwizard.setup.Bootstrap
 import io.dropwizard.setup.Environment
 import io.zerobase.smarttracing.config.GraphDatabaseFactory
-import io.zerobase.smarttracing.models.ScannableId
 import io.zerobase.smarttracing.notifications.AmazonEmailSender
 import io.zerobase.smarttracing.notifications.NotificationFactory
 import io.zerobase.smarttracing.notifications.NotificationManager
@@ -32,7 +31,6 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver
 import org.w3c.tidy.Tidy
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.ses.SesClient
-import java.lang.Exception
 import java.net.URI
 import java.nio.charset.StandardCharsets
 import java.time.Duration

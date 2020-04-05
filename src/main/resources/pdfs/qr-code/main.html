@@ -3,29 +3,26 @@
 
     <head>
         <meta charset="UTF-8">
-        <link rel="stylesheet" type="text/css" media="all" th:href="${stylesheet}"/>
+        <link rel="stylesheet" type="text/css" media="all" th:href="@{css/style.css}"/>
     </head>
 
     <body>
         <div class='header'>
-            <h1>COVID-19 CHECK-IN</h1>
+            <h1>COMMUNITY CHECK-IN</h1>
         </div>
 
         <div>
-            <hr>
-            <h2>Please help our community by anonymously checking in.* It takes just a few seconds. <strong>You could save a life.</strong></h2>
+            <h2>Please help our community by anonymously checking in. It takes just a few seconds. <strong>You can save a life.</strong></h2>
         </div>
-        <p style="font-size:45px"><strong>Scan QR or visit <u>www.zerobase.io</u></strong></p>
-
-        <br/>
+        <h2><strong>Scan QR by holding your phone's camera app over the code below </strong></h2>
 
         <img class="qr-code" th:src="${qrCode}" alt="qr">
-        <h2> Together with <span th:text="${organizationName}"/>, you are doing your part to help keep <span th:text="${administrativeArea}"/> safe.</h2>
 
+        <h2>or visit <u>www.zerobase.io</u></h2>
+        <h3> Together with <span style="background-color: #FFFF00" th:text="${organizationName}"/>, you are doing your part to help keep <span style="background-color: #FFFF00" th:text="${administrativeArea}"/> safe.</h3>
         <div class="next-page"> </div>
 
         <div class='footer' th:include="pdfs/common/letterhead::letterhead"></div>
-        <p>*we put your privacy first. For more information, visit <u>www.zerobase.io/privacy</u></p>
     </body>
 
 </html>
