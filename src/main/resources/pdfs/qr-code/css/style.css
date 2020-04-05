@@ -8,7 +8,7 @@ body {
 }
 h2 {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    font-size: 30px;
+    font-size: 33px;
     font-style: normal;
     font-variant: normal;
     font-weight: 200;
@@ -16,7 +16,7 @@ h2 {
 }
 h3 {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    font-size: 28px;
+    font-size: 30px;
     font-style: normal;
     font-variant: normal;
     font-weight: 200;
@@ -56,7 +56,7 @@ p {
 div.header {
     position: running(header);
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    font-size: 30px;
+    font-size: 31px;
     font-style: normal;
     font-variant: normal;
     font-weight: 700;
