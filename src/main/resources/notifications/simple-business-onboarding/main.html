@@ -1,9 +1,37 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" media="all" href="pdfs/qr-code/css/style.css"/>
 </head>
 <body>
+    <div class='header' th:include="pdfs/common/letterhead::letterhead"></div>
+    <p>Dear [[${name}}]]: </p>
+    <p>We are so glad you have taken this critical step towards making [[${locality}}]] safer.</p>
+    <p>By having your visitors check-in by scanning the QR code(s) we have provided you,
+    you are contributing to a network for check-ins that will help trace, reduce, and stop the spread of COVID-19.</p>
+    <p>
+        This packet contains the following materials:
+        <ul>
+            <li>A QR code PDF document to print out for your business</li>
+            <li>Simple instructions on how to use Zerobase</li>
+            <li>Frequently asked questions and answers</li>
+        </ul>
+    </p>
+    <p>
+        We created Zerobase technology to be as business-friendly and easy to use as possible,
+        and we are here to help you in any way we can. If you have any trouble and can't find
+        the answer to your question in the Zerobase FAQs, please contact us at support@zerobase.io.
+    </p>
+    <p>
+        Stay safe and stay healthy. Let's get through this together.
+    </p>
+    <p>Sincerely, </p>
+    <p>The Zerobase Team</p>
 
+    <div class="footer">
+        <p>Zerobase Foundation | www.zerobase.io </p>
+    </div>
 </body>
 </html>
