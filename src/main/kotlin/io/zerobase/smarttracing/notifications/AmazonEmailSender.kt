@@ -73,9 +73,9 @@ class AmazonEmailSender(
         msg.addBodyPart(mainBody)
 
         attachments.forEach {
-            val bds = ByteArrayDataSource(it.data, it.name)
+            val bds = ByteArrayDataSource(it.data, it.contentType.toString())
             val att = MimeBodyPart()
-            att.dataHandler = DataHandler(bds, it.contentType.toString())
+            att.dataHandler = DataHandler(bds)
             att.fileName = it.name
             msg.addBodyPart(att)
         }
