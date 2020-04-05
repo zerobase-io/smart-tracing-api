@@ -30,7 +30,7 @@ class NotificationManager(private val emailSender: EmailSender,
     fun handleNotificationRequest(event: SimpleOrganizationCreated) {
         log.debug("got notification that new simple business was created. sending onboarding notification. organization={}",
             event.organization)
-        val notification = notificationFactory.simpleBusinessOnboarding(event.organization, event.defaltQrCode)
+        val notification = notificationFactory.simpleBusinessOnboarding(event.organization, event.defaultQrCode)
         send(event.organization.contactInfo, notification)
     }
 }

@@ -87,7 +87,8 @@ class SiteOnboarding internal constructor(
         )
     }
 }
-@SuppressFBWarnings("EI_EXPOSE_REP2") // ask david about this value annotatio
+@SuppressFBWarnings("EI_EXPOSE_REP2")
+// used this to essentially create the body of email; but we will get rid of this since want to put things in notifications
 class SiteOnboardingWelcome internal constructor(
     private val organization: Organization,
     templateEngine: TemplateEngine,

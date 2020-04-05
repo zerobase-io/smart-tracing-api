@@ -67,10 +67,12 @@ class SimpleBusinessOnboarding(
     override fun render(medium: NotificationMedium): String {
         when (medium) {
             NotificationMedium.EMAIL -> {
-                return templateEngine.process("simple-business-onboarding/main.html", Context(Locale.US, mapOf(
+                return templateEngine.process("notifications/simple-business-onboarding/main.html", Context(Locale.US, mapOf(
                     "name" to organization.name,
                     "locality" to organization.address.locality,
-                    "administrativeArea" to organization.address.administrativeArea
+                    "administrativeArea" to organization.address.administrativeArea,
+                    "stylesheet" to Resources.getResource("notifications/simple-business-onboarding/css/style.css"),
+                    "letterheadlogo" to Resources.getResource("pdfs/common/img/logo.png")
                 )))
             }
         }
