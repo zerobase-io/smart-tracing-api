@@ -72,8 +72,7 @@ class SiteOnboarding internal constructor(
         log.debug("creating qr code file")
         val tempPath = Files.createTempFile("zb-", ".png")
         Files.write(tempPath, qrCode)
-        log.debug("temp path: $tempPath")
-        log.debug("qrCode byte array: $qrCode")
+        log.debug("qr written to temp path: $tempPath")
 
         Context(Locale.US, mapOf(
             "qrCode" to tempPath.toUri().toString(),
