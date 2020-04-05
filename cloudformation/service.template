@@ -145,6 +145,8 @@ Resources:
           Value: !Ref AllowedOrigins
         - Name: BASE_LINK
           Value: !Sub 'https://www.${DomainSuffix}/s/'
+        - Name: JAVA_OPTS
+          Value: -Xms=256m -Xmx256m
         Image: !Sub 'zerobaseio/smart-tracing-api:${AppVersion}'
         Memory: !Ref Memory
         LogConfiguration:
