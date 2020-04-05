@@ -22,8 +22,9 @@ class NotificationManager(private val emailSender: EmailSender,
     @Subscribe
     @AllowConcurrentEvents
     fun handleNotificationRequest(event: SimpleOrganizationCreated) {
-        val notification = notificationFactory.simpleBusinessOnboarding(event.orgnization, event.defaltQrCode)
-        send(event.orgnization.contactInfo, notification)
+        log.debug("got notification that new simple business was created. sending onboarding notification. organization={}",
+            event.organization)
+        val notification = notificationFactory.simpleBusinessOnboarding(event.organization, event.defaltQrCode)
+        send(event.organization.contactInfo, notification)
     }
-
 }
