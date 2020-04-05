@@ -126,13 +126,7 @@ class Main : Application<Config>() {
             baseLink = UriBuilder.fromUri(config.baseQrCodeLink),
             logo = Resources.getResource("qr/qr-code-logo.png")
         )
-        val notificationFactory = NotificationFactory(TemplateEngine().apply {
-            templateResolvers = setOf(ClassLoaderTemplateResolver().apply {
-                prefix = "/notifications/"
-                characterEncoding = StandardCharsets.UTF_8.displayName()
-            })
-        }, documentFactory, qrCodeGenerator)
-
+        val notificationFactory = NotificationFactory(templateEngine, documentFactory, qrCodeGenerator)
         val notificationManager = NotificationManager(emailSender, notificationFactory)
 
         eventBus.register(notificationManager)
