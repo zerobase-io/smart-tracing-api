@@ -37,9 +37,16 @@ fun main() {
     })
 
     val fakeOrg = Organization(id = OrganizationId("fake"), name = "Fake Org",
-        address = Address("", "", "", "New Hampshire", "", ""),
+        address = Address("", "", "Manchester", "New Hampshire", "", ""),
         contactName = "", contactInfo = ContactInfo("", ""))
-    val bytes: ByteArray = qrCodeGenerator.generate(qrCodeId.value).let { documentFactory.siteOnboarding(fakeOrg, it) }.render()
+
+    // welcome letter
+    val bytes: ByteArray = documentFactory.siteOnboardingWelcome(fakeOrg).render()
+    // create pdf
+    Files.write(Paths.get("pdfs", "zerobase-welcome.pdf"), bytes)
+
+    // qr pdf
+    // val bytes: ByteArray = qrCodeGenerator.generate(qrCodeId.value).let { documentFactory.siteOnboarding(fakeOrg, it) }.render()
     // And finally, we create the PDF:
-    Files.write(Paths.get("pdfs", "zerobase-qr.pdf"), bytes)
+    // Files.write(Paths.get("pdfs", "zerobase-qr.pdf"), bytes)
 }

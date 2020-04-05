@@ -3,7 +3,7 @@
 
     <head>
         <meta charset="UTF-8">
-        <link rel="stylesheet" type="text/css" media="all" href="pdfs/common/css/style.css"/>
+        <link rel="stylesheet" type="text/css" media="all" th:href="${stylesheet}"/>
     </head>
 
     <body>
@@ -15,17 +15,17 @@
             <hr>
             <h2>Please help our community by anonymously checking in.* It takes just a few seconds. <strong>You could save a life.</strong></h2>
         </div>
-        <h2><strong>Scan QR or visit <u>www.zerobase.io</u></strong></h2>
+        <p style="font-size:45px"><strong>Scan QR or visit <u>www.zerobase.io</u></strong></p>
 
         <br/>
 
-        <img class="qr-code" th:src="${qrCode}" alt="logo">
+        <img class="qr-code" th:src="${qrCode}" alt="qr">
         <h2> Together with <span th:text="${organizationName}"/>, you are doing your part to help keep <span th:text="${administrativeArea}"/> safe.</h2>
 
         <div class="next-page"> </div>
 
         <div class='footer' th:include="pdfs/common/letterhead::letterhead"></div>
-
+        <p>*we put your privacy first. For more information, visit <u>www.zerobase.io/privacy</u></p>
     </body>
 
 </html>

@@ -1,0 +1,179 @@
+body {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 12px;
+    text-align: center;
+    outline: 100px solid #1C6EA4;
+    outline-offset: -18px;
+    color: #1b2935;
+}
+h2 {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 28px;
+    font-style: normal;
+    font-variant: normal;
+    font-weight: 200;
+    line-height: 26px;
+}
+
+h3 {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 18px;
+    font-style: normal;
+    font-variant: normal;
+    font-weight: 700;
+    line-height: 23px;
+}
+p {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 23px;
+    font-style: normal;
+    font-variant: normal;
+    font-weight: 400;
+    line-height: 23px;
+    margin-bottom: 0px;
+}
+ul, ol {
+    font-size: 20px;
+}
+
+blockquote {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 21px;
+    font-style: normal;
+    font-variant: normal;
+    font-weight: 400;
+    line-height: 30px;
+}
+
+pre {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 13px;
+    font-style: normal;
+    font-variant: normal;
+    font-weight: 400;
+    line-height: 18.5714px;
+}
+ol {
+    text-align: left;
+}
+@page {
+
+    @bottom-left {
+        content: element(footer);
+        vertical-align: top;
+        padding-top: 0px;
+    }
+
+    @top-right {
+        content: element(header);
+        vertical-align: bottom;
+        padding-bottom: 10px;
+    }
+
+    margin-top: 5cm;
+    margin-left: 0.5cm;
+    margin-right: 0.5cm;
+    margin-bottom: 5cm;
+
+    size: A4 portrait;
+}
+
+div.header {
+    position: running(header);
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 38px;
+    font-style: normal;
+    font-variant: normal;
+    font-weight: 700;
+    line-height: 45px;
+}
+
+div.center {
+    margin-left: auto;
+    margin-right: auto;
+    display:table;
+}
+
+div.footer {
+    display: block;
+    margin-top: 0.5cm;
+    position: running(footer);
+
+}
+
+#pagenumber:before {
+    content: counter(page);
+}
+
+#pagecount:before {
+    content: counter(pages);
+}
+
+.logo-container {
+    text-align: right;
+}
+
+.page-count {
+    text-align: right;
+}
+
+.logo {
+    width: 300px;
+}
+
+.footer {
+    text-align: center;
+}
+
+.barcode {
+    font-family: "Bar-Code 39";
+    font-size: 26px;
+}
+
+.right {
+    text-align: right;
+}
+.center {
+    text-align: center;
+}
+
+.left {
+    text-align: left;
+}
+
+.bottom {
+    vertical-align: bottom;
+}
+
+.address-block {
+    height: 100px;
+}
+
+table {
+    width: 100%;
+}
+
+hr {
+    background-color: #000000;
+    border: dashed #000000 0.5px;
+    height: 1px;
+}
+
+.page-break {
+    page-break-after: always;
+}
+
+.next-page {
+    page-break-before: always;
+}
+
+.qr-code {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 70%;
+}
+
+.tag-line {
+  font-size: 23px;
+}
