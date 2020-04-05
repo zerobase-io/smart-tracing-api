@@ -6,5 +6,9 @@
     {
         "ParameterKey": "InfrastructureStackName",
         "ParameterValue": "staging-infrastructure"
+    },
+    {
+        "ParameterKey": "AllowedOrigins",
+        "ParameterValue": "*"
     }
 ]
