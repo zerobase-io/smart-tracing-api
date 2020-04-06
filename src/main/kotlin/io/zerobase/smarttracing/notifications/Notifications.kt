@@ -61,6 +61,11 @@ class SimpleBusinessOnboarding(
                 data = qrCodeGenerator.generate(qrCodeId.value).let { documentFactory.siteOnboarding(organization, it) }.render(),
                 contentType = MediaType.PDF
             ),
+            Attachment(
+                name = "logo.png",
+                data = Resources.getResource("logo.png").openStream(),
+                contentType = MediaType.PNG
+            ),
             // TODO: Load the onboarding PDF from a remote source like s3
             Attachment(name = "FAQ & Instructions.pdf", data = ByteArrayInputStream(ByteArray(0)), contentType = MediaType.PDF)
         )

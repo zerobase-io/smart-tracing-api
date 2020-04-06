@@ -3,10 +3,17 @@
 
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" type="text/css" media="all" th:href="@{css/style.css}"/>
+    <link rel="stylesheet" type="text/css" media="all" th:include="@{css/style.css}"/>
 </head>
 <body>
-    <div class='header' th:include="pdfs/common/letterhead::letterhead"></div>
+    <div class='header'>
+        <div>
+            <img class="logo" th:src="cid:logo" alt="logo">
+        </div>
+        <div class="tag-line">
+            <strong>Anonymous. Effective. Accessible to all.</strong>
+        </div>
+    </div>
     <br>
     <div align="left">
         <p>Dear [[${organizationName}]]: </p>

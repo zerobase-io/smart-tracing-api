@@ -37,7 +37,7 @@ Parameters:
     Default: 7
   Memory:
     Type: Number
-    Default: 384
+    Default: 512
   Cpu:
     Type: Number
     Default: 10
@@ -185,4 +185,8 @@ Resources:
             - neptune-db:*
             Effect: Allow
             Resource: !Sub '${DatabaseArn}/*'
+          - Action:
+            - ses:Send*
+            Effect: Allow
+            Resource: '*'
 ...

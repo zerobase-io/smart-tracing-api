@@ -41,7 +41,6 @@ Resources:
       TimeoutInMinutes: 30
       Parameters:
         AppSecurityGroupId: { "Fn::ImportValue": !Sub '${InfrastructureStackName}-EcsClusterSecurityGroupId' }
-        BastionSecurityGroupId: { "Fn::ImportValue": !Sub '${InfrastructureStackName}-BastionSecurityGroupId' }
         Environment: !Ref Environment
         InstanceType: !Ref DatabaseMasterInstanceSize
         ReplicaInstanceType: !Ref DatabaseReplicaInstanceSize

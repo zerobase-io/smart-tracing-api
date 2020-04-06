@@ -1,5 +1,7 @@
 package io.zerobase.smarttracing.notifications
 
+import com.google.common.net.HttpHeaders
+import com.google.common.net.MediaType
 import io.zerobase.smarttracing.utils.LoggerDelegate
 import software.amazon.awssdk.core.SdkBytes
 import software.amazon.awssdk.services.ses.SesClient
@@ -29,7 +31,8 @@ class AmazonEmailSender(
     private val fromAddress: String
 ) : EmailSender {
     companion object {
-        val log by LoggerDelegate()
+        private val log by LoggerDelegate()
+        private val IMAGE_SUFFIX = Regex("\\.png")
     }
 
     override fun sendEmail(subject: String,
@@ -77,6 +80,9 @@ class AmazonEmailSender(
             val att = MimeBodyPart()
             att.dataHandler = DataHandler(bds)
             att.fileName = it.name
+            if (it.contentType == MediaType.PNG) {
+                att.setHeader("Content-ID", "<${IMAGE_SUFFIX.replace(it.name, "")}>")
+            }
             msg.addBodyPart(att)
         }
 

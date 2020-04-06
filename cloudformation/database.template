@@ -4,8 +4,6 @@ Description: Zerobase API Database Stack
 Parameters:
   AppSecurityGroupId:
     Type: AWS::EC2::SecurityGroup::Id
-  BastionSecurityGroupId:
-    Type: AWS::EC2::SecurityGroup::Id
   ClusterPort:
     Type: Number
     Default: 8182
@@ -215,11 +213,6 @@ Resources:
         IpProtocol: tcp
         SourceSecurityGroupId: !Ref AppSecurityGroupId
         Description: App access
-      - FromPort: !Ref ClusterPort
-        ToPort: !Ref ClusterPort
-        IpProtocol: tcp
-        SourceSecurityGroupId: !Ref BastionSecurityGroupId
-        Description: Bastoin access
       Tags:
       - Key: Name
         Value: smart-tracing-api-graph-db
