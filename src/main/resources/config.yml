@@ -38,7 +38,7 @@ aws:
 
 notifications:
   email:
-    fromAddress: ${NOTIFICATION_FROM_EMAIL_ADDRESS:-noreply@zerobase.io}
+    fromAddress: ${EMAIL_NOTIFICATION_FROM_ADDRESS:-noreply@zerobase.io}
 
 siteTypeCategories:
   BUSINESS:

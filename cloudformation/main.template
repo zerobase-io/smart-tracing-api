@@ -32,6 +32,9 @@ Parameters:
     Default: 0
   AllowedOrigins:
     Type: String
+  EmailNotificationsFromAddress:
+    Type: String
+    Default: Zerobase <noreply@zerobase.io>
 
 Resources:
   DatabaseStack:
@@ -70,4 +73,5 @@ Resources:
         DatabasePort: !GetAtt DatabaseStack.Outputs.ClusterPort
         DomainSuffix:  {"Fn::ImportValue": !Sub '${InfrastructureStackName}-DomainSuffix'}
         AllowedOrigins: !Ref AllowedOrigins
+        EmailNotificationsFromAddress: !Ref EmailNotificationsFromAddress
 ...

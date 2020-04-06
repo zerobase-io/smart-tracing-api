@@ -66,7 +66,6 @@ class SimpleBusinessOnboarding(
                 data = Resources.getResource("logo.png").openStream(),
                 contentType = MediaType.PNG
             ),
-            // TODO: Load the onboarding PDF from a remote source like s3
             Attachment(
                 name = "FAQ & Instructions.pdf",
                 data = Resources.getResource("pdfs/business-faq.pdf").openStream(),

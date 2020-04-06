@@ -56,6 +56,8 @@ Parameters:
   AllowedOrigins:
     Type: String
     Description: Value for CORS filter
+  EmailNotificationsFromAddress:
+    Type: String
 
 Resources:
   DnsRecord:
@@ -147,6 +149,8 @@ Resources:
           Value: !Sub 'https://www.${DomainSuffix}/s'
         - Name: JAVA_OPTS
           Value: -Xms256m -Xmx256m
+        - Name: EMAIL_NOTIFICATION_FROM_ADDRESS
+          Value: !Ref EmailNotificationsFromAddress
         Image: !Sub 'zerobaseio/smart-tracing-api:${AppVersion}'
         Memory: !Ref Memory
         LogConfiguration:
