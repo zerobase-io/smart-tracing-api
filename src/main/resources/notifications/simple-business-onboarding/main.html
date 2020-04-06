@@ -3,12 +3,111 @@
 
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" type="text/css" media="all" th:include="@{css/style.css}"/>
+    <style>
+        body {
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-size: 12px;
+            text-align: center;
+            outline: 100px solid #1C6EA4;
+            outline-offset: -18px;
+            color: #1b2935;
+        }
+        h2 {
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-size: 28px;
+            font-style: normal;
+            font-variant: normal;
+            font-weight: 200;
+            line-height: 26px;
+        }
+
+        h3 {
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-size: 18px;
+            font-style: normal;
+            font-variant: normal;
+            font-weight: 700;
+            line-height: 23px;
+        }
+        p {
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-size: 23px;
+            font-style: normal;
+            font-variant: normal;
+            font-weight: 400;
+            line-height: 23px;
+            margin-bottom: 0px;
+        }
+        ul, ol {
+            font-size: 20px;
+        }
+
+        blockquote {
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-size: 21px;
+            font-style: normal;
+            font-variant: normal;
+            font-weight: 400;
+            line-height: 30px;
+        }
+
+        pre {
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-size: 13px;
+            font-style: normal;
+            font-variant: normal;
+            font-weight: 400;
+            line-height: 18.5714px;
+        }
+        ol {
+            text-align: left;
+        }
+
+        div.header {
+            position: running(header);
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-size: 25px;
+            font-style: normal;
+            font-variant: normal;
+            font-weight: 700;
+            line-height: 45px;
+            margin-top: 2cm;
+        }
+
+        div.footer {
+            display: block;
+            margin-top: 0.5cm;
+            position: running(footer);
+
+        }
+
+        .logo {
+            width: 300px;
+        }
+
+        .footer {
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+        }
+
+        hr {
+            background-color: #000000;
+            border: dashed #000000 0.5px;
+            height: 1px;
+        }
+
+        .tag-line {
+            font-size: 23px;
+        }
+    </style>
 </head>
 <body>
     <div class='header'>
         <div>
-            <img class="logo" th:src="cid:logo" alt="logo">
+            <img class="logo" th:src="'cid:logo.png'" alt="logo">
         </div>
         <div class="tag-line">
             <strong>Anonymous. Effective. Accessible to all.</strong>

@@ -1,13 +1,9 @@
 package io.zerobase.smarttracing.notifications
 
-import com.google.common.net.HttpHeaders
 import com.google.common.net.MediaType
 import io.zerobase.smarttracing.utils.LoggerDelegate
 import software.amazon.awssdk.core.SdkBytes
 import software.amazon.awssdk.services.ses.SesClient
-import software.amazon.awssdk.services.ses.model.RawMessage
-import software.amazon.awssdk.services.ses.model.SendRawEmailRequest
-import software.amazon.awssdk.services.ses.model.SendRawEmailRequest.Builder as RawEmailRequestBuilder
 import java.io.ByteArrayOutputStream
 import java.nio.charset.StandardCharsets
 import javax.activation.DataHandler
@@ -18,6 +14,7 @@ import javax.mail.internet.MimeBodyPart
 import javax.mail.internet.MimeMessage
 import javax.mail.internet.MimeMultipart
 import javax.mail.util.ByteArrayDataSource
+import software.amazon.awssdk.services.ses.model.SendRawEmailRequest.Builder as RawEmailRequestBuilder
 
 fun RawEmailRequestBuilder.bytes(bytes: ByteArray): RawEmailRequestBuilder {
     return rawMessage {
@@ -32,7 +29,6 @@ class AmazonEmailSender(
 ) : EmailSender {
     companion object {
         private val log by LoggerDelegate()
-        private val IMAGE_SUFFIX = Regex("\\.png")
     }
 
     override fun sendEmail(subject: String,
@@ -80,8 +76,8 @@ class AmazonEmailSender(
             val att = MimeBodyPart()
             att.dataHandler = DataHandler(bds)
             att.fileName = it.name
-            if (it.contentType == MediaType.PNG) {
-                att.setHeader("Content-ID", "<${IMAGE_SUFFIX.replace(it.name, "")}>")
+            if (it.contentType != MediaType.PDF) {
+                att.setHeader("Content-ID", "<${it.name}>")
             }
             msg.addBodyPart(att)
         }
