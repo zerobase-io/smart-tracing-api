@@ -25,6 +25,6 @@
     },
     {
         "ParameterKey": "AllowedOrigins",
-        "ParameterValue": "*.zerobase.io"
+        "ParameterValue": "'*'"
     }
 ]
