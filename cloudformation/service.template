@@ -37,7 +37,7 @@ Parameters:
     Default: 7
   Memory:
     Type: Number
-    Default: 384
+    Default: 512
   Cpu:
     Type: Number
     Default: 10
@@ -53,6 +53,9 @@ Parameters:
     MinValue: 0
   DomainSuffix:
     Type: String
+  AllowedOrigins:
+    Type: String
+    Description: Value for CORS filter
 
 Resources:
   DnsRecord:
@@ -139,7 +142,11 @@ Resources:
         - Name: SERVICE_REGION
           Value: !Ref AWS::Region
         - Name: CORS_ALLOWED_ORIGINS
-          Value: !Sub '*.${DomainSuffix}'
+          Value: !Ref AllowedOrigins
+        - Name: BASE_LINK
+          Value: !Sub 'https://www.${DomainSuffix}/s/'
+        - Name: JAVA_OPTS
+          Value: -Xms256m -Xmx256m
         Image: !Sub 'zerobaseio/smart-tracing-api:${AppVersion}'
         Memory: !Ref Memory
         LogConfiguration:
@@ -178,4 +185,8 @@ Resources:
             - neptune-db:*
             Effect: Allow
             Resource: !Sub '${DatabaseArn}/*'
+          - Action:
+            - ses:Send*
+            Effect: Allow
+            Resource: '*'
 ...

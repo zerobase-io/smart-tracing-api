@@ -40,27 +40,8 @@ fun main() {
         address = Address("", "", "Manchester", "New Hampshire", "", ""),
         contactName = "", contactInfo = ContactInfo("", ""))
 
-    // welcome letter -- used existing pdf render to create welcome letter
-//    val bytes: ByteArray = documentFactory.siteOnboardingWelcome(fakeOrg).render()
-//    // create pdf
-//    Files.write(Paths.get("pdfs", "zerobase-welcome.pdf"), bytes)
-
     // qr pdf
-     val bytes: ByteArray = qrCodeGenerator.generate(qrCodeId.value).let { documentFactory.siteOnboarding(fakeOrg, it) }.render()
+     val result = qrCodeGenerator.generate(qrCodeId.value).let { documentFactory.siteOnboarding(fakeOrg, it) }.render()
     //     And finally, we create the PDF:
-     Files.write(Paths.get("pdfs", "zerobase-qr.pdf"), bytes)
-
-    // testing out notifications but couldn't figure out configuration
-//    val fakeOrg2 = Organization(id = OrganizationId("fake"), name = "Fake Org",
-//        address = Address("", "", "Manchester", "New Hampshire", "", ""),
-//        contactName = "", contactInfo = ContactInfo("yongldich@gmail.com", ""))
-
-//    val sesClientBuilder = SesClient.builder().region(Region.US_EAST_1)
-//    val session = Session.getDefaultInstance(Properties())
-//    val emailSender = AmazonEmailSender(sesClientBuilder.build(), session, "yongldich@gmail.com")
-//    val notificationFactory = NotificationFactory(templateEngine, documentFactory, qrCodeGenerator)
-//
-//    val notificationManager = NotificationManager(emailSender, notificationFactory)
-//    notificationManager.handleNotificationRequest(SimpleOrganizationCreated(fakeOrg2,ScannableId("qr1")))
-
+    Files.copy(result, Paths.get("pdfs", "zerobase-qr.pdf"))
 }

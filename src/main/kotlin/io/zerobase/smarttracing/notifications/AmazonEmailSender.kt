@@ -1,11 +1,18 @@
 package io.zerobase.smarttracing.notifications
 
+<<<<<<< HEAD
 import io.zerobase.smarttracing.utils.LoggerDelegate
 import software.amazon.awssdk.core.SdkBytes
 import software.amazon.awssdk.services.ses.SesClient
 import software.amazon.awssdk.services.ses.model.RawMessage
 import software.amazon.awssdk.services.ses.model.SendRawEmailRequest
 import software.amazon.awssdk.services.ses.model.SendRawEmailRequest.Builder as RawEmailRequestBuilder
+=======
+import com.google.common.net.MediaType
+import io.zerobase.smarttracing.utils.LoggerDelegate
+import software.amazon.awssdk.core.SdkBytes
+import software.amazon.awssdk.services.ses.SesClient
+>>>>>>> origin/master
 import java.io.ByteArrayOutputStream
 import java.nio.charset.StandardCharsets
 import javax.activation.DataHandler
@@ -16,6 +23,13 @@ import javax.mail.internet.MimeBodyPart
 import javax.mail.internet.MimeMessage
 import javax.mail.internet.MimeMultipart
 import javax.mail.util.ByteArrayDataSource
+import software.amazon.awssdk.services.ses.model.SendRawEmailRequest.Builder as RawEmailRequestBuilder
+
+fun RawEmailRequestBuilder.bytes(bytes: ByteArray): RawEmailRequestBuilder {
+    return rawMessage {
+        it.data(SdkBytes.fromByteArray(bytes))
+    }
+}
 
 fun RawEmailRequestBuilder.bytes(bytes: ByteArray): RawEmailRequestBuilder {
     return rawMessage {
@@ -29,7 +43,11 @@ class AmazonEmailSender(
     private val fromAddress: String
 ) : EmailSender {
     companion object {
+<<<<<<< HEAD
         val log by LoggerDelegate()
+=======
+        private val log by LoggerDelegate()
+>>>>>>> origin/master
     }
 
     override fun sendEmail(subject: String,
@@ -77,6 +95,12 @@ class AmazonEmailSender(
             val att = MimeBodyPart()
             att.dataHandler = DataHandler(bds)
             att.fileName = it.name
+<<<<<<< HEAD
+=======
+            if (it.contentType != MediaType.PDF) {
+                att.setHeader("Content-ID", "<${it.name}>")
+            }
+>>>>>>> origin/master
             msg.addBodyPart(att)
         }
 

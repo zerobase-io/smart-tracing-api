@@ -8,8 +8,9 @@ import org.thymeleaf.TemplateEngine
 import org.thymeleaf.context.Context
 import org.w3c.tidy.Tidy
 import org.xhtmlrenderer.pdf.ITextRenderer
-import java.io.*
-import java.net.URI
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.io.InputStream
 import java.net.URL
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
@@ -18,7 +19,6 @@ import kotlin.collections.HashMap
 
 class DocumentFactory(private val templateEngine: TemplateEngine, private val xhtmlConverter: Tidy) {
     fun siteOnboarding(organization: Organization, qrCode: ByteArray): SiteOnboarding = SiteOnboarding(organization, qrCode, templateEngine, xhtmlConverter)
-    fun siteOnboardingWelcome(organization: Organization): SiteOnboardingWelcome = SiteOnboardingWelcome(organization, templateEngine, xhtmlConverter)
 }
 
 sealed class Document(private val templateEngine: TemplateEngine, private val xhtmlConverter: Tidy) {
@@ -32,8 +32,7 @@ sealed class Document(private val templateEngine: TemplateEngine, private val xh
 
     protected open val templateLocation: URL
         get() = Resources.getResource("pdfs/$name/")
-
-    fun render(): ByteArray {
+    fun render(): InputStream {
         log.debug("rendering document: {}", this::class)
         val generalContextMap = mutableMapOf<String, Any>()
         context.setVariables(generalContextMap)
@@ -46,11 +45,11 @@ sealed class Document(private val templateEngine: TemplateEngine, private val xh
             setDocumentFromString(xhtml, templateLocation.toString())
         }
         renderer.layout()
-        val byteOutputStream = ByteArrayOutputStream()
-        byteOutputStream.use(renderer::createPDF)
-        log.debug("pdf created successfully")
 
-        return byteOutputStream.toByteArray()
+        val tempFile = Files.createTempFile("zb", ".pdf")
+        renderer.createPDF(Files.newOutputStream(tempFile))
+        log.debug("pdf created successfully")
+        return Files.newInputStream(tempFile)
     }
 
     private fun convertToXhtml(html: String): String {
@@ -73,27 +72,10 @@ class SiteOnboarding internal constructor(
         log.debug("creating qr code file")
         val tempPath = Files.createTempFile("zb-", ".png")
         Files.write(tempPath, qrCode)
-        log.debug("temp path: $tempPath")
-        log.debug("qrCode byte array: $qrCode")
+        log.debug("qr written to temp path: $tempPath")
 
         Context(Locale.US, mapOf(
             "qrCode" to tempPath.toUri().toString(),
-            "organizationName" to organization.name,
-            "administrativeArea" to organization.address.administrativeArea)
-        )
-    }
-}
-@SuppressFBWarnings("EI_EXPOSE_REP2")
-// used this to essentially create the body of email; but we will get rid of this since want to put things in notifications
-class SiteOnboardingWelcome internal constructor(
-    private val organization: Organization,
-    templateEngine: TemplateEngine,
-    xhtmlConverter: Tidy
-) : Document(templateEngine, xhtmlConverter) {
-    override val name: String = "welcome-letter"
-    override val context: Context by lazy {
-        log.debug("creating welcome letter")
-        Context(Locale.US, mapOf(
             "organizationName" to organization.name,
             "administrativeArea" to organization.address.administrativeArea)
         )

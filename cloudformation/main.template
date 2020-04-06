@@ -30,6 +30,8 @@ Parameters:
     MinValue: 0
     MaxValue: 2
     Default: 0
+  AllowedOrigins:
+    Type: String
 
 Resources:
   DatabaseStack:
@@ -39,7 +41,6 @@ Resources:
       TimeoutInMinutes: 30
       Parameters:
         AppSecurityGroupId: { "Fn::ImportValue": !Sub '${InfrastructureStackName}-EcsClusterSecurityGroupId' }
-        BastionSecurityGroupId: { "Fn::ImportValue": !Sub '${InfrastructureStackName}-BastionSecurityGroupId' }
         Environment: !Ref Environment
         InstanceType: !Ref DatabaseMasterInstanceSize
         ReplicaInstanceType: !Ref DatabaseReplicaInstanceSize
@@ -68,4 +69,5 @@ Resources:
         ReadEndpoint: !GetAtt DatabaseStack.Outputs.ReadEndpoint
         DatabasePort: !GetAtt DatabaseStack.Outputs.ClusterPort
         DomainSuffix:  {"Fn::ImportValue": !Sub '${InfrastructureStackName}-DomainSuffix'}
+        AllowedOrigins: !Ref AllowedOrigins
 ...

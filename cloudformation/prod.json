@@ -22,5 +22,9 @@
     {
         "ParameterKey": "DatabaseReplicaCount",
         "ParameterValue": "1"
+    },
+    {
+        "ParameterKey": "AllowedOrigins",
+        "ParameterValue": "*.zerobase.io"
     }
 ]

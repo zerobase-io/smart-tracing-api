@@ -8,11 +8,20 @@ import io.zerobase.smarttracing.models.Organization
 import io.zerobase.smarttracing.models.ScannableId
 import io.zerobase.smarttracing.pdf.DocumentFactory
 import io.zerobase.smarttracing.qr.QRCodeGenerator
+<<<<<<< HEAD
+=======
+import org.apache.http.impl.io.EmptyInputStream
+>>>>>>> origin/master
 import org.apache.http.util.Args
 import org.thymeleaf.TemplateEngine
 import org.thymeleaf.context.Context
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver
 import org.w3c.tidy.Tidy
+<<<<<<< HEAD
+=======
+import java.io.ByteArrayInputStream
+import java.io.InputStream
+>>>>>>> origin/master
 import java.lang.Exception
 import java.net.URI
 import java.nio.charset.StandardCharsets
@@ -32,11 +41,18 @@ class NotificationFactory(
 ) {
     fun simpleBusinessOnboarding(organization: Organization, defaultQrCode: ScannableId)
         = SimpleBusinessOnboarding(templateEngine, documentFactory, qrCodeGenerator, organization, defaultQrCode)
+<<<<<<< HEAD
 
 }
 
 @SuppressFBWarnings("EI_EXPOSE_REP", "EI_EXPOSE_REP2")
 class Attachment(val data: ByteArray, val name: String, val contentType: MediaType)
+=======
+}
+
+@SuppressFBWarnings("EI_EXPOSE_REP", "EI_EXPOSE_REP2")
+class Attachment(val data: InputStream, val name: String, val contentType: MediaType)
+>>>>>>> origin/master
 
 sealed class Notification {
     abstract val subject: String
@@ -59,8 +75,18 @@ class SimpleBusinessOnboarding(
                 data = qrCodeGenerator.generate(qrCodeId.value).let { documentFactory.siteOnboarding(organization, it) }.render(),
                 contentType = MediaType.PDF
             ),
+<<<<<<< HEAD
             // TODO: Load the onboarding PDF from a remote source like s3
             Attachment(name = "FAQ & Instructions.pdf", data = ByteArray(0), contentType = MediaType.PDF)
+=======
+            Attachment(
+                name = "logo.png",
+                data = Resources.getResource("logo.png").openStream(),
+                contentType = MediaType.PNG
+            ),
+            // TODO: Load the onboarding PDF from a remote source like s3
+            Attachment(name = "FAQ & Instructions.pdf", data = ByteArrayInputStream(ByteArray(0)), contentType = MediaType.PDF)
+>>>>>>> origin/master
         )
     }
 
@@ -68,7 +94,11 @@ class SimpleBusinessOnboarding(
         when (medium) {
             NotificationMedium.EMAIL -> {
                 return templateEngine.process("notifications/simple-business-onboarding/main.html", Context(Locale.US, mapOf(
+<<<<<<< HEAD
                     "name" to organization.name,
+=======
+                    "organizationName" to organization.name,
+>>>>>>> origin/master
                     "locality" to organization.address.locality,
                     "administrativeArea" to organization.address.administrativeArea
                 )))
