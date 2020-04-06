@@ -5,7 +5,7 @@
     },
     {
         "ParameterKey": "InfrastructureStackName",
-        "ParameterValue": "staging-infrastructure"
+        "ParameterValue": "prod-infrastructure"
     },
     {
         "ParameterKey": "TaskCount",
