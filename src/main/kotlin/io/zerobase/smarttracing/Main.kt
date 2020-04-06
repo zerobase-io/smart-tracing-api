@@ -121,7 +121,7 @@ class Main : Application<Config>() {
         })
 
         val qrCodeGenerator = QRCodeGenerator(
-            baseLink = UriBuilder.fromUri(config.baseQrCodeLink),
+            baseLink = UriBuilder.fromUri(config.baseQrCodeLink).path("{code}"),
             logo = Resources.getResource("qr/qr-code-logo.png")
         )
         val notificationFactory = NotificationFactory(templateEngine, documentFactory, qrCodeGenerator)
