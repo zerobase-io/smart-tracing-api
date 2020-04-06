@@ -86,8 +86,8 @@ class GraphDao(
                     .to(graph.V(scanned.value))
                     .property(T.id, scanId)
                     .property("timestamp", System.currentTimeMillis())
-                    .property("latitude", loc?.latitude)
-                    .property("longitude", loc?.longitude)
+                    .property("latitude",  loc?.latitude ?: 0)
+                    .property("longitude", loc?.longitude ?: 0)
                     .execute()
             return ScanId(scanId)
         } catch (ex: Exception) {
