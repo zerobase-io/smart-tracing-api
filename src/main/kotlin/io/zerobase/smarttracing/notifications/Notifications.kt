@@ -8,11 +8,14 @@ import io.zerobase.smarttracing.models.Organization
 import io.zerobase.smarttracing.models.ScannableId
 import io.zerobase.smarttracing.pdf.DocumentFactory
 import io.zerobase.smarttracing.qr.QRCodeGenerator
+import org.apache.http.impl.io.EmptyInputStream
 import org.apache.http.util.Args
 import org.thymeleaf.TemplateEngine
 import org.thymeleaf.context.Context
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver
 import org.w3c.tidy.Tidy
+import java.io.ByteArrayInputStream
+import java.io.InputStream
 import java.lang.Exception
 import java.net.URI
 import java.nio.charset.StandardCharsets
@@ -35,7 +38,7 @@ class NotificationFactory(
 }
 
 @SuppressFBWarnings("EI_EXPOSE_REP", "EI_EXPOSE_REP2")
-class Attachment(val data: ByteArray, val name: String, val contentType: MediaType)
+class Attachment(val data: InputStream, val name: String, val contentType: MediaType)
 
 sealed class Notification {
     abstract val subject: String
@@ -59,7 +62,7 @@ class SimpleBusinessOnboarding(
                 contentType = MediaType.PDF
             ),
             // TODO: Load the onboarding PDF from a remote source like s3
-            Attachment(name = "FAQ & Instructions.pdf", data = ByteArray(0), contentType = MediaType.PDF)
+            Attachment(name = "FAQ & Instructions.pdf", data = ByteArrayInputStream(ByteArray(0)), contentType = MediaType.PDF)
         )
     }
 

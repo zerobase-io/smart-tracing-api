@@ -8,13 +8,13 @@ import org.thymeleaf.TemplateEngine
 import org.thymeleaf.context.Context
 import org.w3c.tidy.Tidy
 import org.xhtmlrenderer.pdf.ITextRenderer
-import java.io.*
-import java.net.URI
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.io.InputStream
 import java.net.URL
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.util.*
-import kotlin.collections.HashMap
 
 class DocumentFactory(private val templateEngine: TemplateEngine, private val xhtmlConverter: Tidy) {
     fun siteOnboarding(organization: Organization, qrCode: ByteArray): SiteOnboarding = SiteOnboarding(organization, qrCode, templateEngine, xhtmlConverter)
@@ -32,7 +32,7 @@ sealed class Document(private val templateEngine: TemplateEngine, private val xh
     protected open val templateLocation: URL
         get() = Resources.getResource("pdfs/$name/")
 
-    fun render(): ByteArray {
+    fun render(): InputStream {
         log.debug("rendering document: {}", this::class)
         val generalContextMap = mutableMapOf<String, Any>()
         context.setVariables(generalContextMap)
@@ -45,11 +45,12 @@ sealed class Document(private val templateEngine: TemplateEngine, private val xh
             setDocumentFromString(xhtml, templateLocation.toString())
         }
         renderer.layout()
-        val byteOutputStream = ByteArrayOutputStream()
-        byteOutputStream.use(renderer::createPDF)
+
+        val tempFile = Files.createTempFile("zb", ".pdf")
+        renderer.createPDF(Files.newOutputStream(tempFile))
         log.debug("pdf created successfully")
 
-        return byteOutputStream.toByteArray()
+        return Files.newInputStream(tempFile)
     }
 
     private fun convertToXhtml(html: String): String {

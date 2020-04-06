@@ -41,7 +41,7 @@ fun main() {
         contactName = "", contactInfo = ContactInfo("", ""))
 
     // qr pdf
-     val bytes: ByteArray = qrCodeGenerator.generate(qrCodeId.value).let { documentFactory.siteOnboarding(fakeOrg, it) }.render()
+     val result = qrCodeGenerator.generate(qrCodeId.value).let { documentFactory.siteOnboarding(fakeOrg, it) }.render()
     //     And finally, we create the PDF:
-     Files.write(Paths.get("pdfs", "zerobase-qr.pdf"), bytes)
+    Files.copy(result, Paths.get("pdfs", "zerobase-qr.pdf"))
 }
