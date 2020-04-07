@@ -20,6 +20,7 @@ import io.zerobase.smarttracing.config.GraphDatabaseFactory
 import io.zerobase.smarttracing.notifications.AmazonEmailSender
 import io.zerobase.smarttracing.notifications.NotificationFactory
 import io.zerobase.smarttracing.notifications.NotificationManager
+import io.zerobase.smarttracing.notifications.S3StaticResourceLoader
 import io.zerobase.smarttracing.pdf.DocumentFactory
 import io.zerobase.smarttracing.qr.QRCodeGenerator
 import io.zerobase.smarttracing.resources.*
@@ -30,6 +31,7 @@ import org.thymeleaf.TemplateEngine
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver
 import org.w3c.tidy.Tidy
 import software.amazon.awssdk.regions.Region
+import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.ses.SesClient
 import java.net.URI
 import java.nio.charset.StandardCharsets
@@ -47,9 +49,14 @@ import javax.ws.rs.core.UriBuilder
 typealias MultiMap<K, V> = Map<K, List<V>>
 
 data class AmazonEmailConfig(val region: Region, val endpoint: URI? = null)
-data class AmazonConfig(val ses: AmazonEmailConfig)
+data class S3Config(val region: Region)
+data class AmazonConfig(val ses: AmazonEmailConfig, val s3: S3Config)
 data class EmailNotificationConfig(val fromAddress: String)
-data class NotificationConfig(val email: EmailNotificationConfig, val templateLocation: String = "notifications")
+data class NotificationConfig(
+    val email: EmailNotificationConfig,
+    val templateLocation: String = "notifications",
+    val staticResourcesBucket: String
+)
 data class Config(
         val database: GraphDatabaseFactory = GraphDatabaseFactory(),
         val siteTypeCategories: MultiMap<String, String>,
@@ -124,7 +131,9 @@ class Main : Application<Config>() {
             baseLink = UriBuilder.fromUri(config.baseQrCodeLink).path("{code}"),
             logo = Resources.getResource("qr/qr-code-logo.png")
         )
-        val notificationFactory = NotificationFactory(templateEngine, documentFactory, qrCodeGenerator)
+        val s3 = S3Client.builder().region(config.aws.s3.region).build()
+        val staticResourceLoader = S3StaticResourceLoader(s3, config.notifications.staticResourcesBucket)
+        val notificationFactory = NotificationFactory(templateEngine, documentFactory, qrCodeGenerator, staticResourceLoader)
         val notificationManager = NotificationManager(emailSender, notificationFactory)
 
         eventBus.register(notificationManager)
@@ -150,8 +159,6 @@ class Main : Application<Config>() {
         cors.setInitParameter(CrossOriginFilter.ALLOWED_HEADERS_PARAM, "X-Requested-With,Content-Type,Accept,Origin,Authorization")
         cors.setInitParameter(CrossOriginFilter.ALLOWED_METHODS_PARAM, "OPTIONS,GET,PUT,POST,DELETE,HEAD")
         cors.setInitParameter(CrossOriginFilter.ALLOW_CREDENTIALS_PARAM, "true")
-
-        // Add URL mapping
 
         // Add URL mapping
         cors.addMappingForUrlPatterns(EnumSet.allOf(DispatcherType::class.java), true, "/*")

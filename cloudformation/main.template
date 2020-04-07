@@ -74,4 +74,5 @@ Resources:
         DomainSuffix:  {"Fn::ImportValue": !Sub '${InfrastructureStackName}-DomainSuffix'}
         AllowedOrigins: !Ref AllowedOrigins
         EmailNotificationsFromAddress: !Ref EmailNotificationsFromAddress
+        StaticResourcesBucket: {"Fn::ImportValue": !Sub '${InfrastructureStackName}-StaticResourcesBucket'}
 ...

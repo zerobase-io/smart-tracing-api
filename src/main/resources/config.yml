@@ -35,8 +35,11 @@ aws:
   ses:
     region: ${AWS_SES_REGION:-us-east-1}
     endpoint: ${AWS_SES_ENDPOINT:-null}
+  s3:
+    region: ${AWS_S3_REGION:-us-east-1}
 
 notifications:
+  staticResourcesBucket: ${STATIC_RESOURCES_BUCKET}
   email:
     fromAddress: ${EMAIL_NOTIFICATION_FROM_ADDRESS:-noreply@zerobase.io}
 

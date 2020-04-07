@@ -202,6 +202,10 @@
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>regions</artifactId>
         </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3</artifactId>
+        </dependency>
 
         <!-- Other Dependencies -->
         <dependency>
@@ -402,6 +406,9 @@
                         -->
                         <pattern>io.netty.*</pattern>
                     </ignoredClassPatterns>
+                    <ignoredResourcePatterns>
+                        <resourcePattern>codegen-resources/.+</resourcePattern>
+                    </ignoredResourcePatterns>
                 </configuration>
             </plugin>
         </plugins>

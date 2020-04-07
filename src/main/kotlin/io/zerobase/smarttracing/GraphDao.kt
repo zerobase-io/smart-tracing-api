@@ -48,18 +48,18 @@ class GraphDao(
     /**
      * Creates a new CheckIn and returns its ID
      */
-    @Deprecated(message = "Legacy API endpoint", replaceWith = ReplaceWith("recordPeerToPerScan"))
     fun createCheckIn(deviceId: DeviceId, scannedId: ScannableId, loc: Location?): ScanId {
         val scanId = UUID.randomUUID().toString()
         try {
-            graph.addE("SCAN")
-                    .from(graph.V(deviceId.value))
-                    .to(graph.V(scannedId.value))
-                    .property(T.id, scanId)
-                    .property("timestamp", System.currentTimeMillis())
-                    .property("latitude", loc?.latitude)
-                    .property("longitude", loc?.longitude)
-                    .getIfPresent()
+            val deviceNode = graph.V(deviceId.value).getIfPresent() ?: throw InvalidIdException(deviceId)
+            val scannableNode = graph.V(scannedId.value).getIfPresent() ?: throw InvalidIdException(scannedId)
+            val edge = graph.addE("SCAN")
+                .from(deviceNode)
+                .to(scannableNode)
+                .property(T.id, scanId)
+                .property("timestamp", System.currentTimeMillis())
+            loc?.also { (lat, long) -> edge.property("latitude", loc?.latitude).property("longitude", loc?.longitude) }
+            edge.getIfPresent()
             return ScanId(scanId)
         } catch (ex: Exception) {
             log.error("error creating check-in. device={} scannable={}", deviceId, scannedId, ex)
@@ -81,9 +81,11 @@ class GraphDao(
     fun recordPeerToPeerScan(scanner: DeviceId, scanned: DeviceId, loc: Location?): ScanId {
         val scanId = UUID.randomUUID().toString()
         try {
+            val aNode = graph.V(scanner.value).getIfPresent() ?: throw InvalidIdException(scanner)
+            val bNode = graph.V(scanned.value).getIfPresent() ?: throw InvalidIdException(scanned)
             graph.addE("SCAN")
-                    .from(graph.V(scanner.value))
-                    .to(graph.V(scanned.value))
+                    .from(aNode)
+                    .to(bNode)
                     .property(T.id, scanId)
                     .property("timestamp", System.currentTimeMillis())
                     .property("latitude", loc?.latitude ?: 0)
@@ -93,22 +95,6 @@ class GraphDao(
         } catch (ex: Exception) {
             log.error("error creating p2p scan. scanner={} scanned={}", scanner, scanned, ex)
             throw EntityCreationException("Error creating scan relationship between devices.", ex)
-        }
-    }
-
-    fun recordDeviceCheckIn(device: DeviceId, site: SiteId): ScanId {
-        val id = UUID.randomUUID().toString()
-        try {
-            graph.addE("SCAN")
-                    .from(graph.V(device.value))
-                    .to(graph.V(site.value))
-                    .property(T.id, id)
-                    .property("timestamp", System.currentTimeMillis())
-                    .execute()
-            return ScanId(id)
-        } catch (ex: Exception) {
-            log.error("error creating site scan. device={} site={}", device, site, ex)
-            throw EntityCreationException("Error creating scan between device and site.", ex);
         }
     }
 
@@ -290,7 +276,7 @@ class GraphDao(
             graph.addV("USER")
                 .property(T.id, id).property("name", name).property("phone", phone).property("email", email)
                 .property("deleted", false)
-                .addE("OWNS").from(deviceVertex)
+                .addE("OWNS").to(deviceVertex)
                 .execute()
             return UserId(id)
         } catch (ex: Exception) {

@@ -58,6 +58,8 @@ Parameters:
     Description: Value for CORS filter
   EmailNotificationsFromAddress:
     Type: String
+  StaticResourcesBucket:
+    Type: String
 
 Resources:
   DnsRecord:
@@ -151,6 +153,8 @@ Resources:
           Value: -Xms256m -Xmx256m
         - Name: EMAIL_NOTIFICATION_FROM_ADDRESS
           Value: !Ref EmailNotificationsFromAddress
+        - Name: STATIC_RESOURCES_BUCKET
+          Value: !Ref StaticResourcesBucket
         Image: !Sub 'zerobaseio/smart-tracing-api:${AppVersion}'
         Memory: !Ref Memory
         LogConfiguration:
@@ -181,7 +185,7 @@ Resources:
           Action: sts:AssumeRole
       Path: "/"
       Policies:
-      - PolicyName: database-access
+      - PolicyName: api-service-access
         PolicyDocument:
           Version: 2012-10-17
           Statement:
@@ -193,4 +197,8 @@ Resources:
             - ses:Send*
             Effect: Allow
             Resource: '*'
+          - Action:
+            - s3:Get*
+            Effect: Allow
+            Resource: !Sub arn:aws:s3:::${StaticResourcesBucket}/*
 ...

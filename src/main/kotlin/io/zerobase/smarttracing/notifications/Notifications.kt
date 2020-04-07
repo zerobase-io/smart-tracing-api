@@ -8,19 +8,10 @@ import io.zerobase.smarttracing.models.Organization
 import io.zerobase.smarttracing.models.ScannableId
 import io.zerobase.smarttracing.pdf.DocumentFactory
 import io.zerobase.smarttracing.qr.QRCodeGenerator
-import org.apache.http.impl.io.EmptyInputStream
-import org.apache.http.util.Args
 import org.thymeleaf.TemplateEngine
 import org.thymeleaf.context.Context
-import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver
-import org.w3c.tidy.Tidy
-import java.io.ByteArrayInputStream
 import java.io.InputStream
-import java.lang.Exception
-import java.net.URI
-import java.nio.charset.StandardCharsets
 import java.util.*
-import javax.ws.rs.core.UriBuilder
 
 data class NotificationRequest(val notification: Notification, val contactInfo: ContactInfo)
 
@@ -31,10 +22,11 @@ enum class NotificationMedium {
 class NotificationFactory(
     private val templateEngine: TemplateEngine,
     private val documentFactory: DocumentFactory,
-    private val qrCodeGenerator: QRCodeGenerator
+    private val qrCodeGenerator: QRCodeGenerator,
+    private val staticResourceLoader: StaticResourceLoader
 ) {
     fun simpleBusinessOnboarding(organization: Organization, defaultQrCode: ScannableId)
-        = SimpleBusinessOnboarding(templateEngine, documentFactory, qrCodeGenerator, organization, defaultQrCode)
+        = SimpleBusinessOnboarding(templateEngine, documentFactory, qrCodeGenerator, staticResourceLoader, organization, defaultQrCode)
 }
 
 @SuppressFBWarnings("EI_EXPOSE_REP", "EI_EXPOSE_REP2")
@@ -50,6 +42,7 @@ class SimpleBusinessOnboarding(
     private val templateEngine: TemplateEngine,
     private val documentFactory: DocumentFactory,
     private val qrCodeGenerator: QRCodeGenerator,
+    private val staticResourceLoader: StaticResourceLoader,
     private val organization: Organization,
     private val qrCodeId: ScannableId
 ) : Notification() {
@@ -68,7 +61,7 @@ class SimpleBusinessOnboarding(
             ),
             Attachment(
                 name = "FAQ & Instructions.pdf",
-                data = Resources.getResource("pdfs/business-faq.pdf").openStream(),
+                data = staticResourceLoader.load("notifications/business-faq.pdf"),
                 contentType = MediaType.PDF)
         )
     }
