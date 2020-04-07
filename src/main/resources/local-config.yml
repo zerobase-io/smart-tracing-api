@@ -22,10 +22,13 @@ aws:
   ses:
     region: ${REGION:-us-east-1}
     endpoint: ${FAKE_SES_ENDPOINT:-http://127.0.0.1:4579}
+  s3:
+    region: ${REGION:-us-east-1}
 
 baseQrCodeLink: http://127.0.0.1:8080/s/
 
 notifications:
+  staticResourcesBucket: ${STATIC_RESOURCES_BUCKET:-local-static-resources}
   email:
     fromAddress: ${NOTIFICATION_FROM_EMAIL_ADDRESS:-noreply@zerobase.io}
 
