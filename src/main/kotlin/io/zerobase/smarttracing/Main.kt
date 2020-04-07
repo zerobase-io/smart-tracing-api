@@ -17,6 +17,7 @@ import io.dropwizard.configuration.SubstitutingSourceProvider
 import io.dropwizard.setup.Bootstrap
 import io.dropwizard.setup.Environment
 import io.zerobase.smarttracing.config.GraphDatabaseFactory
+import io.zerobase.smarttracing.healthchecks.NeptuneHealthCheck
 import io.zerobase.smarttracing.notifications.AmazonEmailSender
 import io.zerobase.smarttracing.notifications.NotificationFactory
 import io.zerobase.smarttracing.notifications.NotificationManager
@@ -145,6 +146,8 @@ class Main : Application<Config>() {
         env.jersey().register(DevicesResource(dao))
         env.jersey().register(UsersResource(dao))
         env.jersey().register(ModelsResource(config.siteTypeCategories, config.scannableTypes))
+
+        env.healthChecks().register("neptune", NeptuneHealthCheck(graph))
 
         addCorsFilter(config.allowedOrigins, env)
     }
