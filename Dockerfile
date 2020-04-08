@@ -6,5 +6,5 @@ ENTRYPOINT /entrypoint.sh
 
 ENV JAVA_OPTS -Xms256m -Xmx256m
 
-COPY target/classes/config.yml /
 COPY target/smart-tracing-api.jar /app.jar
+COPY target/classes/config.yml /

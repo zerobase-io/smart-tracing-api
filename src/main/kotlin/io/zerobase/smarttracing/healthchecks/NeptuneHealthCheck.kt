@@ -16,7 +16,7 @@ class NeptuneHealthCheck(private val graph: GraphTraversalSource) : HealthCheck(
 
     override fun check(): Result {
         try {
-            graph.V("test-id").tryNext()
+            graph.inject(0)
             return Result.healthy()
         } catch (ex: Exception) {
             log.warn(MARKER, "neptune healthcheck failed.", ex)

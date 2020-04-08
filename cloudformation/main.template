@@ -35,6 +35,10 @@ Parameters:
   EmailNotificationsFromAddress:
     Type: String
     Default: Zerobase <noreply@zerobase.io>
+  DatabaseIamAuthEnabled:
+    Type: String
+    AllowedValues: ['true', 'false']
+    Default: true
 
 Resources:
   DatabaseStack:
@@ -45,6 +49,7 @@ Resources:
       Parameters:
         AppSecurityGroupId: { "Fn::ImportValue": !Sub '${InfrastructureStackName}-EcsClusterSecurityGroupId' }
         Environment: !Ref Environment
+        IamAuthentication: !Ref DatabaseIamAuthEnabled
         InstanceType: !Ref DatabaseMasterInstanceSize
         ReplicaInstanceType: !Ref DatabaseReplicaInstanceSize
         ReplicaCount: !Ref DatabaseReplicaCount

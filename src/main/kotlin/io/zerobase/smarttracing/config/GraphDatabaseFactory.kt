@@ -1,6 +1,7 @@
 package io.zerobase.smarttracing.config
 
 import io.dropwizard.setup.Environment
+import io.zerobase.smarttracing.utils.LoggerDelegate
 import org.apache.tinkerpop.gremlin.driver.Cluster
 import org.apache.tinkerpop.gremlin.driver.SigV4WebSocketChannelizer
 import org.apache.tinkerpop.gremlin.driver.remote.DriverRemoteConnection
@@ -14,6 +15,10 @@ data class Endpoints(val write: String, val read: String?)
 
 @OptIn(ExperimentalUnsignedTypes::class)
 class GraphDatabaseFactory {
+    companion object {
+        val log by LoggerDelegate()
+    }
+
     enum class Mode { READ, WRITE }
 
     var endpoints: Endpoints = Endpoints(write = "localhost", read = null)
@@ -43,6 +48,7 @@ class GraphDatabaseFactory {
         credentials?.also { (u, p) -> builder.credentials(u, p) }
 
         if (enableAwsSigner) {
+            log.info("adding SigV4 to gremlin websocket...")
             builder.channelizer(SigV4WebSocketChannelizer::class.java)
         }
 

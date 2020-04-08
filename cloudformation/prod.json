@@ -26,5 +26,9 @@
     {
         "ParameterKey": "AllowedOrigins",
         "ParameterValue": "'*'"
+    },
+    {
+        "ParameterKey": "DatabaseIamAuthEnabled",
+        "ParameterValue": "false"
     }
 ]
