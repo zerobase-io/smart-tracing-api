@@ -181,8 +181,6 @@ class GraphDao(
                 .property("creationTimestamp", System.currentTimeMillis())
             lat?.also { v.property("latitude", it) }
             long?.also { v.property("longitude", it) }
-            lat?.also { v.property("latitude", it) }
-            long?.also { v.property("longitude", it) }
             contactName?.also { v.property("contactName", it) }
             phone?.also { v.property("phone", it) }
             email?.also { v.property("email", it) }
