@@ -174,3 +174,5 @@ set an environment variable of `DB_PORT` to the port your gremlin server is runn
   you prefer the command line.
 * App endpoints are available at `http://localhost:9000`
 
+## Database Model
+![Database Model](https://www.lucidchart.com/publicSegments/view/5946562a-26d8-4b1a-9054-e1692c23afe7/image.png)
