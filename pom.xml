@@ -317,6 +317,11 @@
         <!-- Test Dependencies -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
             <scope>test</scope>
         </dependency>
@@ -387,6 +392,11 @@
                             Ignoring because it's a false positive.
                         -->
                         <dependency>edu.washington.cs.types.checker:checker-framework</dependency>
+                        <!--
+                            Another one where I can't find any references to any of the classes here. It's purely transitive as far
+                            as I can tell.
+                        -->
+                        <dependency>com.amazonaws:aws-java-sdk-core</dependency>
                     </ignoredUsedUndeclaredDependencies>
                 </configuration>
             </plugin>
