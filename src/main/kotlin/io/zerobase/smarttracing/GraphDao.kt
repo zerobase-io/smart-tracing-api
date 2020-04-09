@@ -7,7 +7,11 @@ import io.zerobase.smarttracing.models.*
 import io.zerobase.smarttracing.utils.LoggerDelegate
 import org.apache.tinkerpop.gremlin.process.traversal.Traversal
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.`__`.unfold
+import org.apache.tinkerpop.gremlin.process.traversal.step.util.WithOptions
 import org.apache.tinkerpop.gremlin.structure.T
+import org.apache.tinkerpop.gremlin.structure.VertexProperty
+import org.apache.tinkerpop.gremlin.structure.VertexProperty.Cardinality.single
 import java.util.*
 
 private fun <S, T> Traversal<S, T>.getIfPresent(): T? {
@@ -175,18 +179,18 @@ class GraphDao(
         try {
             val v = graph.addV("Site")
                 .property(T.id, id)
-                .property("name", name)
-                .property("category", category)
-                .property("subcategory", subcategory)
-                .property("testing", testing)
-                .property("creationTimestamp", System.currentTimeMillis())
+                .property(single,"organizationId", organizationId.value)
+                .property(single,"name", name)
+                .property(single,"category", category)
+                .property(single,"subcategory", subcategory)
+                .property(single,"testing", testing)
+                .property(single,"creationTimestamp", System.currentTimeMillis())
             lat?.also { v.property("latitude", it) }
             long?.also { v.property("longitude", it) }
             contactName?.also { v.property("contactName", it) }
             phone?.also { v.property("phone", it) }
             email?.also { v.property("email", it) }
-            v.execute()
-            graph.addE("OWNS").from(graph.V(organizationId.value)).to(graph.V(id)).execute()
+            v.addE("OWNS").from(graph.V(organizationId.value)).to(graph.V(id)).execute()
             return SiteId(id)
         } catch (ex: Exception) {
             log.error("error creating site. organization={} name={} category={}-{} testing={}", id, name, category, subcategory, testing, ex)
@@ -204,7 +208,7 @@ class GraphDao(
     @SuppressFBWarnings("BC_BAD_CAST_TO_ABSTRACT_COLLECTION", justification = "false positive")
     fun getSites(id: OrganizationId): List<Pair<String, String>> {
         return graph.V(id.value).out("OWNS").hasLabel("Site")
-            .elementMap<String>().toList()
+            .valueMap<String>().with(WithOptions.tokens).by(unfold<String>()).toList()
             .map{ it[T.id]!! to it["name"]!! }
     }
 
