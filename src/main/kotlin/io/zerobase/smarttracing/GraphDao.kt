@@ -113,7 +113,7 @@ class GraphDao(
      *
      * @throws exception if phone number is invalid.
      */
-    fun createOrganization(name: String, phone: String?, email: String, contactName: String, address: Address,
+    fun createOrganization(name: String, phone: String, email: String, contactName: String, address: Address,
                            hasTestingFacilities: Boolean, multiSite: Boolean): Organization {
 
         validatePhoneNumber(phone)
@@ -131,11 +131,11 @@ class GraphDao(
                 .property("country", address.country)
                 .property("contactName", contactName)
                 .property("email", email)
+                .property("phone", phone)
                 .property("verified", false)
                 .property("hasTestingFacilities", hasTestingFacilities)
                 .property("multisite", multiSite)
                 .property("creationTimestamp", System.currentTimeMillis())
-            phone?.also { v.property("phone", it) }
             v.execute()
 
             return Organization(OrganizationId(id), name, address, contactName, ContactInfo(email, phone))
@@ -175,7 +175,6 @@ class GraphDao(
         try {
             val v = graph.addV("Site")
                 .property(T.id, id)
-                .property("id", id)
                 .property("name", name)
                 .property("category", category)
                 .property("subcategory", subcategory)
@@ -204,8 +203,9 @@ class GraphDao(
      */
     @SuppressFBWarnings("BC_BAD_CAST_TO_ABSTRACT_COLLECTION", justification = "false positive")
     fun getSites(id: OrganizationId): List<Pair<String, String>> {
-        return graph.V(id.value).out("OWNS").hasLabel("Site").toList()
-            .map{ "${it.id()}" to it.property<String>("name").value() }
+        return graph.V(id.value).out("OWNS").hasLabel("Site")
+            .elementMap<String>().toList()
+            .map{ it[T.id]!! to it["name"]!! }
     }
 
     /*

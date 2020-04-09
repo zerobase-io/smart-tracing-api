@@ -81,6 +81,6 @@ class ApiIt {
             .path(OrganizationsResource::class.java).path(OrganizationsResource::class.java, "getSites")
             .build(createResponse["id"])).request().get(object: GenericType<List<SiteResponse>>(){})
 
-        assertThat(sites).isNotNull.isNotEmpty.hasSize(1)
+        assertThat(sites).isNotNull.isNotEmpty.hasSize(1).first().extracting("name").isEqualTo("Default")
     }
 }

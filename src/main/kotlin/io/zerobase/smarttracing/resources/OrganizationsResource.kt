@@ -102,8 +102,7 @@ class OrganizationsResource(private val dao: GraphDao,
     @Path("/{id}/sites")
     @GET
     fun getSites(@PathParam("id") id: String): List<SiteResponse> {
-        val (x, y) = dao.getSites(OrganizationId(id)).unzip()
-        return x.zip(y) { a:String, b:String -> SiteResponse(a, b) }
+        return dao.getSites(OrganizationId(id)).map { (id, name) -> SiteResponse(id, name) }
     }
 
     @Path("/{id}/multiple-sites-setting")
