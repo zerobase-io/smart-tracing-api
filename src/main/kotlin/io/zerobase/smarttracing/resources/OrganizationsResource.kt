@@ -1,6 +1,7 @@
 package io.zerobase.smarttracing.resources
 
 import com.google.common.eventbus.EventBus
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import io.zerobase.smarttracing.GraphDao
 import io.zerobase.smarttracing.MultiMap
 import io.zerobase.smarttracing.models.*
@@ -101,6 +102,7 @@ class OrganizationsResource(private val dao: GraphDao,
 
     @Path("/{id}/sites")
     @GET
+    @SuppressFBWarnings("BC_BAD_CAST_TO_ABSTRACT_COLLECTION", justification = "false positive")
     fun getSites(@PathParam("id") id: String): List<SiteResponse> {
         return dao.getSites(OrganizationId(id)).map { (id, name) -> SiteResponse(id, name) }
     }
