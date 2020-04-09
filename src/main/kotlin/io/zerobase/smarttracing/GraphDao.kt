@@ -113,7 +113,7 @@ class GraphDao(
      *
      * @throws exception if phone number is invalid.
      */
-    fun createOrganization(name: String, phone: String?, email: String, contactName: String, address: Address,
+    fun createOrganization(name: String, phone: String, email: String, contactName: String, address: Address,
                            hasTestingFacilities: Boolean, multiSite: Boolean): Organization {
 
         validatePhoneNumber(phone)
@@ -131,11 +131,11 @@ class GraphDao(
                 .property("country", address.country)
                 .property("contactName", contactName)
                 .property("email", email)
+                .property("phone", phone)
                 .property("verified", false)
                 .property("hasTestingFacilities", hasTestingFacilities)
                 .property("multisite", multiSite)
                 .property("creationTimestamp", System.currentTimeMillis())
-            phone?.also { v.property("phone", it) }
             v.execute()
 
             return Organization(OrganizationId(id), name, address, contactName, ContactInfo(email, phone))
@@ -169,12 +169,13 @@ class GraphDao(
      * @param email contact email of site manager
      * @param contactName contact name of site manager
      */
-    fun createSite(organizationId: OrganizationId, name: String? = null, category: String, subcategory: String, lat: Float? = null, long: Float? = null,
+    fun createSite(organizationId: OrganizationId, name: String = "Default", category: String, subcategory: String, lat: Float? = null, long: Float? = null,
                    testing: Boolean = false, phone: String? = null, email: String? = null, contactName: String? = null): SiteId {
         val id = UUID.randomUUID().toString()
         try {
             val v = graph.addV("Site")
                 .property(T.id, id)
+                .property("name", name)
                 .property("category", category)
                 .property("subcategory", subcategory)
                 .property("testing", testing)
@@ -185,7 +186,7 @@ class GraphDao(
             phone?.also { v.property("phone", it) }
             email?.also { v.property("email", it) }
             v.execute()
-            graph.addE("OWNS").from(graph.V(organizationId.value)).to(graph.V(id))
+            graph.addE("OWNS").from(graph.V(organizationId.value)).to(graph.V(id)).execute()
             return SiteId(id)
         } catch (ex: Exception) {
             log.error("error creating site. organization={} name={} category={}-{} testing={}", id, name, category, subcategory, testing, ex)
@@ -202,11 +203,12 @@ class GraphDao(
      */
     @SuppressFBWarnings("BC_BAD_CAST_TO_ABSTRACT_COLLECTION", justification = "false positive")
     fun getSites(id: OrganizationId): List<Pair<String, String>> {
-        return graph.V(id.value).outE("OWNS").otherV().toList()
-            .map{ "${it.id()}" to it.property<String>("name").value() }
+        return graph.V(id.value).out("OWNS").hasLabel("Site")
+            .elementMap<String>().toList()
+            .map{ it[T.id]!! to it["name"]!! }
     }
 
-    /**
+    /*
      * Creates a scannable for a site. A scannable is either QR Code or BT
      * receivers.
      *
