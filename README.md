@@ -76,7 +76,7 @@ To run the backend when not intending to work on it (useful if you are working o
 Alternately, run *just dependencies* from docker-compose and build/develop on your machine
 
     $ mvn clean install
-    $ docker-compose -f ./docker-compose-dependnecies.yml up database aws
+    $ docker-compose -f ./docker-compose-dependencies.yml up database aws
 
 ### Manually with Docker
 #### Database - Gremlin
@@ -90,7 +90,7 @@ Alternately, run *just dependencies* from docker-compose and build/develop on yo
     $ docker run -d \
             -p 8182:8182 \
             -v $(pwd)/src/test/resources/tinkergraph-overrides.properties:/opt/gremlin-server/conf/tinkergraph-empty.properties \
-            --name=zerboase-db \
+            --name=zerobase-db \
             tinkerpop/gremlin-server:latest
     ```
 By default, there are no credentials for the local install

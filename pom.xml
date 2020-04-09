@@ -193,7 +193,7 @@
             <artifactId>logback-access</artifactId>
         </dependency>
 
-        <!-- AWS Depenencies -->
+        <!-- AWS Dependencies -->
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>ses</artifactId>
@@ -209,6 +209,13 @@
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>s3</artifactId>
+        </dependency>
+
+        <!-- Metrics Dependencies -->
+        <dependency>
+            <groupId>org.coursera</groupId>
+            <artifactId>dropwizard-metrics-datadog</artifactId>
+            <version>1.1.14</version>
         </dependency>
 
         <!-- Other Dependencies -->
@@ -346,7 +353,9 @@
                             These annotations are useful for compile time linting, I don't want to be pulling them in and out every
                             time we change which annotations we are using. Since it's compile time only, I'm just ignoring it.
                         -->
-                        <dependecy>org.jetbrains:annotations</dependecy>
+                        <dependency>org.jetbrains:annotations</dependency>
+                        <!-- Metrics reporter used via reflection -->
+                        <dependency>org.coursera:dropwizard-metrics-datadog</dependency>
                     </ignoredUnusedDeclaredDependencies>
                     <ignoredUsedUndeclaredDependencies>
                         <!--
