@@ -60,6 +60,8 @@ Parameters:
     Type: String
   StaticResourcesBucket:
     Type: String
+  ProjectLogLevel:
+    Type: String
 
 Resources:
   DnsRecord:
@@ -155,6 +157,8 @@ Resources:
           Value: !Ref EmailNotificationsFromAddress
         - Name: STATIC_RESOURCES_BUCKET
           Value: !Ref StaticResourcesBucket
+        - Name: ProjectLogLevel
+          Value: !Ref ProjectLogLevel
         Image: !Sub 'zerobaseio/smart-tracing-api:${AppVersion}'
         Memory: !Ref Memory
         LogConfiguration:

@@ -169,25 +169,25 @@ class GraphDao(
      * @param email contact email of site manager
      * @param contactName contact name of site manager
      */
-    fun createSite(organizationId: OrganizationId, name: String? = null, category: String, subcategory: String, lat: Float? = null, long: Float? = null,
+    fun createSite(organizationId: OrganizationId, name: String = "Default", category: String, subcategory: String, lat: Float? = null, long: Float? = null,
                    testing: Boolean = false, phone: String? = null, email: String? = null, contactName: String? = null): SiteId {
         val id = UUID.randomUUID().toString()
         try {
             val v = graph.addV("Site")
                 .property(T.id, id)
+                .property("id", id)
+                .property("name", name)
                 .property("category", category)
                 .property("subcategory", subcategory)
                 .property("testing", testing)
                 .property("creationTimestamp", System.currentTimeMillis())
             lat?.also { v.property("latitude", it) }
             long?.also { v.property("longitude", it) }
-            lat?.also { v.property("latitude", it) }
-            long?.also { v.property("longitude", it) }
             contactName?.also { v.property("contactName", it) }
             phone?.also { v.property("phone", it) }
             email?.also { v.property("email", it) }
             v.execute()
-            graph.addE("OWNS").from(graph.V(organizationId.value)).to(graph.V(id))
+            graph.addE("OWNS").from(graph.V(organizationId.value)).to(graph.V(id)).execute()
             return SiteId(id)
         } catch (ex: Exception) {
             log.error("error creating site. organization={} name={} category={}-{} testing={}", id, name, category, subcategory, testing, ex)
@@ -204,11 +204,11 @@ class GraphDao(
      */
     @SuppressFBWarnings("BC_BAD_CAST_TO_ABSTRACT_COLLECTION", justification = "false positive")
     fun getSites(id: OrganizationId): List<Pair<String, String>> {
-        return graph.V(id.value).outE("OWNS").otherV().toList()
+        return graph.V(id.value).out("OWNS").hasLabel("Site").toList()
             .map{ "${it.id()}" to it.property<String>("name").value() }
     }
 
-    /**
+    /*
      * Creates a scannable for a site. A scannable is either QR Code or BT
      * receivers.
      *
