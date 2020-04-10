@@ -230,6 +230,10 @@
             <artifactId>slf4j-api</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.googlecode.libphonenumber</groupId>
             <artifactId>libphonenumber</artifactId>
             <version>8.10.2</version>
@@ -362,6 +366,7 @@
                         <dependency>org.jetbrains:annotations</dependency>
                         <!-- Metrics reporter used via reflection -->
                         <dependency>org.coursera:dropwizard-metrics-datadog</dependency>
+                        <dependency>org.slf4j:jcl-over-slf4j</dependency>
                     </ignoredUnusedDeclaredDependencies>
                     <ignoredUsedUndeclaredDependencies>
                         <!--
