@@ -56,14 +56,14 @@ class GraphDao(
         val scanId = UUID.randomUUID().toString()
         try {
             val deviceNode = graph.V(deviceId.value).getIfPresent() ?: throw InvalidIdException(deviceId)
-            val scannableNode = graph.V(scannedId.value).getIfPresent() ?: throw InvalidIdException(scannedId)
-            val edge = graph.addE("SCAN")
+            val scannableNode = graph.V(scannedId.value).hasLabel("Scannable").getIfPresent() ?: throw InvalidIdException(scannedId)
+            val traversal = graph.addE("SCAN")
                 .from(deviceNode)
                 .to(scannableNode)
                 .property(T.id, scanId)
                 .property("timestamp", System.currentTimeMillis())
-            loc?.also { (lat, long) -> edge.property("latitude", loc?.latitude).property("longitude", loc?.longitude) }
-            edge.getIfPresent()
+            loc?.also { (lat, long) -> traversal.property("latitude", lat).property("longitude", long) }
+            traversal.execute()
             return ScanId(scanId)
         } catch (ex: Exception) {
             log.error("error creating check-in. device={} scannable={}", deviceId, scannedId, ex)
