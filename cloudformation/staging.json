@@ -10,5 +10,9 @@
     {
         "ParameterKey": "AllowedOrigins",
         "ParameterValue": "'*'"
+    },
+    {
+        "ParameterKey": "pDatadogAPIKeyARN",
+        "ParameterValue": "arn:aws:ssm:us-east-1:146029531730:parameter/apikeys/datadog-api-key"
     }
 ]

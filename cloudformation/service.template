@@ -62,6 +62,9 @@ Parameters:
     Type: String
   ProjectLogLevel:
     Type: String
+  DatadogApiKey:
+    Type: AWS::SSM::Parameter::Value<String>
+    NoEcho: true
 
 Resources:
   DnsRecord:
@@ -157,8 +160,10 @@ Resources:
           Value: !Ref EmailNotificationsFromAddress
         - Name: STATIC_RESOURCES_BUCKET
           Value: !Ref StaticResourcesBucket
-        - Name: ProjectLogLevel
+        - Name: PROJECT_LOG_LEVEL
           Value: !Ref ProjectLogLevel
+        - Name: DD_API_KEY
+          Value: !Ref DatadogApiKey
         Image: !Sub 'zerobaseio/smart-tracing-api:${AppVersion}'
         Memory: !Ref Memory
         LogConfiguration:
@@ -174,6 +179,27 @@ Resources:
         - ContainerPort: 8081
           HostPort: 0
         Privileged: false
+      - Essential: true
+        Image: amazon/aws-for-fluent-bit:latest
+        Name: log_router
+        FirelensConfiguration:
+          Type: fluentbit
+          Options:
+            enable-ecs-log-metadata: true
+            config-file-type: file
+            config-file-value: /fluent-bit/configs/parse-json.conf
+        LogConfiguration:
+          LogDriver: awsfirelens
+          Options:
+            Name: datadog
+            apikey: !Ref DatadogApiKey
+            Host: http-intake.logs.datadoghq.com
+            dd_service: smart-tracing-api
+            dd_source: app
+            dd_message_key: log
+            dd_tags: !Sub project:smart-tracing,version=${AppVersion},environment:${Environment}
+            TLS: on
+            provider: ecs
       Family: !Sub '${Environment}-smart-tracing-api'
       TaskRoleArn: !Ref TaskRole
 
