@@ -169,7 +169,7 @@ Resources:
           LogDriver: awsfirelens
           Options:
             Name: datadog
-            apikey: ${DD_API_KEY}
+            apikey: ${DATADOG_API_KEY}
             Host: http-intake.logs.datadoghq.com
             dd_service: smart-tracing-api
             dd_source: app
@@ -185,7 +185,7 @@ Resources:
           HostPort: 0
         Privileged: false
         Secrets:
-        - Name: DD_API_KEY
+        - Name: DATADOG_API_KEY
           ValueFrom: !Ref DatadogApiKeyArn
       - Essential: true
         Image: amazon/aws-for-fluent-bit:latest
@@ -204,7 +204,7 @@ Resources:
             awslogs-region: !Ref AWS::Region
             awslogs-stream-prefix: !Sub '${Environment}-smart-tracing-api'
         Secrets:
-        - Name: DD_API_KEY
+        - Name: DATADOG_API_KEY
           ValueFrom: !Ref DatadogApiKeyArn
       ExecutionRoleArn: !Ref TaskExecutionRole
       Family: !Sub '${Environment}-smart-tracing-api'
