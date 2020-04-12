@@ -174,7 +174,7 @@ Resources:
             dd_service: smart-tracing-api
             dd_source: app
             dd_message_key: log
-            dd_tags: !Sub project:smart-tracing,version=${AppVersion},environment:${Environment}
+            dd_tags: !Sub project:smart-tracing,version:${AppVersion},environment:${Environment}
             TLS: on
             provider: ecs
         Name: app
@@ -197,6 +197,15 @@ Resources:
             enable-ecs-log-metadata: true
             config-file-type: file
             config-file-value: /fluent-bit/configs/parse-json.conf
+        LogConfiguration:
+          LogDriver: awslogs
+          Options:
+            awslogs-group: !Ref LogGroup
+            awslogs-region: !Ref AWS::Region
+            awslogs-stream-prefix: !Sub '${Environment}-smart-tracing-api'
+        Secrets:
+        - Name: DD_API_KEY
+          ValueFrom: !Ref DatadogApiKeyArn
       ExecutionRoleArn: !Ref TaskExecutionRole
       Family: !Sub '${Environment}-smart-tracing-api'
       TaskRoleArn: !Ref TaskRole
@@ -224,6 +233,9 @@ Resources:
             Resource:
             - !Ref DatadogApiKeyArn
             - !Ref KmsAlias
+          - Effect: Allow
+            Action: logs:*
+            Resource: '*'
 
   TaskRole:
     Type: AWS::IAM::Role

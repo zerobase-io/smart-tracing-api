@@ -9,6 +9,8 @@ server:
   requestLog:
     appenders:
     - type: console
+      layout:
+        type: json
       filterFactories:
       - type: noise
         path: healthcheck
