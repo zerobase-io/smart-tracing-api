@@ -4,10 +4,7 @@ import io.dropwizard.testing.ConfigOverride
 import io.dropwizard.testing.junit5.DropwizardAppExtension
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport
 import io.zerobase.smarttracing.models.Address
-import io.zerobase.smarttracing.resources.Contact
-import io.zerobase.smarttracing.resources.CreateOrganizationRequest
-import io.zerobase.smarttracing.resources.OrganizationsResource
-import io.zerobase.smarttracing.resources.SiteResponse
+import io.zerobase.smarttracing.resources.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -82,5 +79,19 @@ class ApiIt {
             .build(createResponse["id"])).request().get(object: GenericType<List<SiteResponse>>(){})
 
         assertThat(sites).isNotNull.isNotEmpty.hasSize(1).first().extracting("name").isEqualTo("Default")
+    }
+
+    @Test
+    fun shouldCreateScannable(){
+        // creating a scannable -- but need to double check that we have an org id and site id that already exists
+        // creating scannable for a non-testing facility
+        val request = CreateScannableRequest("qr_code", false)
+        // why is connection index 0
+        val createScan = app.client().target(UriBuilder.fromUri("http://localhost:${app.getPort(0)}")
+            .path(OrganizationsResource::class.java).path(OrganizationsResource::class.java, "createScannable")
+            .build("1", "1")).request().post(Entity.json(request))
+
+        println(createScan)
+        assertThat(createScan).isNotNull
     }
 }
