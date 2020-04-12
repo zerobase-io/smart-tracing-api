@@ -6,6 +6,7 @@ import io.zerobase.smarttracing.GraphDao
 import io.zerobase.smarttracing.MultiMap
 import io.zerobase.smarttracing.models.*
 import io.zerobase.smarttracing.notifications.NotificationFactory
+import io.zerobase.smarttracing.utils.LoggerDelegate
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
 import javax.ws.rs.core.Response
@@ -51,6 +52,9 @@ class OrganizationsResource(private val dao: GraphDao,
                             private val scanTypes: List<String>,
                             private val eventBus: EventBus
 ) {
+    companion object {
+        val log by LoggerDelegate()
+    }
 
     @POST
     @Creator
@@ -66,8 +70,10 @@ class OrganizationsResource(private val dao: GraphDao,
         val organization = dao.createOrganization(name, phone, email, contactName, address, hasTestingFacilities, hasMultipleSites)
 
         if (!hasTestingFacilities && !hasMultipleSites) {
+            log.debug("Simple business organization detected. Auto-creating site and default qr code. organization={}", organization)
             val siteId = dao.createSite(organization.id, category = "BUSINESS", subcategory = "OTHER")
             val scannableId = dao.createScannable(organization.id, siteId, "QR_CODE", false)
+            log.info("Created site and default ")
             eventBus.post(SimpleOrganizationCreated(organization, scannableId))
         }
 

@@ -141,6 +141,7 @@ class Main : Application<Config>() {
 
         eventBus.register(notificationManager)
 
+        env.jersey().register(TraceIdFilter())
         env.jersey().register(InvalidPhoneNumberExceptionMapper())
         env.jersey().register(InvalidIdExceptionMapper())
         env.jersey().register(CreatorFilter())
