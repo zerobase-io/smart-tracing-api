@@ -62,9 +62,10 @@ Parameters:
     Type: String
   ProjectLogLevel:
     Type: String
-  DatadogApiKey:
-    Type: AWS::SSM::Parameter::Value<String>
-    NoEcho: true
+  DatadogApiKeyArn:
+    Type: String
+  KmsAlias:
+    Type: String
 
 Resources:
   DnsRecord:
@@ -162,37 +163,13 @@ Resources:
           Value: !Ref StaticResourcesBucket
         - Name: PROJECT_LOG_LEVEL
           Value: !Ref ProjectLogLevel
-        - Name: DD_API_KEY
-          Value: !Ref DatadogApiKey
         Image: !Sub 'zerobaseio/smart-tracing-api:${AppVersion}'
         Memory: !Ref Memory
-        LogConfiguration:
-          LogDriver: awslogs
-          Options:
-            awslogs-group: !Ref LogGroup
-            awslogs-region: !Ref AWS::Region
-            awslogs-stream-prefix: !Sub '${Environment}-smart-tracing-api'
-        Name: app
-        PortMappings:
-        - ContainerPort: 8080
-          HostPort: 0
-        - ContainerPort: 8081
-          HostPort: 0
-        Privileged: false
-      - Essential: true
-        Image: amazon/aws-for-fluent-bit:latest
-        Name: log_router
-        FirelensConfiguration:
-          Type: fluentbit
-          Options:
-            enable-ecs-log-metadata: true
-            config-file-type: file
-            config-file-value: /fluent-bit/configs/parse-json.conf
         LogConfiguration:
           LogDriver: awsfirelens
           Options:
             Name: datadog
-            apikey: !Ref DatadogApiKey
+            apikey: ${DD_API_KEY}
             Host: http-intake.logs.datadoghq.com
             dd_service: smart-tracing-api
             dd_source: app
@@ -200,8 +177,53 @@ Resources:
             dd_tags: !Sub project:smart-tracing,version=${AppVersion},environment:${Environment}
             TLS: on
             provider: ecs
+        Name: app
+        PortMappings:
+        - ContainerPort: 8080
+          HostPort: 0
+        - ContainerPort: 8081
+          HostPort: 0
+        Privileged: false
+        Secrets:
+        - Name: DD_API_KEY
+          ValueFrom: !Ref DatadogApiKeyArn
+      - Essential: true
+        Image: amazon/aws-for-fluent-bit:latest
+        Memory: 50
+        Name: log_router
+        FirelensConfiguration:
+          Type: fluentbit
+          Options:
+            enable-ecs-log-metadata: true
+            config-file-type: file
+            config-file-value: /fluent-bit/configs/parse-json.conf
+      ExecutionRoleArn: !Ref TaskExecutionRole
       Family: !Sub '${Environment}-smart-tracing-api'
       TaskRoleArn: !Ref TaskRole
+
+  TaskExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Action:
+          - sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service:
+            - ecs-tasks.amazonaws.com
+      Policies:
+      - PolicyName: !Sub 'SmartTracingApi_${Environment}_TaskExecPolicy'
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action:
+            - ssm:GetParameters
+            - kms:Decrypt
+            Resource:
+            - !Ref DatadogApiKeyArn
+            - !Ref KmsAlias
 
   TaskRole:
     Type: AWS::IAM::Role

@@ -415,6 +415,8 @@
                             time we change which annotations we are using. Since it's compile time only, I'm just ignoring it.
                         -->
                         <dependecy>org.jetbrains:annotations</dependecy>
+                        <!-- Used via reflection through the config file -->
+                        <dependency>io.dropwizard:dropwizard-json-logging</dependency>
                     </ignoredUnusedDeclaredDependencies>
                     <ignoredUsedUndeclaredDependencies>
                         <!--

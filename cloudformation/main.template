@@ -45,6 +45,8 @@ Parameters:
     Default: DEBUG
   DatadogApiKeyArn:
     Type: String
+  KmsAlias:
+    Type: String
 
 Resources:
   DatabaseStack:
@@ -88,4 +90,5 @@ Resources:
         StaticResourcesBucket: {"Fn::ImportValue": !Sub '${InfrastructureStackName}-StaticResourcesBucket'}
         ProjectLogLevel: !Ref ProjectLogLevel
         DatadogApiKeyArn: !Ref DatadogApiKeyArn
+        KmsAlias: !Ref KmsAlias
 ...

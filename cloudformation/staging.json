@@ -12,7 +12,11 @@
         "ParameterValue": "'*'"
     },
     {
-        "ParameterKey": "pDatadogAPIKeyARN",
+        "ParameterKey": "DatadogApiKeyArn",
         "ParameterValue": "arn:aws:ssm:us-east-1:146029531730:parameter/apikeys/datadog-api-key"
+    },
+    {
+        "ParameterKey": "KmsAlias",
+        "ParameterValue": "arn:aws:kms:us-east-1:146029531730:key/78963c12-a320-4599-b174-ce9db72e94e5"
     }
 ]
