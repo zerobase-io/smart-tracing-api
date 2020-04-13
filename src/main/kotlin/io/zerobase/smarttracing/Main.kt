@@ -50,7 +50,7 @@ import javax.ws.rs.core.UriBuilder
 typealias MultiMap<K, V> = Map<K, List<V>>
 
 data class AmazonEmailConfig(val region: Region, val endpoint: URI? = null)
-data class S3Config(val region: Region)
+data class S3Config(val region: Region, val endpoint: URI? = null)
 data class AmazonConfig(val ses: AmazonEmailConfig, val s3: S3Config)
 data class EmailNotificationConfig(val fromAddress: String)
 data class NotificationConfig(
@@ -65,7 +65,7 @@ data class Config(
         val aws: AmazonConfig,
         val notifications: NotificationConfig,
         val baseQrCodeLink: URI,
-        val allowedOrigins: List<String>
+        val allowedOrigins: String
 ): Configuration()
 
 fun main(vararg args: String) {
@@ -132,13 +132,16 @@ class Main : Application<Config>() {
             baseLink = UriBuilder.fromUri(config.baseQrCodeLink).path("{code}"),
             logo = Resources.getResource("qr/qr-code-logo.png")
         )
-        val s3 = S3Client.builder().region(config.aws.s3.region).build()
+        val s3ClientBuilder = S3Client.builder().region(config.aws.s3.region)
+        config.aws.s3.endpoint?.let(s3ClientBuilder::endpointOverride)
+        val s3 = s3ClientBuilder.build()
         val staticResourceLoader = S3StaticResourceLoader(s3, config.notifications.staticResourcesBucket)
         val notificationFactory = NotificationFactory(templateEngine, documentFactory, qrCodeGenerator, staticResourceLoader)
         val notificationManager = NotificationManager(emailSender, notificationFactory)
 
         eventBus.register(notificationManager)
 
+        env.jersey().register(TraceIdFilter())
         env.jersey().register(InvalidPhoneNumberExceptionMapper())
         env.jersey().register(InvalidIdExceptionMapper())
         env.jersey().register(CreatorFilter())
@@ -152,13 +155,13 @@ class Main : Application<Config>() {
         addCorsFilter(config.allowedOrigins, env)
     }
 
-    private fun addCorsFilter(allowedOrigins: List<String>, env: Environment) {
+    private fun addCorsFilter(allowedOrigins: String, env: Environment) {
         val cors: FilterRegistration.Dynamic = env.servlets().addFilter("CORS", CrossOriginFilter::class.java)
 
         // Configure CORS parameters
 
         // Configure CORS parameters
-        cors.setInitParameter(CrossOriginFilter.ALLOWED_ORIGINS_PARAM, allowedOrigins.joinToString(separator = ","))
+        cors.setInitParameter(CrossOriginFilter.ALLOWED_ORIGINS_PARAM, allowedOrigins)
         cors.setInitParameter(CrossOriginFilter.ALLOWED_HEADERS_PARAM, "X-Requested-With,Content-Type,Accept,Origin,Authorization")
         cors.setInitParameter(CrossOriginFilter.ALLOWED_METHODS_PARAM, "OPTIONS,GET,PUT,POST,DELETE,HEAD")
         cors.setInitParameter(CrossOriginFilter.ALLOW_CREDENTIALS_PARAM, "true")

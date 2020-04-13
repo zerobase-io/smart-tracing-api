@@ -39,6 +39,14 @@ Parameters:
     Type: String
     AllowedValues: ['true', 'false']
     Default: true
+  ProjectLogLevel:
+    Type: String
+    AllowedValues: ['TRACE', 'DEBUG', 'INFO', 'WARN', 'ERROR']
+    Default: DEBUG
+  DatadogApiKeyArn:
+    Type: String
+  KmsAlias:
+    Type: String
 
 Resources:
   DatabaseStack:
@@ -80,4 +88,7 @@ Resources:
         AllowedOrigins: !Ref AllowedOrigins
         EmailNotificationsFromAddress: !Ref EmailNotificationsFromAddress
         StaticResourcesBucket: {"Fn::ImportValue": !Sub '${InfrastructureStackName}-StaticResourcesBucket'}
+        ProjectLogLevel: !Ref ProjectLogLevel
+        DatadogApiKeyArn: !Ref DatadogApiKeyArn
+        KmsAlias: !Ref KmsAlias
 ...

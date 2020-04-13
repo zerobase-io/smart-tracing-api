@@ -12,7 +12,7 @@
 
     <groupId>io.zerobase</groupId>
     <artifactId>smart-tracing-api</artifactId>
-    <version>1.0.31-SNAPSHOT</version>
+    <version>1.0.34-SNAPSHOT</version>
 
     <scm>
         <developerConnection>scm:git:https://github.com/zerobase-io/smart-tracing-api.git</developerConnection>
@@ -32,6 +32,7 @@
         <dropwizard.version>2.0.5</dropwizard.version>
         <gremlin.version>[3.4.6,4)</gremlin.version>
         <kotlin.compiler.jvmTarget>11</kotlin.compiler.jvmTarget>
+        <testcontainers.version>1.13.0</testcontainers.version>
     </properties>
 
     <dependencyManagement>
@@ -76,6 +77,17 @@
                 </exclusions>
             </dependency>
             <dependency>
+                <groupId>io.dropwizard</groupId>
+                <artifactId>dropwizard-testing</artifactId>
+                <version>${dropwizard.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>jakarta.activation</groupId>
+                        <artifactId>jakarta.activation-api</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
                 <groupId>org.yaml</groupId>
                 <artifactId>snakeyaml</artifactId>
                 <version>[1.24,2)</version>
@@ -108,6 +120,28 @@
                 <version>4.1.48.Final</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>testcontainers-bom</artifactId>
+                <version>${testcontainers.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>testcontainers</artifactId>
+                <version>${testcontainers.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>javax.xml.bind</groupId>
+                        <artifactId>jaxb-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>javax.annotation</groupId>
+                        <artifactId>javax.annotation-api</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -147,6 +181,10 @@
         <dependency>
             <groupId>io.dropwizard.metrics</groupId>
             <artifactId>metrics-healthchecks</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.dropwizard</groupId>
+            <artifactId>dropwizard-json-logging</artifactId>
         </dependency>
 
         <!-- Jackson Dependencies -->
@@ -323,8 +361,17 @@
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
 
         <!-- Test Dependencies -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
@@ -333,6 +380,31 @@
         <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-runner</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>localstack</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.dropwizard</groupId>
+            <artifactId>dropwizard-testing</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -367,6 +439,8 @@
                         <!-- Metrics reporter used via reflection -->
                         <dependency>org.coursera:dropwizard-metrics-datadog</dependency>
                         <dependency>org.slf4j:jcl-over-slf4j</dependency>
+                        <!-- Used via reflection through the config file -->
+                        <dependency>io.dropwizard:dropwizard-json-logging</dependency>
                     </ignoredUnusedDeclaredDependencies>
                     <ignoredUsedUndeclaredDependencies>
                         <!--
@@ -374,6 +448,11 @@
                             Ignoring because it's a false positive.
                         -->
                         <dependency>edu.washington.cs.types.checker:checker-framework</dependency>
+                        <!--
+                            Another one where I can't find any references to any of the classes here. It's purely transitive as far
+                            as I can tell.
+                        -->
+                        <dependency>com.amazonaws:aws-java-sdk-core</dependency>
                     </ignoredUsedUndeclaredDependencies>
                 </configuration>
             </plugin>

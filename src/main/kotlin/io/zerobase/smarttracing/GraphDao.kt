@@ -7,7 +7,11 @@ import io.zerobase.smarttracing.models.*
 import io.zerobase.smarttracing.utils.LoggerDelegate
 import org.apache.tinkerpop.gremlin.process.traversal.Traversal
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.`__`.unfold
+import org.apache.tinkerpop.gremlin.process.traversal.step.util.WithOptions
 import org.apache.tinkerpop.gremlin.structure.T
+import org.apache.tinkerpop.gremlin.structure.VertexProperty
+import org.apache.tinkerpop.gremlin.structure.VertexProperty.Cardinality.single
 import java.util.*
 
 private fun <S, T> Traversal<S, T>.getIfPresent(): T? {
@@ -52,14 +56,14 @@ class GraphDao(
         val scanId = UUID.randomUUID().toString()
         try {
             val deviceNode = graph.V(deviceId.value).getIfPresent() ?: throw InvalidIdException(deviceId)
-            val scannableNode = graph.V(scannedId.value).getIfPresent() ?: throw InvalidIdException(scannedId)
-            val edge = graph.addE("SCAN")
+            val scannableNode = graph.V(scannedId.value).hasLabel("Scannable").getIfPresent() ?: throw InvalidIdException(scannedId)
+            val traversal = graph.addE("SCAN")
                 .from(deviceNode)
                 .to(scannableNode)
                 .property(T.id, scanId)
                 .property("timestamp", System.currentTimeMillis())
-            loc?.also { (lat, long) -> edge.property("latitude", loc?.latitude).property("longitude", loc?.longitude) }
-            edge.getIfPresent()
+            loc?.also { (lat, long) -> traversal.property("latitude", lat).property("longitude", long) }
+            traversal.execute()
             return ScanId(scanId)
         } catch (ex: Exception) {
             log.error("error creating check-in. device={} scannable={}", deviceId, scannedId, ex)
@@ -113,7 +117,7 @@ class GraphDao(
      *
      * @throws exception if phone number is invalid.
      */
-    fun createOrganization(name: String, phone: String?, email: String, contactName: String, address: Address,
+    fun createOrganization(name: String, phone: String, email: String, contactName: String, address: Address,
                            hasTestingFacilities: Boolean, multiSite: Boolean): Organization {
 
         validatePhoneNumber(phone)
@@ -131,11 +135,11 @@ class GraphDao(
                 .property("country", address.country)
                 .property("contactName", contactName)
                 .property("email", email)
+                .property("phone", phone)
                 .property("verified", false)
                 .property("hasTestingFacilities", hasTestingFacilities)
                 .property("multisite", multiSite)
                 .property("creationTimestamp", System.currentTimeMillis())
-            phone?.also { v.property("phone", it) }
             v.execute()
 
             return Organization(OrganizationId(id), name, address, contactName, ContactInfo(email, phone))
@@ -169,23 +173,24 @@ class GraphDao(
      * @param email contact email of site manager
      * @param contactName contact name of site manager
      */
-    fun createSite(organizationId: OrganizationId, name: String? = null, category: String, subcategory: String, lat: Float? = null, long: Float? = null,
+    fun createSite(organizationId: OrganizationId, name: String = "Default", category: String, subcategory: String, lat: Float? = null, long: Float? = null,
                    testing: Boolean = false, phone: String? = null, email: String? = null, contactName: String? = null): SiteId {
         val id = UUID.randomUUID().toString()
         try {
             val v = graph.addV("Site")
                 .property(T.id, id)
-                .property("category", category)
-                .property("subcategory", subcategory)
-                .property("testing", testing)
-                .property("creationTimestamp", System.currentTimeMillis())
+                .property(single,"organizationId", organizationId.value)
+                .property(single,"name", name)
+                .property(single,"category", category)
+                .property(single,"subcategory", subcategory)
+                .property(single,"testing", testing)
+                .property(single,"creationTimestamp", System.currentTimeMillis())
             lat?.also { v.property("latitude", it) }
             long?.also { v.property("longitude", it) }
             contactName?.also { v.property("contactName", it) }
             phone?.also { v.property("phone", it) }
             email?.also { v.property("email", it) }
-            v.execute()
-            graph.addE("OWNS").from(graph.V(organizationId.value)).to(graph.V(id))
+            v.addE("OWNS").from(graph.V(organizationId.value)).to(graph.V(id)).execute()
             return SiteId(id)
         } catch (ex: Exception) {
             log.error("error creating site. organization={} name={} category={}-{} testing={}", id, name, category, subcategory, testing, ex)
@@ -202,11 +207,12 @@ class GraphDao(
      */
     @SuppressFBWarnings("BC_BAD_CAST_TO_ABSTRACT_COLLECTION", justification = "false positive")
     fun getSites(id: OrganizationId): List<Pair<String, String>> {
-        return graph.V(id.value).outE("OWNS").otherV().toList()
-            .map{ "${it.id()}" to it.property<String>("name").value() }
+        return graph.V(id.value).out("OWNS").hasLabel("Site")
+            .valueMap<String>().with(WithOptions.tokens).by(unfold<String>()).toList()
+            .map{ it[T.id]!! to it["name"]!! }
     }
 
-    /**
+    /*
      * Creates a scannable for a site. A scannable is either QR Code or BT
      * receivers.
      *

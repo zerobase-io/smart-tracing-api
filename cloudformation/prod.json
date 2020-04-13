@@ -30,5 +30,9 @@
     {
         "ParameterKey": "DatabaseIamAuthEnabled",
         "ParameterValue": "false"
+    },
+    {
+        "ParameterKey": "ProjectLogLevel",
+        "ParameterValue": "INFO"
     }
 ]

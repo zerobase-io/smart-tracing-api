@@ -3,8 +3,7 @@ server:
   applicationConnectors:
   - type: http
     port: ${PORT:-9000}
-allowedOrigins:
-- '*'
+allowedOrigins: '*'
 
 logging:
   level: ${ROOT_LOG_LEVEL:-INFO}

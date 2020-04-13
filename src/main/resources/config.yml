@@ -9,15 +9,24 @@ server:
   requestLog:
     appenders:
     - type: console
+      layout:
+        type: json
       filterFactories:
       - type: noise
         path: healthcheck
 
-allowedOrigins: [${CORS_ALLOWED_ORIGINS}]
+allowedOrigins: ${CORS_ALLOWED_ORIGINS}
 
 logging:
   level: ${ROOT_LOG_LEVEL:-INFO}
+  appenders:
+  - type: console
+    layout:
+      type: json
+      flattenMdc: true
+      timestampFormat: ISO_INSTANT
   loggers:
+    io.zerobase: ${PROJECT_LOG_LEVEL:DEBUG}
     # Enable errors from body processing
     io.dropwizard.jersey.jackson.JsonProcessingExceptionMapper: DEBUG
 
@@ -37,6 +46,7 @@ aws:
     endpoint: ${AWS_SES_ENDPOINT:-null}
   s3:
     region: ${AWS_S3_REGION:-us-east-1}
+    endpoint: ${AWS_S3_ENDPOINT:-null}
 
 notifications:
   staticResourcesBucket: ${STATIC_RESOURCES_BUCKET}
@@ -47,10 +57,10 @@ metrics:
   frequency: 1 minute
   reporters:
     - type: datadog
-      host: TODO
+      host: https://api.datadoghq.com/api/
       transport:
         type: http
-        apiKey: ${DATADOG_API_KEY} #TODO
+        apiKey: ${DATADOG_API_KEY}
 
 siteTypeCategories:
   BUSINESS:
