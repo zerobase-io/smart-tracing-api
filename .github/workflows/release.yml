@@ -25,6 +25,10 @@ jobs:
         path: ~/.m2
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2
+    - name: Pull Docker Images for Testing
+      run: |
+        docker pull tinkerpop/gremlin-server:latest
+        docker pull localstack/localstack:0.9.4
     - name: Perform Java Release
       run: |
         git config user.name github-actions
