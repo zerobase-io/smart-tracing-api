@@ -26,7 +26,7 @@ class KGenericContainer(imageName: String) : GenericContainer<KGenericContainer>
 
 @Testcontainers
 @ExtendWith(DropwizardExtensionsSupport::class)
-class ApiIt {
+class ApiIT {
     companion object {
         @JvmStatic
         @Container
