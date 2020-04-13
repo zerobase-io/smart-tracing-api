@@ -1,5 +1,7 @@
 # Zerobase API Server
 
+[![Build Status](https://dev.azure.com/zerobase-io/smart-tracing-api/_apis/build/status/zerobase-io.smart-tracing-api?branchName=azure-pipelines-testing)](https://dev.azure.com/zerobase-io/smart-tracing-api/_build/latest?definitionId=3&branchName=azure-pipelines-testing)
+
 This repository contains the back end for the Zerobase smart tracing platform. Refer to the [smart-tracing repo](https://github.com/zerobase-io/smart-tracing) for the front end. We are using Kotlin and Neo4j with cloud storage on Heroku. We are using Dropwizard for the REST framework. Kotlin requires Java and Maven.
 
 Any commands shown in this read-me are written in bash. If you are on Windows or use an alternate shell, like fish, please adjust the commands
@@ -149,7 +151,7 @@ set an environment variable of `DB_PORT` to the port your gremlin server is runn
     ```sh
     $ mvn clean install
     ```
-    
+
     Alternately, to do a build with fewer checks
     ```sh
       mvn package -Dbasepom.check.skip-all
