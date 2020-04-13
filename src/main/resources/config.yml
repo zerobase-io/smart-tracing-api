@@ -53,6 +53,15 @@ notifications:
   email:
     fromAddress: ${EMAIL_NOTIFICATION_FROM_ADDRESS:-noreply@zerobase.io}
 
+metrics:
+  frequency: 1 minute
+  reporters:
+    - type: datadog
+      host: https://api.datadoghq.com/api/
+      transport:
+        type: http
+        apiKey: ${DATADOG_API_KEY}
+
 siteTypeCategories:
   BUSINESS:
   - GROCERY

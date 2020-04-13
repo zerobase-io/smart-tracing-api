@@ -249,10 +249,27 @@
             <artifactId>s3</artifactId>
         </dependency>
 
+        <!-- Metrics Dependencies -->
+        <dependency>
+            <groupId>org.coursera</groupId>
+            <artifactId>dropwizard-metrics-datadog</artifactId>
+            <version>1.1.14</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
         <!-- Other Dependencies -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
         </dependency>
         <dependency>
             <groupId>com.googlecode.libphonenumber</groupId>
@@ -418,7 +435,10 @@
                             These annotations are useful for compile time linting, I don't want to be pulling them in and out every
                             time we change which annotations we are using. Since it's compile time only, I'm just ignoring it.
                         -->
-                        <dependecy>org.jetbrains:annotations</dependecy>
+                        <dependency>org.jetbrains:annotations</dependency>
+                        <!-- Metrics reporter used via reflection -->
+                        <dependency>org.coursera:dropwizard-metrics-datadog</dependency>
+                        <dependency>org.slf4j:jcl-over-slf4j</dependency>
                         <!-- Used via reflection through the config file -->
                         <dependency>io.dropwizard:dropwizard-json-logging</dependency>
                     </ignoredUnusedDeclaredDependencies>
