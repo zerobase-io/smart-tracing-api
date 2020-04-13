@@ -163,6 +163,8 @@ Resources:
           Value: !Ref StaticResourcesBucket
         - Name: PROJECT_LOG_LEVEL
           Value: !Ref ProjectLogLevel
+        - Name: ENVIRONMENT
+          Value: !Ref Environment
         Image: !Sub 'zerobaseio/smart-tracing-api:${AppVersion}'
         Memory: !Ref Memory
         LogConfiguration:

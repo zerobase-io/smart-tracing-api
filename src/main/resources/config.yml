@@ -30,6 +30,20 @@ logging:
     # Enable errors from body processing
     io.dropwizard.jersey.jackson.JsonProcessingExceptionMapper: DEBUG
 
+metrics:
+  frequency: 1 minute
+  reporters:
+  - type: datadog
+    transport:
+      type: http
+      apiKey: ${DATADOG_API_KEY}
+    dynamicTagsCallback:
+      type: ecs
+    tags:
+    - version:${project.version}
+    - environment:${ENVIRONMENT}
+    - region:${SERVICE_REGION}
+
 database:
   endpoints:
     write: ${WRITE_ENDPOINT}
@@ -52,15 +66,6 @@ notifications:
   staticResourcesBucket: ${STATIC_RESOURCES_BUCKET}
   email:
     fromAddress: ${EMAIL_NOTIFICATION_FROM_ADDRESS:-noreply@zerobase.io}
-
-metrics:
-  frequency: 1 minute
-  reporters:
-    - type: datadog
-      host: https://api.datadoghq.com/api/
-      transport:
-        type: http
-        apiKey: ${DATADOG_API_KEY}
 
 siteTypeCategories:
   BUSINESS:

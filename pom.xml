@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -34,6 +34,7 @@
         <gremlin.version>[3.4.6,4)</gremlin.version>
         <kotlin.compiler.jvmTarget>11</kotlin.compiler.jvmTarget>
         <testcontainers.version>1.13.0</testcontainers.version>
+        <metrics-datadog.version>1.1.14</metrics-datadog.version>
     </properties>
 
     <dependencyManagement>
@@ -253,8 +254,19 @@
         <!-- Metrics Dependencies -->
         <dependency>
             <groupId>org.coursera</groupId>
+            <artifactId>metrics-datadog</artifactId>
+            <version>${metrics-datadog.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.coursera</groupId>
             <artifactId>dropwizard-metrics-datadog</artifactId>
-            <version>1.1.14</version>
+            <version>${metrics-datadog.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>commons-logging</groupId>
