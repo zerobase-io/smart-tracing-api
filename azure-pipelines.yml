@@ -4,7 +4,9 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/java
 
 trigger:
-- master
+  paths:
+    include:
+    - '*' # same as '/' for the repository root
 
 pool:
   vmImage: 'ubuntu-latest'
