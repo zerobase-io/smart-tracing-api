@@ -9,6 +9,8 @@ server:
   requestLog:
     appenders:
     - type: console
+      layout:
+        type: json
       filterFactories:
       - type: noise
         path: healthcheck
@@ -17,6 +19,12 @@ allowedOrigins: ${CORS_ALLOWED_ORIGINS}
 
 logging:
   level: ${ROOT_LOG_LEVEL:-INFO}
+  appenders:
+  - type: console
+    layout:
+      type: json
+      flattenMdc: true
+      timestampFormat: ISO_INSTANT
   loggers:
     io.zerobase: ${PROJECT_LOG_LEVEL:DEBUG}
     # Enable errors from body processing
