@@ -67,6 +67,16 @@ notifications:
   email:
     fromAddress: ${EMAIL_NOTIFICATION_FROM_ADDRESS:-noreply@zerobase.io}
 
+features:
+  - type: organizations
+    enabled: ${ORGANIZATIONS_FEATURE_ENABLED:-false}
+  - type: models
+    enabled: ${MODELS_FEATURE_ENABLED:-false}
+  - type: notifications
+    enabled: ${NOTIFICATIONS_FEATURE_ENABLED:-false}
+  - type: devices
+    enabled: ${DEVICES_FEATURE_ENABLED:-false}
+
 siteTypeCategories:
   BUSINESS:
   - GROCERY
@@ -82,6 +92,5 @@ siteTypeCategories:
   - OTHER
   OTHER:
   - OTHER
-
 scannableTypes:
 - QR_CODE

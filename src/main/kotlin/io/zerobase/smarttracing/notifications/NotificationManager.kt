@@ -5,11 +5,14 @@ import com.google.common.eventbus.Subscribe
 import io.zerobase.smarttracing.models.ContactInfo
 import io.zerobase.smarttracing.models.SimpleOrganizationCreated
 import io.zerobase.smarttracing.utils.LoggerDelegate
+import com.google.inject.Inject
 
+class NotificationManager
+    @Inject constructor(
+        private val emailSender: EmailSender,
+        private val notificationFactory: NotificationFactory
+    ) {
 
-class NotificationManager(private val emailSender: EmailSender,
-                          private val notificationFactory: NotificationFactory
-) {
     companion object {
         val log by LoggerDelegate()
     }

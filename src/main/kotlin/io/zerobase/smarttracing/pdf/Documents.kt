@@ -15,8 +15,13 @@ import java.net.URL
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.util.*
+import com.google.inject.Inject
 
-class DocumentFactory(private val templateEngine: TemplateEngine, private val xhtmlConverter: Tidy) {
+class DocumentFactory
+    @Inject constructor(
+        private val templateEngine: TemplateEngine,
+        private val xhtmlConverter: Tidy
+    ) {
     fun siteOnboarding(organization: Organization, qrCode: ByteArray): SiteOnboarding = SiteOnboarding(organization, qrCode, templateEngine, xhtmlConverter)
 }
 

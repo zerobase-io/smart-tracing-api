@@ -7,6 +7,7 @@ import software.amazon.awssdk.services.ses.SesClient
 import java.io.ByteArrayOutputStream
 import java.nio.charset.StandardCharsets
 import javax.activation.DataHandler
+import com.google.inject.Inject
 import javax.mail.Message
 import javax.mail.Session
 import javax.mail.internet.InternetAddress
@@ -22,7 +23,7 @@ fun RawEmailRequestBuilder.bytes(bytes: ByteArray): RawEmailRequestBuilder {
     }
 }
 
-class AmazonEmailSender(
+class AmazonEmailSender @Inject constructor(
     private val client: SesClient,
     private val session: Session,
     private val fromAddress: String

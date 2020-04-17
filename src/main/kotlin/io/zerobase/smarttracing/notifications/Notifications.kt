@@ -12,6 +12,7 @@ import org.thymeleaf.TemplateEngine
 import org.thymeleaf.context.Context
 import java.io.InputStream
 import java.util.*
+import com.google.inject.Inject
 
 data class NotificationRequest(val notification: Notification, val contactInfo: ContactInfo)
 
@@ -19,12 +20,14 @@ enum class NotificationMedium {
     EMAIL
 }
 
-class NotificationFactory(
-    private val templateEngine: TemplateEngine,
-    private val documentFactory: DocumentFactory,
-    private val qrCodeGenerator: QRCodeGenerator,
-    private val staticResourceLoader: StaticResourceLoader
-) {
+class NotificationFactory
+    @Inject constructor (
+        private val templateEngine: TemplateEngine,
+        private val documentFactory: DocumentFactory,
+        private val qrCodeGenerator: QRCodeGenerator,
+        private val staticResourceLoader: StaticResourceLoader
+    ) {
+
     fun simpleBusinessOnboarding(organization: Organization, defaultQrCode: ScannableId)
         = SimpleBusinessOnboarding(templateEngine, documentFactory, qrCodeGenerator, staticResourceLoader, organization, defaultQrCode)
 }

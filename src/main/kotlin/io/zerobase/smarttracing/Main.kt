@@ -11,12 +11,12 @@ import com.google.common.io.Resources
 import com.google.common.util.concurrent.ThreadFactoryBuilder
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import io.dropwizard.Application
-import io.dropwizard.Configuration
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor
 import io.dropwizard.configuration.SubstitutingSourceProvider
 import io.dropwizard.setup.Bootstrap
 import io.dropwizard.setup.Environment
-import io.zerobase.smarttracing.config.GraphDatabaseFactory
+import io.zerobase.smarttracing.config.AppConfig
+import io.zerobase.smarttracing.features.notifications.NotificationsBundle
 import io.zerobase.smarttracing.healthchecks.NeptuneHealthCheck
 import io.zerobase.smarttracing.notifications.AmazonEmailSender
 import io.zerobase.smarttracing.notifications.NotificationFactory
@@ -24,17 +24,20 @@ import io.zerobase.smarttracing.notifications.NotificationManager
 import io.zerobase.smarttracing.notifications.S3StaticResourceLoader
 import io.zerobase.smarttracing.pdf.DocumentFactory
 import io.zerobase.smarttracing.qr.QRCodeGenerator
-import io.zerobase.smarttracing.resources.*
+import io.zerobase.smarttracing.resources.CreatorFilter
+import io.zerobase.smarttracing.resources.TraceIdFilter
 import io.zerobase.smarttracing.utils.LoggerDelegate
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource
 import org.eclipse.jetty.servlets.CrossOriginFilter
 import org.thymeleaf.TemplateEngine
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver
 import org.w3c.tidy.Tidy
+import ru.vyarus.dropwizard.guice.GuiceBundle
+import ru.vyarus.dropwizard.guice.GuiceyOptions
+import ru.vyarus.guicey.eventbus.EventBusBundle
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.ses.SesClient
-import java.net.URI
 import java.nio.charset.StandardCharsets
 import java.time.Duration
 import java.util.*
@@ -47,37 +50,32 @@ import javax.servlet.DispatcherType
 import javax.servlet.FilterRegistration
 import javax.ws.rs.core.UriBuilder
 
-typealias MultiMap<K, V> = Map<K, List<V>>
-
-data class AmazonEmailConfig(val region: Region, val endpoint: URI? = null)
-data class S3Config(val region: Region, val endpoint: URI? = null)
-data class AmazonConfig(val ses: AmazonEmailConfig, val s3: S3Config)
-data class EmailNotificationConfig(val fromAddress: String)
-data class NotificationConfig(
-    val email: EmailNotificationConfig,
-    val templateLocation: String = "notifications",
-    val staticResourcesBucket: String
-)
-data class Config(
-        val database: GraphDatabaseFactory = GraphDatabaseFactory(),
-        val siteTypeCategories: MultiMap<String, String>,
-        val scannableTypes: List<String>,
-        val aws: AmazonConfig,
-        val notifications: NotificationConfig,
-        val baseQrCodeLink: URI,
-        val allowedOrigins: String
-): Configuration()
-
 fun main(vararg args: String) {
     Main().run(*args)
 }
 
-class Main : Application<Config>() {
+class Main : Application<AppConfig>() {
     companion object {
         val log by LoggerDelegate()
     }
 
-    override fun initialize(bootstrap: Bootstrap<Config>) {
+    val eventBus = AsyncEventBus(
+        saneThreadPool("default-event-bus"),
+        SubscriberExceptionHandler { exception, context ->
+            log.warn(
+                "event handler failed. bus={} handler={}.{} event={}",
+                context.eventBus.identifier(), context.subscriber::class, context.subscriberMethod.name, context.event, exception
+            )
+        }
+    )
+
+    val guiceBundle = GuiceBundle.builder()
+        .modules(AppModule())
+        .bundles(EventBusBundle(eventBus), NotificationsBundle())
+        .extensions()
+        .build()
+
+    override fun initialize(bootstrap: Bootstrap<AppConfig>) {
         bootstrap.objectMapper.registerModules(KotlinModule(), SimpleModule().addDeserializer(Region::class.java, object : JsonDeserializer<Region>() {
             override fun deserialize(p: JsonParser, ctxt: DeserializationContext): Region = Region.of(p.valueAsString)
         }))
@@ -85,80 +83,23 @@ class Main : Application<Config>() {
             bootstrap.configurationSourceProvider,
             EnvironmentVariableSubstitutor(false)
         )
+
+        bootstrap.addBundle(guiceBundle)
     }
 
-    override fun run(config: Config, env: Environment) {
-        val graph: GraphTraversalSource = config.database.build(env)
-
-        val session = Session.getDefaultInstance(Properties())
-
-        /**
-         * For phone number verification.
-         */
-        val phoneUtil = PhoneNumberUtil.getInstance()
-
-        // For emails
-        val sesClientBuilder = SesClient.builder().region(config.aws.ses.region)
-        config.aws.ses.endpoint?.let(sesClientBuilder::endpointOverride)
-        val emailSender = AmazonEmailSender(sesClientBuilder.build(), session, config.notifications.email.fromAddress)
-
-        val resolver = ClassLoaderTemplateResolver().apply {
-            suffix = ".html"
-            characterEncoding = StandardCharsets.UTF_8.displayName()
-        }
-        val templateEngine = TemplateEngine().apply {
-            templateResolvers = setOf(resolver)
-        }
-
-        val dao = GraphDao(graph, phoneUtil)
-
-        val eventBus = AsyncEventBus(
-            saneThreadPool("default-event-bus"),
-            SubscriberExceptionHandler { exception, context ->
-                log.warn(
-                    "event handler failed. bus={} handler={}.{} event={}",
-                    context.eventBus.identifier(), context.subscriber::class, context.subscriberMethod.name, context.event, exception
-                )
-            }
-        )
-
-        val documentFactory = DocumentFactory(templateEngine, Tidy().apply {
-            inputEncoding = StandardCharsets.UTF_8.displayName()
-            outputEncoding = StandardCharsets.UTF_8.displayName()
-            xhtml = true
-        })
-
-        val qrCodeGenerator = QRCodeGenerator(
-            baseLink = UriBuilder.fromUri(config.baseQrCodeLink).path("{code}"),
-            logo = Resources.getResource("qr/qr-code-logo.png")
-        )
-        val s3ClientBuilder = S3Client.builder().region(config.aws.s3.region)
-        config.aws.s3.endpoint?.let(s3ClientBuilder::endpointOverride)
-        val s3 = s3ClientBuilder.build()
-        val staticResourceLoader = S3StaticResourceLoader(s3, config.notifications.staticResourcesBucket)
-        val notificationFactory = NotificationFactory(templateEngine, documentFactory, qrCodeGenerator, staticResourceLoader)
-        val notificationManager = NotificationManager(emailSender, notificationFactory)
-
-        eventBus.register(notificationManager)
-
+    override fun run(config: AppConfig, env: Environment) {
         env.jersey().register(TraceIdFilter())
         env.jersey().register(InvalidPhoneNumberExceptionMapper())
         env.jersey().register(InvalidIdExceptionMapper())
         env.jersey().register(CreatorFilter())
-        env.jersey().register(OrganizationsResource(dao, config.siteTypeCategories, config.scannableTypes, eventBus))
-        env.jersey().register(DevicesResource(dao))
-        env.jersey().register(UsersResource(dao))
-        env.jersey().register(ModelsResource(config.siteTypeCategories, config.scannableTypes))
 
-        env.healthChecks().register("neptune", NeptuneHealthCheck(graph))
+        config.featureFactories.forEach { it.build(env, config, guiceBundle.injector) }
 
         addCorsFilter(config.allowedOrigins, env)
     }
 
     private fun addCorsFilter(allowedOrigins: String, env: Environment) {
         val cors: FilterRegistration.Dynamic = env.servlets().addFilter("CORS", CrossOriginFilter::class.java)
-
-        // Configure CORS parameters
 
         // Configure CORS parameters
         cors.setInitParameter(CrossOriginFilter.ALLOWED_ORIGINS_PARAM, allowedOrigins)

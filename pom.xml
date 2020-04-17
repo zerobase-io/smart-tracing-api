@@ -76,6 +76,10 @@
                         <groupId>jakarta.activation</groupId>
                         <artifactId>jakarta.activation-api</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>org.glassfish.hk2.external</groupId>
+                        <artifactId>aopalliance-repackaged</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
@@ -145,6 +149,11 @@
                     </exclusion>
                 </exclusions>
             </dependency>
+            <dependency>
+                <groupId>ru.vyarus</groupId>
+                <artifactId>dropwizard-guicey</artifactId>
+                <version>5.0.1</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -187,6 +196,10 @@
         <dependency>
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-json-logging</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.dropwizard</groupId>
+            <artifactId>dropwizard-jackson</artifactId>
         </dependency>
 
         <!-- Jackson Dependencies -->
@@ -367,16 +380,26 @@
             <version>3.3.0</version>
         </dependency>
         <dependency>
-            <groupId>org.glassfish.hk2</groupId>
-            <artifactId>hk2-api</artifactId>
-        </dependency>
-        <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ru.vyarus</groupId>
+            <artifactId>dropwizard-guicey</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ru.vyarus.guicey</groupId>
+            <artifactId>guicey-eventbus</artifactId>
+            <version>5.0.1-1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.inject</groupId>
+            <artifactId>guice</artifactId>
+            <version>[4.2.2,5)</version>
         </dependency>
 
         <!-- Test Dependencies -->
