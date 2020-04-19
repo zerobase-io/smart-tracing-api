@@ -1,8 +1,8 @@
 package io.zerobase.smarttracing.notifications
 
+import com.google.inject.Inject
 import software.amazon.awssdk.services.s3.S3Client
 import java.io.InputStream
-import com.google.inject.Inject
 
 class S3StaticResourceLoader
     @Inject constructor(

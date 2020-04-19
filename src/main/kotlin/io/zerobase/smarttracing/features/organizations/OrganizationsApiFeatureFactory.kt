@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonTypeName
 import com.google.common.eventbus.EventBus
 import com.google.inject.Injector
 import io.dropwizard.setup.Environment
-import io.zerobase.smarttracing.GraphDao
 import io.zerobase.smarttracing.config.AppConfig
 import io.zerobase.smarttracing.features.FeatureFactory
 
@@ -13,7 +12,7 @@ class OrganizationsApiFeatureFactory(override val enabled: Boolean) : FeatureFac
     override fun build(env: Environment, config: AppConfig, injector: Injector) {
         if (enabled) {
             env.jersey().register(OrganizationsResource(
-                injector.getInstance(GraphDao::class.java),
+                injector.getInstance(OrganizationsDao::class.java),
                 config.siteTypeCategories,
                 config.scannableTypes,
                 injector.getInstance(EventBus::class.java)

@@ -1,7 +1,7 @@
-package io.zerobase.smarttracing.resources
+package io.zerobase.smarttracing.features.devices
 
-import io.zerobase.smarttracing.GraphDao
 import io.zerobase.smarttracing.models.*
+import io.zerobase.smarttracing.resources.Creator
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
 
@@ -14,17 +14,16 @@ enum class ScanType {
 data class CreateDeviceRequest(val fingerprint: String?)
 
 data class CreateCheckInRequest(
-        val scannedId: String,
-        val type: ScanType,
-        val location: Location?
+    val scannedId: String,
+    val type: ScanType,
+    val location: Location?
 )
-
 //endregion
 
 @Path("/devices")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-class DevicesResource(val dao: GraphDao) {
+class DevicesResource(val dao: DevicesDao) {
 
     @POST
     @Creator

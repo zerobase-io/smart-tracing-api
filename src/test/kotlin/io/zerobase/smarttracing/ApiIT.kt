@@ -3,11 +3,11 @@ package io.zerobase.smarttracing
 import io.dropwizard.testing.ConfigOverride
 import io.dropwizard.testing.junit5.DropwizardAppExtension
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport
-import io.zerobase.smarttracing.models.Address
 import io.zerobase.smarttracing.features.organizations.Contact
 import io.zerobase.smarttracing.features.organizations.CreateOrganizationRequest
 import io.zerobase.smarttracing.features.organizations.OrganizationsResource
 import io.zerobase.smarttracing.features.organizations.SiteResponse
+import io.zerobase.smarttracing.models.Address
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith

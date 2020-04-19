@@ -1,6 +1,7 @@
 package io.zerobase.smarttracing.pdf
 
 import com.google.common.io.Resources
+import com.google.inject.Inject
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import io.zerobase.smarttracing.models.Organization
 import io.zerobase.smarttracing.utils.LoggerDelegate
@@ -15,7 +16,6 @@ import java.net.URL
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.util.*
-import com.google.inject.Inject
 
 class DocumentFactory
     @Inject constructor(

@@ -2,10 +2,10 @@ package io.zerobase.smarttracing.notifications
 
 import com.google.common.eventbus.AllowConcurrentEvents
 import com.google.common.eventbus.Subscribe
+import com.google.inject.Inject
 import io.zerobase.smarttracing.models.ContactInfo
 import io.zerobase.smarttracing.models.SimpleOrganizationCreated
 import io.zerobase.smarttracing.utils.LoggerDelegate
-import com.google.inject.Inject
 
 class NotificationManager
     @Inject constructor(

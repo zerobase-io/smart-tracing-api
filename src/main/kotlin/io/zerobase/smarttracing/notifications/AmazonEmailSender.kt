@@ -1,13 +1,13 @@
 package io.zerobase.smarttracing.notifications
 
 import com.google.common.net.MediaType
+import com.google.inject.Inject
 import io.zerobase.smarttracing.utils.LoggerDelegate
 import software.amazon.awssdk.core.SdkBytes
 import software.amazon.awssdk.services.ses.SesClient
 import java.io.ByteArrayOutputStream
 import java.nio.charset.StandardCharsets
 import javax.activation.DataHandler
-import com.google.inject.Inject
 import javax.mail.Message
 import javax.mail.Session
 import javax.mail.internet.InternetAddress

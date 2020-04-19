@@ -2,6 +2,7 @@ package io.zerobase.smarttracing.notifications
 
 import com.google.common.io.Resources
 import com.google.common.net.MediaType
+import com.google.inject.Inject
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import io.zerobase.smarttracing.models.ContactInfo
 import io.zerobase.smarttracing.models.Organization
@@ -12,7 +13,6 @@ import org.thymeleaf.TemplateEngine
 import org.thymeleaf.context.Context
 import java.io.InputStream
 import java.util.*
-import com.google.inject.Inject
 
 data class NotificationRequest(val notification: Notification, val contactInfo: ContactInfo)
 

@@ -4,6 +4,7 @@ import com.google.common.io.Resources
 import com.google.inject.AbstractModule
 import com.google.inject.Provides
 import com.google.inject.Scopes
+import com.google.inject.Singleton
 import io.zerobase.smarttracing.config.AmazonEmailConfig
 import io.zerobase.smarttracing.config.S3Config
 import io.zerobase.smarttracing.notifications.*
@@ -17,11 +18,10 @@ import software.amazon.awssdk.services.ses.SesClient
 import java.net.URI
 import java.nio.charset.StandardCharsets
 import java.util.*
-import com.google.inject.Singleton
 import javax.mail.Session
 import javax.ws.rs.core.UriBuilder
 
-class NotificaationModule : AbstractModule() {
+class NotificationModule : AbstractModule() {
     override fun configure() {
         bind(Session::class.java).toInstance(Session.getDefaultInstance(Properties()))
         bind(EmailSender::class.java).to(AmazonEmailSender::class.java).`in`(Scopes.SINGLETON)

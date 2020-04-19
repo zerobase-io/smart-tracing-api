@@ -7,9 +7,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.google.common.eventbus.AsyncEventBus
 import com.google.common.eventbus.SubscriberExceptionHandler
-import com.google.common.io.Resources
 import com.google.common.util.concurrent.ThreadFactoryBuilder
-import com.google.i18n.phonenumbers.PhoneNumberUtil
 import io.dropwizard.Application
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor
 import io.dropwizard.configuration.SubstitutingSourceProvider
@@ -17,38 +15,23 @@ import io.dropwizard.setup.Bootstrap
 import io.dropwizard.setup.Environment
 import io.zerobase.smarttracing.config.AppConfig
 import io.zerobase.smarttracing.features.notifications.NotificationsBundle
-import io.zerobase.smarttracing.healthchecks.NeptuneHealthCheck
-import io.zerobase.smarttracing.notifications.AmazonEmailSender
-import io.zerobase.smarttracing.notifications.NotificationFactory
-import io.zerobase.smarttracing.notifications.NotificationManager
-import io.zerobase.smarttracing.notifications.S3StaticResourceLoader
-import io.zerobase.smarttracing.pdf.DocumentFactory
-import io.zerobase.smarttracing.qr.QRCodeGenerator
 import io.zerobase.smarttracing.resources.CreatorFilter
+import io.zerobase.smarttracing.resources.InvalidIdExceptionMapper
+import io.zerobase.smarttracing.resources.InvalidPhoneNumberExceptionMapper
 import io.zerobase.smarttracing.resources.TraceIdFilter
 import io.zerobase.smarttracing.utils.LoggerDelegate
-import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource
 import org.eclipse.jetty.servlets.CrossOriginFilter
-import org.thymeleaf.TemplateEngine
-import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver
-import org.w3c.tidy.Tidy
 import ru.vyarus.dropwizard.guice.GuiceBundle
-import ru.vyarus.dropwizard.guice.GuiceyOptions
 import ru.vyarus.guicey.eventbus.EventBusBundle
 import software.amazon.awssdk.regions.Region
-import software.amazon.awssdk.services.s3.S3Client
-import software.amazon.awssdk.services.ses.SesClient
-import java.nio.charset.StandardCharsets
 import java.time.Duration
 import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.SynchronousQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
-import javax.mail.Session
 import javax.servlet.DispatcherType
 import javax.servlet.FilterRegistration
-import javax.ws.rs.core.UriBuilder
 
 fun main(vararg args: String) {
     Main().run(*args)

@@ -3,7 +3,6 @@ package io.zerobase.smarttracing.features.organizations
 import com.google.common.collect.Multimap
 import com.google.common.eventbus.EventBus
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
-import io.zerobase.smarttracing.GraphDao
 import io.zerobase.smarttracing.models.*
 import io.zerobase.smarttracing.resources.Creator
 import io.zerobase.smarttracing.utils.LoggerDelegate
@@ -48,7 +47,7 @@ data class SiteResponse(val id: String, val name: String)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 class OrganizationsResource(
-    private val dao: GraphDao,
+    private val dao: OrganizationsDao,
     private val siteTypes: Multimap<String, String>,
     private val scanTypes: List<String>,
     private val eventBus: EventBus
