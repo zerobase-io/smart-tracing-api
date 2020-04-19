@@ -67,6 +67,7 @@ notifications:
   email:
     fromAddress: ${EMAIL_NOTIFICATION_FROM_ADDRESS:-noreply@zerobase.io}
 
+enableAllFeatures: false
 features:
   - type: organizations
     enabled: ${ORGANIZATIONS_FEATURE_ENABLED:-false}

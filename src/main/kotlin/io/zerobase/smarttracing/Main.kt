@@ -15,6 +15,7 @@ import io.dropwizard.setup.Bootstrap
 import io.dropwizard.setup.Environment
 import io.zerobase.smarttracing.config.AppConfig
 import io.zerobase.smarttracing.features.notifications.NotificationsBundle
+import io.zerobase.smarttracing.healthchecks.NeptuneHealthCheck
 import io.zerobase.smarttracing.resources.CreatorFilter
 import io.zerobase.smarttracing.resources.InvalidIdExceptionMapper
 import io.zerobase.smarttracing.resources.InvalidPhoneNumberExceptionMapper
@@ -55,7 +56,7 @@ class Main : Application<AppConfig>() {
     val guiceBundle = GuiceBundle.builder()
         .modules(AppModule())
         .bundles(EventBusBundle(eventBus), NotificationsBundle())
-        .extensions()
+        .extensions(NeptuneHealthCheck::class.java)
         .build()
 
     override fun initialize(bootstrap: Bootstrap<AppConfig>) {

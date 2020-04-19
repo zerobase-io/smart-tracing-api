@@ -10,7 +10,7 @@ import io.zerobase.smarttracing.features.FeatureFactory
 @JsonTypeName("organizations")
 class OrganizationsApiFeatureFactory(override val enabled: Boolean) : FeatureFactory {
     override fun build(env: Environment, config: AppConfig, injector: Injector) {
-        if (enabled) {
+        if (enabled || config.enableAllFeatures) {
             env.jersey().register(OrganizationsResource(
                 injector.getInstance(OrganizationsDao::class.java),
                 config.siteTypeCategories,

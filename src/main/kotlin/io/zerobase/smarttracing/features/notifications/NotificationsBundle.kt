@@ -8,7 +8,7 @@ class NotificationsBundle: GuiceyBundle {
     override fun run(environment: GuiceyEnvironment) {
         val config = environment.configuration<AppConfig>()
         val factory = config.featureFactories.first { it is NotificationsFeatureFactory }
-        if (factory.enabled) {
+        if (factory.enabled || config.enableAllFeatures) {
             environment.modules(NotificationModule())
         }
     }

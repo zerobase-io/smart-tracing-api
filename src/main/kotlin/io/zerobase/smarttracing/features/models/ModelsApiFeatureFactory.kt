@@ -10,9 +10,8 @@ import io.zerobase.smarttracing.features.FeatureFactory
 class ModelsApiFeatureFactory(
     override val enabled: Boolean
 ) : FeatureFactory {
-
     override fun build(env: Environment, config: AppConfig, injector: Injector) {
-        if (enabled) {
+        if (enabled || config.enableAllFeatures) {
             env.jersey().register(ModelsResource(config.siteTypeCategories, config.scannableTypes))
         }
     }

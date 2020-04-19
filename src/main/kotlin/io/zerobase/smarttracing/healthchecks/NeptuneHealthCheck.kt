@@ -1,6 +1,7 @@
 package io.zerobase.smarttracing.healthchecks
 
 import com.codahale.metrics.health.annotation.Async
+import com.google.inject.Inject
 import io.zerobase.smarttracing.utils.LoggerDelegate
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource
 import org.slf4j.MarkerFactory
@@ -8,7 +9,7 @@ import ru.vyarus.dropwizard.guice.module.installer.feature.health.NamedHealthChe
 import java.util.concurrent.TimeUnit
 
 @Async(period = 2, unit = TimeUnit.SECONDS)
-class NeptuneHealthCheck(private val graph: GraphTraversalSource) : NamedHealthCheck() {
+class NeptuneHealthCheck @Inject constructor(private val graph: GraphTraversalSource) : NamedHealthCheck() {
     companion object {
         private val log by LoggerDelegate()
         private val MARKER = MarkerFactory.getMarker("healthcheck")

@@ -31,15 +31,12 @@ notifications:
   email:
     fromAddress: ${NOTIFICATION_FROM_EMAIL_ADDRESS:-noreply@zerobase.io}
 
+enableAllFeatures: true
 features:
   - type: organizations
-    enabled: true
   - type: models
-    enabled: true
   - type: notifications
-    enabled: true
   - type: devices
-    enabled: true
 
 siteTypeCategories:
   BUSINESS:

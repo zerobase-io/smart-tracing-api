@@ -30,7 +30,7 @@ class ApiIT {
     companion object {
         @JvmStatic
         @Container
-        val database: KGenericContainer = KGenericContainer("tinkerpop/gremlin-server:latest")
+        val database: KGenericContainer = KGenericContainer("tinkerpop/gremlin-server:3.4")
             .withExposedPorts(8182)
             .withClasspathResourceMapping(
                 "tinkergraph-overrides.properties",
@@ -40,11 +40,12 @@ class ApiIT {
 
         @JvmStatic
         @Container
-        val aws = LocalStackContainer().withServices(SES, S3)
+        val aws: LocalStackContainer = LocalStackContainer().withServices(SES, S3)
 
         @JvmStatic
         val app = DropwizardAppExtension(Main::class.java, "src/main/resources/config.yml",
             ConfigOverride.config("server.connector.port", "0"),
+            ConfigOverride.config("enableAllFeatures", "true"),
             ConfigOverride.config("allowedOrigins", "'*'"),
             ConfigOverride.config("database.endpoints.write", database::getContainerIpAddress),
             ConfigOverride.config("database.port") { "${database.getMappedPort(8182)}" },

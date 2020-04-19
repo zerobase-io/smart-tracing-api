@@ -9,7 +9,7 @@ import io.zerobase.smarttracing.features.FeatureFactory
 @JsonTypeName("devices")
 class DevicesApiFeatureFactory(override val enabled: Boolean): FeatureFactory {
     override fun build(env: Environment, config: AppConfig, injector: Injector) {
-        if (enabled) {
+        if (enabled || config.enableAllFeatures) {
             env.jersey().register(DevicesResource(injector.getInstance(DevicesDao::class.java)))
             env.jersey().register(UsersResource(injector.getInstance(UsersDao::class.java)))
         }

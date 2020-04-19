@@ -29,6 +29,8 @@ data class AppConfig(
     val allowedOrigins: String,
     val siteTypeCategories: Multimap<String, String>,
     val scannableTypes: List<String>,
+    // Workaround for tests
+    val enableAllFeatures: Boolean,
     @JsonProperty("features")
     val featureFactories: List<FeatureFactory>
 ): Configuration()

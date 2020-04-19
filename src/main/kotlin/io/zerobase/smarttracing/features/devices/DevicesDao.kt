@@ -1,5 +1,6 @@
 package io.zerobase.smarttracing.features.devices
 
+import com.google.inject.Inject
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import io.zerobase.smarttracing.gremlin.execute
 import io.zerobase.smarttracing.gremlin.getIfPresent
@@ -9,7 +10,7 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
 import org.apache.tinkerpop.gremlin.structure.T
 import java.util.*
 
-class DevicesDao(private val graph: GraphTraversalSource) {
+class DevicesDao @Inject constructor(private val graph: GraphTraversalSource) {
     companion object {
         private val log by LoggerDelegate()
     }

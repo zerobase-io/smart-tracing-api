@@ -8,10 +8,11 @@ import io.dropwizard.setup.Environment
 import io.zerobase.smarttracing.config.GraphDatabaseFactory
 import io.zerobase.smarttracing.config.GraphDatabaseFactory.Mode.WRITE
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource
+import ru.vyarus.dropwizard.guice.module.yaml.bind.Config
 
 class AppModule: AbstractModule() {
 
     @Provides
     @Singleton
-    fun graph(env: Environment, factory: GraphDatabaseFactory): GraphTraversalSource = factory.build(env, WRITE)
+    fun graph(env: Environment, @Config factory: GraphDatabaseFactory): GraphTraversalSource = factory.build(env, WRITE)
 }
