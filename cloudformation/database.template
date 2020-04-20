@@ -26,6 +26,7 @@ Parameters:
   InstanceType:
     Type: String
     AllowedValues:
+    - db.t3.medium
     - db.r5.large
     - db.r5.xlarge
     - db.r5.2xlarge
@@ -39,6 +40,7 @@ Parameters:
   ReplicaInstanceType:
     Type: String
     AllowedValues:
+    - db.t3.medium
     - db.r5.large
     - db.r5.xlarge
     - db.r5.2xlarge
