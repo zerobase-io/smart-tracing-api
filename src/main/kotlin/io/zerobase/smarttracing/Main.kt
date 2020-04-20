@@ -23,6 +23,8 @@ import io.zerobase.smarttracing.resources.TraceIdFilter
 import io.zerobase.smarttracing.utils.LoggerDelegate
 import org.eclipse.jetty.servlets.CrossOriginFilter
 import ru.vyarus.dropwizard.guice.GuiceBundle
+import ru.vyarus.dropwizard.guice.GuiceyOptions
+import ru.vyarus.dropwizard.guice.module.installer.feature.jersey.provider.JerseyProviderInstaller
 import ru.vyarus.guicey.eventbus.EventBusBundle
 import software.amazon.awssdk.regions.Region
 import java.time.Duration
@@ -55,8 +57,8 @@ class Main : Application<AppConfig>() {
 
     val guiceBundle = GuiceBundle.builder()
         .modules(AppModule())
+        .option(GuiceyOptions.UseCoreInstallers, true)
         .bundles(EventBusBundle(eventBus), NotificationsBundle())
-        .extensions(NeptuneHealthCheck::class.java)
         .build()
 
     override fun initialize(bootstrap: Bootstrap<AppConfig>) {
