@@ -3,6 +3,7 @@ package io.zerobase.smarttracing.notifications
 import com.google.common.net.MediaType
 import com.google.inject.Inject
 import io.zerobase.smarttracing.utils.LoggerDelegate
+import ru.vyarus.dropwizard.guice.module.yaml.bind.Config
 import software.amazon.awssdk.core.SdkBytes
 import software.amazon.awssdk.services.ses.SesClient
 import java.io.ByteArrayOutputStream
@@ -26,7 +27,7 @@ fun RawEmailRequestBuilder.bytes(bytes: ByteArray): RawEmailRequestBuilder {
 class AmazonEmailSender @Inject constructor(
     private val client: SesClient,
     private val session: Session,
-    private val fromAddress: String
+    @Config("notifications.email.fromAddress") private val fromAddress: String
 ) : EmailSender {
     companion object {
         private val log by LoggerDelegate()
