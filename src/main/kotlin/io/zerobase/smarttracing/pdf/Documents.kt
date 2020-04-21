@@ -1,6 +1,7 @@
 package io.zerobase.smarttracing.pdf
 
 import com.google.common.io.Resources
+import com.google.inject.Inject
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import io.zerobase.smarttracing.models.Organization
 import io.zerobase.smarttracing.utils.LoggerDelegate
@@ -16,7 +17,11 @@ import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.util.*
 
-class DocumentFactory(private val templateEngine: TemplateEngine, private val xhtmlConverter: Tidy) {
+class DocumentFactory
+    @Inject constructor(
+        private val templateEngine: TemplateEngine,
+        private val xhtmlConverter: Tidy
+    ) {
     fun siteOnboarding(organization: Organization, qrCode: ByteArray): SiteOnboarding = SiteOnboarding(organization, qrCode, templateEngine, xhtmlConverter)
 }
 

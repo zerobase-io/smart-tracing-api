@@ -2,6 +2,7 @@ package io.zerobase.smarttracing.notifications
 
 import com.google.common.io.Resources
 import com.google.common.net.MediaType
+import com.google.inject.Inject
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import io.zerobase.smarttracing.models.ContactInfo
 import io.zerobase.smarttracing.models.Organization
@@ -19,12 +20,14 @@ enum class NotificationMedium {
     EMAIL
 }
 
-class NotificationFactory(
-    private val templateEngine: TemplateEngine,
-    private val documentFactory: DocumentFactory,
-    private val qrCodeGenerator: QRCodeGenerator,
-    private val staticResourceLoader: StaticResourceLoader
-) {
+class NotificationFactory
+    @Inject constructor (
+        private val templateEngine: TemplateEngine,
+        private val documentFactory: DocumentFactory,
+        private val qrCodeGenerator: QRCodeGenerator,
+        private val staticResourceLoader: StaticResourceLoader
+    ) {
+
     fun simpleBusinessOnboarding(organization: Organization, defaultQrCode: ScannableId)
         = SimpleBusinessOnboarding(templateEngine, documentFactory, qrCodeGenerator, staticResourceLoader, organization, defaultQrCode)
 }

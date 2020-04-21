@@ -1,4 +1,4 @@
-package io.zerobase.smarttracing
+package io.zerobase.smarttracing.resources
 
 import io.dropwizard.jersey.errors.ErrorMessage
 import io.dropwizard.jersey.errors.LoggingExceptionMapper

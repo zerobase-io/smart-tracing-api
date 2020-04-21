@@ -165,6 +165,15 @@ Resources:
           Value: !Ref ProjectLogLevel
         - Name: ENVIRONMENT
           Value: !Ref Environment
+        # TODO: Split these into multiple tasks
+        - Name: ORGANIZATIONS_FEATURE_ENABLED
+          Value: true
+        - Name: MODELS_FEATURE_ENABLED
+          Value: true
+        - Name: NOTIFICATIONS_FEATURE_ENABLED
+          Value: true
+        - Name: DEVICES_FEATURE_ENABLED
+          Value: true
         Image: !Sub 'zerobaseio/smart-tracing-api:${AppVersion}'
         Memory: !Ref Memory
         LogConfiguration:

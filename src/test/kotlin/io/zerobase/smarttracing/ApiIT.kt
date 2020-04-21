@@ -3,11 +3,11 @@ package io.zerobase.smarttracing
 import io.dropwizard.testing.ConfigOverride
 import io.dropwizard.testing.junit5.DropwizardAppExtension
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport
+import io.zerobase.smarttracing.features.organizations.Contact
+import io.zerobase.smarttracing.features.organizations.CreateOrganizationRequest
+import io.zerobase.smarttracing.features.organizations.OrganizationsResource
+import io.zerobase.smarttracing.features.organizations.SiteResponse
 import io.zerobase.smarttracing.models.Address
-import io.zerobase.smarttracing.resources.Contact
-import io.zerobase.smarttracing.resources.CreateOrganizationRequest
-import io.zerobase.smarttracing.resources.OrganizationsResource
-import io.zerobase.smarttracing.resources.SiteResponse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -30,7 +30,7 @@ class ApiIT {
     companion object {
         @JvmStatic
         @Container
-        val database: KGenericContainer = KGenericContainer("tinkerpop/gremlin-server:latest")
+        val database: KGenericContainer = KGenericContainer("tinkerpop/gremlin-server:3.4")
             .withExposedPorts(8182)
             .withClasspathResourceMapping(
                 "tinkergraph-overrides.properties",
@@ -40,11 +40,12 @@ class ApiIT {
 
         @JvmStatic
         @Container
-        val aws = LocalStackContainer().withServices(SES, S3)
+        val aws: LocalStackContainer = LocalStackContainer().withServices(SES, S3)
 
         @JvmStatic
         val app = DropwizardAppExtension(Main::class.java, "src/main/resources/config.yml",
             ConfigOverride.config("server.connector.port", "0"),
+            ConfigOverride.config("enableAllFeatures", "true"),
             ConfigOverride.config("allowedOrigins", "'*'"),
             ConfigOverride.config("database.endpoints.write", database::getContainerIpAddress),
             ConfigOverride.config("database.port") { "${database.getMappedPort(8182)}" },
@@ -67,8 +68,8 @@ class ApiIT {
     @Test
     fun shouldCreateOrganization() {
         val request = CreateOrganizationRequest("test-org", Contact("+12225551234", "test@zerobase.io", "Testy McTesterson"),
-            Address("123", "Happy St", "Fryburg", "CA", "90210", "USA"),
-            hasTestingFacilities = false, hasMultipleSites = false
+                Address("123", "Happy St", "Fryburg", "CA", "90210", "USA"),
+                hasTestingFacilities = false, hasMultipleSites = false
         )
 
         val createResponse: Map<String,String> = app.client().target(UriBuilder.fromUri("http://localhost:${app.getPort(0)}")

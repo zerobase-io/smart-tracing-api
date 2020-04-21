@@ -24,5 +24,9 @@ jobs:
         path: ~/.m2
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2
+    - name: Pull Docker Images for Testing
+      run: |
+        docker pull tinkerpop/gremlin-server:3.4
+        docker pull localstack/localstack:0.9.4
     - name: Build and test
       run: mvn -B verify

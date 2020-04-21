@@ -2,14 +2,17 @@ package io.zerobase.smarttracing.notifications
 
 import com.google.common.eventbus.AllowConcurrentEvents
 import com.google.common.eventbus.Subscribe
+import com.google.inject.Inject
 import io.zerobase.smarttracing.models.ContactInfo
 import io.zerobase.smarttracing.models.SimpleOrganizationCreated
 import io.zerobase.smarttracing.utils.LoggerDelegate
 
+class NotificationManager
+    @Inject constructor(
+        private val emailSender: EmailSender,
+        private val notificationFactory: NotificationFactory
+    ) {
 
-class NotificationManager(private val emailSender: EmailSender,
-                          private val notificationFactory: NotificationFactory
-) {
     companion object {
         val log by LoggerDelegate()
     }

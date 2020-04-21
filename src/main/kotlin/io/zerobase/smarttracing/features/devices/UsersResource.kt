@@ -1,9 +1,7 @@
-package io.zerobase.smarttracing.resources
+package io.zerobase.smarttracing.features.devices
 
-import io.zerobase.smarttracing.GraphDao
 import io.zerobase.smarttracing.models.*
-import io.zerobase.smarttracing.notifications.NotificationFactory
-import io.zerobase.smarttracing.notifications.NotificationManager
+import io.zerobase.smarttracing.resources.Creator
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
 
@@ -16,15 +14,15 @@ data class ContactUser(
 )
 
 data class CreateUserRequest(
-    val name: String?,
-    val contact: ContactUser,
-    val deviceId: String
+        val name: String?,
+        val contact: ContactUser,
+        val deviceId: String
 )
 
 @Path("/users")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-class UsersResource(val dao: GraphDao) {
+class UsersResource(val dao: UsersDao) {
 
     @POST
     @Creator

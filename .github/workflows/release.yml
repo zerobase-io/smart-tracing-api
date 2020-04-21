@@ -27,7 +27,7 @@ jobs:
         restore-keys: ${{ runner.os }}-m2
     - name: Pull Docker Images for Testing
       run: |
-        docker pull tinkerpop/gremlin-server:latest
+        docker pull tinkerpop/gremlin-server:3.4
         docker pull localstack/localstack:0.9.4
     - name: Perform Java Release
       run: |

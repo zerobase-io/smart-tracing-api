@@ -1,11 +1,10 @@
-package io.zerobase.smarttracing.resources
+package io.zerobase.smarttracing.features.organizations
 
+import com.google.common.collect.Multimap
 import com.google.common.eventbus.EventBus
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
-import io.zerobase.smarttracing.GraphDao
-import io.zerobase.smarttracing.MultiMap
 import io.zerobase.smarttracing.models.*
-import io.zerobase.smarttracing.notifications.NotificationFactory
+import io.zerobase.smarttracing.resources.Creator
 import io.zerobase.smarttracing.utils.LoggerDelegate
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
@@ -47,10 +46,11 @@ data class SiteResponse(val id: String, val name: String)
 @Path("/organizations")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-class OrganizationsResource(private val dao: GraphDao,
-                            private val siteTypes: MultiMap<String, String>,
-                            private val scanTypes: List<String>,
-                            private val eventBus: EventBus
+class OrganizationsResource(
+    private val dao: OrganizationsDao,
+    private val siteTypes: Multimap<String, String>,
+    private val scanTypes: List<String>,
+    private val eventBus: EventBus
 ) {
     companion object {
         val log by LoggerDelegate()
