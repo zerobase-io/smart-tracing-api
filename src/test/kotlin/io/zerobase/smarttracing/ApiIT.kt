@@ -1,14 +1,24 @@
 package io.zerobase.smarttracing
 
+import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.dropwizard.testing.ConfigOverride
 import io.dropwizard.testing.junit5.DropwizardAppExtension
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport
-import io.zerobase.smarttracing.features.organizations.Contact
-import io.zerobase.smarttracing.features.organizations.CreateOrganizationRequest
-import io.zerobase.smarttracing.features.organizations.OrganizationsResource
-import io.zerobase.smarttracing.features.organizations.SiteResponse
+import io.zerobase.smarttracing.features.organizations.*
+import io.zerobase.smarttracing.gremlin.execute
 import io.zerobase.smarttracing.models.Address
+import io.zerobase.smarttracing.models.Scannable
+import org.apache.tinkerpop.gremlin.driver.Cluster
+import org.apache.tinkerpop.gremlin.driver.remote.DriverRemoteConnection
+import org.apache.tinkerpop.gremlin.process.traversal.AnonymousTraversalSource
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource
+import org.apache.tinkerpop.gremlin.structure.T
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.testcontainers.containers.BindMode
@@ -18,8 +28,10 @@ import org.testcontainers.containers.localstack.LocalStackContainer.Service.S3
 import org.testcontainers.containers.localstack.LocalStackContainer.Service.SES
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
+import java.util.*
 import javax.ws.rs.client.Entity
 import javax.ws.rs.core.GenericType
+import javax.ws.rs.core.Response
 import javax.ws.rs.core.UriBuilder
 
 class KGenericContainer(imageName: String) : GenericContainer<KGenericContainer>(imageName)
@@ -59,6 +71,24 @@ class ApiIT {
         )
     }
 
+    lateinit var g: GraphTraversalSource
+
+    @BeforeEach
+    fun setup() {
+        app.objectMapper.registerModule(KotlinModule()).addMixIn(Scannable::class.java, ConstructorFix::class.java)
+        g = AnonymousTraversalSource.traversal()
+            .withRemote(DriverRemoteConnection.using(Cluster.build()
+                .addContactPoints(database.containerIpAddress)
+                .port(database.getMappedPort(8182))
+                .enableSsl(false)
+                .create()))
+    }
+
+    @AfterEach
+    fun cleanup() {
+        g.close()
+    }
+
     @Test
     fun shouldHaveHealthchecks() {
         val response = app.client().target("http://localhost:${app.adminPort}/admin/healthcheck").request().get()
@@ -84,4 +114,69 @@ class ApiIT {
 
         assertThat(sites).isNotNull.isNotEmpty.hasSize(1).first().extracting("name").isEqualTo("Default")
     }
+
+    @Test
+    fun shouldUpdateSiteName() {
+        val orgId = createFake("Organization")
+        val siteId = createFake("Site")
+        g.V(orgId).addE("OWNS").to(g.V(siteId)).execute()
+
+        val updateResponse = app.client().target(UriBuilder.fromUri("http://localhost:${app.getPort(0)}")
+            .path(OrganizationsResource::class.java)
+            .path(OrganizationsResource::class.java, "delegateSiteRequest")
+            .path(SitesResource::class.java, "updateName")
+            .build(orgId, siteId)).request()
+            .put(Entity.json("New Name"))
+        assertThat(updateResponse.status).isEqualTo(204)
+
+        val updatedSites = app.client().target(UriBuilder.fromUri("http://localhost:${app.getPort(0)}")
+            .path(OrganizationsResource::class.java).path(OrganizationsResource::class.java, "getSites")
+            .build(orgId)).request().get(object: GenericType<List<SiteResponse>>(){})
+
+        assertThat(updatedSites).isNotNull.isNotEmpty.hasSize(1).first().extracting("name").isEqualTo("New Name")
+    }
+
+    @Test
+    fun shouldUpdateScannableName() {
+        val orgId: String = createFake("Organization")
+        val siteId: String = createFake("Site")
+        g.V(orgId).addE("OWNS").to(g.V(siteId)).execute()
+        val scannableId: String = createFake("Scannable", mapOf("type" to "QR_CODE"))
+        g.V(scannableId).addE("OWNS").from(g.V(siteId)).execute()
+
+        val response: Response = app.client().target(UriBuilder.fromUri("http://localhost:${app.getPort(0)}")
+            .path(OrganizationsResource::class.java)
+            .path(OrganizationsResource::class.java, "delegateSiteRequest")
+            .path(SitesResource::class.java, "delegateScannableRequest")
+            .path(ScannablesResource::class.java, "updateName")
+            .build(orgId, siteId, scannableId)).request()
+            .put(Entity.json("New Name"))
+        assertThat(response.status).isEqualTo(204)
+
+        val scannables: List<Scannable> = app.client().target(UriBuilder.fromUri("http://localhost:${app.getPort(0)}")
+            .path(OrganizationsResource::class.java)
+            .path(OrganizationsResource::class.java, "delegateSiteRequest")
+            .path(SitesResource::class.java, "getScannables")
+            .build(orgId, siteId, scannableId)).request()
+            .get(String::class.java)
+            .let { app.objectMapper.readValue(it) }
+
+        assertThat(scannables).isNotNull.isNotEmpty.hasSize(1).first().extracting("name").isEqualTo("New Name")
+    }
+
+    fun createFake(label: String, properties: Map<String, Any> = mapOf()): String {
+        val id = UUID.randomUUID().toString()
+        val t = g.addV(label).property(T.id, id)
+        properties.forEach { k, v -> t.property(k, v) }
+        t.execute()
+        return id
+    }
+}
+
+abstract class ConstructorFix
+    @JsonCreator constructor(
+        @JsonProperty("id") id: String,
+        @JsonProperty("name") name: String,
+        @JsonProperty("type") type: String)
+{
 }

@@ -12,7 +12,7 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.`__`.unfold
 import org.apache.tinkerpop.gremlin.process.traversal.step.util.WithOptions
 import org.apache.tinkerpop.gremlin.structure.T
-import org.apache.tinkerpop.gremlin.structure.VertexProperty
+import org.apache.tinkerpop.gremlin.structure.VertexProperty.Cardinality.single
 import java.util.*
 
 class OrganizationsDao @Inject constructor(private val graph: GraphTraversalSource) {
@@ -122,12 +122,12 @@ class OrganizationsDao @Inject constructor(private val graph: GraphTraversalSour
         try {
             val v = graph.addV("Site")
                 .property(T.id, id)
-                .property(VertexProperty.Cardinality.single,"organizationId", organizationId.value)
-                .property(VertexProperty.Cardinality.single,"name", name)
-                .property(VertexProperty.Cardinality.single,"category", category)
-                .property(VertexProperty.Cardinality.single,"subcategory", subcategory)
-                .property(VertexProperty.Cardinality.single,"testing", testing)
-                .property(VertexProperty.Cardinality.single,"creationTimestamp", now())
+                .property(single,"organizationId", organizationId.value)
+                .property(single,"name", name)
+                .property(single,"category", category)
+                .property(single,"subcategory", subcategory)
+                .property(single,"testing", testing)
+                .property(single,"creationTimestamp", now())
             lat?.also { v.property("latitude", it) }
             long?.also { v.property("longitude", it) }
             contactName?.also { v.property("contactName", it) }
@@ -177,6 +177,26 @@ class OrganizationsDao @Inject constructor(private val graph: GraphTraversalSour
         } catch (ex: Exception) {
             log.error("error creating scannable. organization={} site={} type={}", oid, sid, type)
             throw EntityCreationException("Error creating scannable.", ex)
+        }
+    }
+
+    fun updateEntityName(id: Id, nodeType: String, name: String) {
+        try {
+            graph.V(id.value).hasLabel(nodeType).property(single, "name", name).execute()
+        } catch (ex: Exception) {
+            log.error("error updating name of site. id={} label={}", id, nodeType, ex);
+            throw UpdateFailedException("Site Name")
+        }
+    }
+
+    fun getScannables(id: SiteId): List<Scannable> {
+        try {
+            return graph.V(id.value).hasLabel("Site").outE("OWNS").otherV().hasLabel("Scannable")
+                .valueMap<String>("name", "type").with(WithOptions.tokens).by(unfold<String>()).toList()
+                .map { Scannable(ScannableId(it[T.id]!!), it["name"] ?: "None", it["type"]!!) }
+        } catch (ex: Exception) {
+            log.error("error executing query. siteId={}", id, ex)
+            throw QueryFailedException("Site Scannables")
         }
     }
 }
