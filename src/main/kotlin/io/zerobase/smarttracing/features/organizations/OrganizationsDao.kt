@@ -189,6 +189,7 @@ class OrganizationsDao @Inject constructor(private val graph: GraphTraversalSour
         }
     }
 
+    @SuppressFBWarnings("BC_BAD_CAST_TO_ABSTRACT_COLLECTION", justification = "False positive from kotlin")
     fun getScannables(id: SiteId): List<Scannable> {
         try {
             return graph.V(id.value).hasLabel("Site").outE("OWNS").otherV().hasLabel("Scannable")
