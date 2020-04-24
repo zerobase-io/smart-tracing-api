@@ -5,6 +5,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import io.zerobase.smarttracing.gremlin.execute
 import io.zerobase.smarttracing.gremlin.getIfPresent
 import io.zerobase.smarttracing.models.*
+import io.zerobase.smarttracing.now
 import io.zerobase.smarttracing.utils.LoggerDelegate
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource
 import org.apache.tinkerpop.gremlin.structure.T
@@ -25,7 +26,7 @@ class DevicesDao @Inject constructor(private val graph: GraphTraversalSource) {
             val vertex = graph.addV("Device")
                 .property(T.id, id)
                 .property("fingerprint", fingerprint?.value ?: "none")
-                .property("creationTimestamp", System.currentTimeMillis())
+                .property("creationTimestamp", now())
                 .execute()
             return vertex?.run { DeviceId(id) } ?: throw EntityCreationException("Failed to save device")
         } catch (ex: Exception) {
@@ -46,7 +47,7 @@ class DevicesDao @Inject constructor(private val graph: GraphTraversalSource) {
                 .from(deviceNode)
                 .to(scannableNode)
                 .property(T.id, scanId)
-                .property("timestamp", System.currentTimeMillis())
+                .property("timestamp", now())
             loc?.also { (lat, long) -> traversal.property("latitude", lat).property("longitude", long) }
             traversal.execute()
             return ScanId(scanId)
@@ -76,7 +77,7 @@ class DevicesDao @Inject constructor(private val graph: GraphTraversalSource) {
                 .from(aNode)
                 .to(bNode)
                 .property(T.id, scanId)
-                .property("timestamp", System.currentTimeMillis())
+                .property("timestamp", now())
                 .property("latitude", loc?.latitude ?: 0)
                 .property("longitude", loc?.longitude ?: 0)
                 .execute()

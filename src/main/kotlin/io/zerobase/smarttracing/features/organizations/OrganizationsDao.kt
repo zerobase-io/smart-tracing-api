@@ -5,6 +5,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import io.zerobase.smarttracing.gremlin.execute
 import io.zerobase.smarttracing.gremlin.getIfPresent
 import io.zerobase.smarttracing.models.*
+import io.zerobase.smarttracing.now
 import io.zerobase.smarttracing.utils.LoggerDelegate
 import io.zerobase.smarttracing.validatePhoneNumber
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource
@@ -56,7 +57,7 @@ class OrganizationsDao @Inject constructor(private val graph: GraphTraversalSour
                 .property("verified", false)
                 .property("hasTestingFacilities", hasTestingFacilities)
                 .property("multisite", multiSite)
-                .property("creationTimestamp", System.currentTimeMillis())
+                .property("creationTimestamp", now())
             v.execute()
 
             return Organization(OrganizationId(id), name, address, contactName, ContactInfo(email, phone))
@@ -126,7 +127,7 @@ class OrganizationsDao @Inject constructor(private val graph: GraphTraversalSour
                 .property(VertexProperty.Cardinality.single,"category", category)
                 .property(VertexProperty.Cardinality.single,"subcategory", subcategory)
                 .property(VertexProperty.Cardinality.single,"testing", testing)
-                .property(VertexProperty.Cardinality.single,"creationTimestamp", System.currentTimeMillis())
+                .property(VertexProperty.Cardinality.single,"creationTimestamp", now())
             lat?.also { v.property("latitude", it) }
             long?.also { v.property("longitude", it) }
             contactName?.also { v.property("contactName", it) }
