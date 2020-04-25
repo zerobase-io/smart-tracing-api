@@ -16,7 +16,7 @@ import org.apache.tinkerpop.gremlin.driver.Cluster
 import org.apache.tinkerpop.gremlin.driver.remote.DriverRemoteConnection
 import org.apache.tinkerpop.gremlin.process.traversal.AnonymousTraversalSource
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource
-import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.unfold
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.`__`.unfold
 import org.apache.tinkerpop.gremlin.process.traversal.step.util.WithOptions
 import org.apache.tinkerpop.gremlin.structure.T
 import org.assertj.core.api.Assertions.assertThat
@@ -197,7 +197,7 @@ class ApiIT {
             .containsEntry("verified", false)
             .containsEntry("testDate", LocalDate.now().minusDays(1).toString())
 
-        val otherVertexes = g.V(reportId).hasLabel("TestResult").bothE("REPORTED_BY", "REPORT_FOR").otherV().id().toList()
+        val otherVertexes = g.V(reportId).hasLabel("TestResult").bothE("REPORTED", "REPORT_FOR").otherV().id().toList()
         assertThat(otherVertexes).isNotNull.isNotEmpty.hasSize(2).containsOnly(deviceId)
     }
 
