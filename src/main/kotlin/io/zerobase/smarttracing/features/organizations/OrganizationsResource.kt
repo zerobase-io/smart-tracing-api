@@ -8,7 +8,6 @@ import io.zerobase.smarttracing.resources.Creator
 import io.zerobase.smarttracing.utils.LoggerDelegate
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
-import javax.ws.rs.core.Response
 
 /**
  * Requests from clients.
@@ -49,7 +48,7 @@ data class SiteResponse(val id: String, val name: String)
 class OrganizationsResource(
     private val dao: OrganizationsDao,
     private val siteTypes: Multimap<String, String>,
-    private val scanTypes: List<String>,
+    private val scanTypes: Set<String>,
     private val eventBus: EventBus
 ) {
     companion object {
@@ -119,21 +118,8 @@ class OrganizationsResource(
         dao.setMultiSite(OrganizationId(id), hasMultipleSites)
     }
 
-    @Path("/{orgId}/sites/{siteId}/scannables")
-    @POST
-    @Creator
-    fun createScannable(@PathParam("orgId") orgId: String, @PathParam("siteId") siteId: String,
-                        request: CreateScannableRequest): IdWrapper {
-        val type = request.type
-        val singleUse = request.singleUse
-
-        if (!scanTypes.contains(type)) {
-            val res = Response.status(Response.Status.BAD_REQUEST)
-                .entity("Not a valid type please check /models/scannable-types")
-                .build()
-            throw WebApplicationException(res)
-        }
-
-        return dao.createScannable(OrganizationId(orgId), SiteId(siteId), type, singleUse).let(::IdWrapper)
+    @Path("/{orgId}/sites/{siteId}")
+    fun delegateSiteRequest(@PathParam("orgId") orgId: String, @PathParam("siteId") siteId: String): SitesResource {
+        return SitesResource(OrganizationId(orgId), SiteId(siteId), dao, scanTypes)
     }
 }

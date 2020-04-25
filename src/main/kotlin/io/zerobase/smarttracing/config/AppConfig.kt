@@ -28,7 +28,7 @@ data class AppConfig(
     val baseQrCodeLink: URI,
     val allowedOrigins: String,
     val siteTypeCategories: Multimap<String, String>,
-    val scannableTypes: List<String>,
+    val scannableTypes: Set<String>,
     // Workaround for tests
     val enableAllFeatures: Boolean,
     @JsonProperty("features")
