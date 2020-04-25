@@ -109,8 +109,9 @@ class ApiIT {
         assertThat(createResponse).isNotNull.containsKey("id")
 
         val sites = app.client().target(UriBuilder.fromUri("http://localhost:${app.getPort(0)}")
-            .path(OrganizationsResource::class.java).path(OrganizationsResource::class.java, "getSites")
-            .build(createResponse["id"])).request().get(object: GenericType<List<SiteResponse>>(){})
+            .path("/organizations/{orgId}/sites")
+            .build(createResponse["id"])).request()
+            .get(object: GenericType<List<SiteResponse>>(){})
 
         assertThat(sites).isNotNull.isNotEmpty.hasSize(1).first().extracting("name").isEqualTo("Default")
     }
@@ -122,16 +123,15 @@ class ApiIT {
         g.V(orgId).addE("OWNS").to(g.V(siteId)).execute()
 
         val updateResponse = app.client().target(UriBuilder.fromUri("http://localhost:${app.getPort(0)}")
-            .path(OrganizationsResource::class.java)
-            .path(OrganizationsResource::class.java, "delegateSiteRequest")
-            .path(SitesResource::class.java, "updateName")
+            .path("/organizations/{orgId}/sites/{siteId}/name")
             .build(orgId, siteId)).request()
             .put(Entity.json("New Name"))
         assertThat(updateResponse.status).isEqualTo(204)
 
         val updatedSites = app.client().target(UriBuilder.fromUri("http://localhost:${app.getPort(0)}")
-            .path(OrganizationsResource::class.java).path(OrganizationsResource::class.java, "getSites")
-            .build(orgId)).request().get(object: GenericType<List<SiteResponse>>(){})
+            .path("/organizations/{orgId}/sites")
+            .build(orgId)).request()
+            .get(object: GenericType<List<SiteResponse>>(){})
 
         assertThat(updatedSites).isNotNull.isNotEmpty.hasSize(1).first().extracting("name").isEqualTo("New Name")
     }
@@ -154,14 +154,12 @@ class ApiIT {
         assertThat(response.status).isEqualTo(204)
 
         val scannables: List<Scannable> = app.client().target(UriBuilder.fromUri("http://localhost:${app.getPort(0)}")
-            .path(OrganizationsResource::class.java)
-            .path(OrganizationsResource::class.java, "delegateSiteRequest")
-            .path(SitesResource::class.java, "getScannables")
-            .build(orgId, siteId, scannableId)).request()
+            .path("/organizations/{orgId}/sites/{siteId}/scannables")
+            .build(orgId, siteId)).request()
             .get(String::class.java)
             .let { app.objectMapper.readValue(it) }
 
-        assertThat(scannables).isNotNull.isNotEmpty.hasSize(1).first().extracting("name").isEqualTo("New Name")
+        assertThat(scannables).isNotNull.isNotEmpty.hasSize(1).first().extracting("id", "name").contains(scannableId, "New Name")
     }
 
     fun createFake(label: String, properties: Map<String, Any> = mapOf()): String {
