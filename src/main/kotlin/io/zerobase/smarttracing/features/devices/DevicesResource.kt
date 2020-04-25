@@ -2,6 +2,8 @@ package io.zerobase.smarttracing.features.devices
 
 import io.zerobase.smarttracing.models.*
 import io.zerobase.smarttracing.resources.Creator
+import java.time.Instant
+import java.time.LocalDate
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
 
@@ -17,6 +19,12 @@ data class CreateCheckInRequest(
     val scannedId: String,
     val type: ScanType,
     val location: Location?
+)
+
+data class SelfReportedTestResult(
+    val testDate: LocalDate,
+    val result: Boolean,
+    val timestamp: Instant
 )
 //endregion
 
@@ -62,5 +70,20 @@ class DevicesResource(val dao: DevicesDao) {
             loc: Location
     ) {
         dao.updateCheckInLocation(DeviceId(deviceId), ScanId(checkInId), loc)
+    }
+
+    @Path("/{id}/reports/tests")
+    @POST
+    @Creator
+    fun selfReportTestResult(@PathParam("id") id: String, report: SelfReportedTestResult): IdWrapper {
+        val deviceId = DeviceId(id)
+        return dao.recordTestResult(TestResult(
+            reportedBy = deviceId,
+            testedParty = deviceId,
+            result = report.result,
+            testDate = report.testDate,
+            verified = false,
+            timestamp = report.timestamp
+        )).let { IdWrapper(it) }
     }
 }
