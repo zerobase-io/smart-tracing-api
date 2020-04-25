@@ -3,6 +3,7 @@ package io.zerobase.smarttracing
 import com.google.i18n.phonenumbers.NumberParseException
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import io.zerobase.smarttracing.models.InvalidPhoneNumberException
+import java.util.*
 
 private val phoneUtil = PhoneNumberUtil.getInstance()
 
@@ -21,3 +22,5 @@ fun validatePhoneNumber(phone: String?) {
         throw InvalidPhoneNumberException("Phone number could not be parsed: ${ex.message}")
     }
 }
+
+fun now(): Date = Date()

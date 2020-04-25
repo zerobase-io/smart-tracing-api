@@ -4,6 +4,7 @@ import com.google.inject.Inject
 import io.zerobase.smarttracing.gremlin.execute
 import io.zerobase.smarttracing.gremlin.getIfPresent
 import io.zerobase.smarttracing.models.*
+import io.zerobase.smarttracing.now
 import io.zerobase.smarttracing.utils.LoggerDelegate
 import io.zerobase.smarttracing.validatePhoneNumber
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource
@@ -32,7 +33,7 @@ class UsersDao @Inject constructor(private val graph: GraphTraversalSource) {
         try {
             graph.addV("USER")
                 .property(T.id, id).property("name", name).property("phone", phone).property("email", email)
-                .property("deleted", false)
+                .property("deleted", false).property("timestamp", now())
                 .addE("OWNS").to(deviceVertex)
                 .execute()
             return UserId(id)

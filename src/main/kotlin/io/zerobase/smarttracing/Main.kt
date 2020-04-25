@@ -15,7 +15,6 @@ import io.dropwizard.setup.Bootstrap
 import io.dropwizard.setup.Environment
 import io.zerobase.smarttracing.config.AppConfig
 import io.zerobase.smarttracing.features.notifications.NotificationsBundle
-import io.zerobase.smarttracing.healthchecks.NeptuneHealthCheck
 import io.zerobase.smarttracing.resources.CreatorFilter
 import io.zerobase.smarttracing.resources.InvalidIdExceptionMapper
 import io.zerobase.smarttracing.resources.InvalidPhoneNumberExceptionMapper
@@ -24,7 +23,6 @@ import io.zerobase.smarttracing.utils.LoggerDelegate
 import org.eclipse.jetty.servlets.CrossOriginFilter
 import ru.vyarus.dropwizard.guice.GuiceBundle
 import ru.vyarus.dropwizard.guice.GuiceyOptions
-import ru.vyarus.dropwizard.guice.module.installer.feature.jersey.provider.JerseyProviderInstaller
 import ru.vyarus.guicey.eventbus.EventBusBundle
 import software.amazon.awssdk.regions.Region
 import java.time.Duration
