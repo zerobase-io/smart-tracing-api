@@ -26,6 +26,15 @@ data class SelfReportedTestResult(
     val result: Boolean,
     val timestamp: Instant
 )
+
+data class SelfReportedSymptoms(
+    val timestamp: Instant,
+    val symptoms: Set<Symptom>,
+    val age: AgeCategory? = null,
+    val householdSize: HouseholdSize? = null,
+    val publicInteractionEstimate: PublicInteractionScale? = null,
+    val temperature: Temperature? = null
+)
 //endregion
 
 @Path("/devices")
@@ -85,5 +94,23 @@ class DevicesResource(val dao: DevicesDao) {
             verified = false,
             timestamp = report.timestamp
         )).let { IdWrapper(it) }
+    }
+
+    @Path("/{id}/reports/symptoms")
+    @POST
+    @Creator
+    fun selfReportSymtoms(@PathParam("id") id: String, report: SelfReportedSymptoms): IdWrapper {
+        val deviceId = DeviceId(id)
+        return dao.recordSymptoms(SymptomSummary(
+            reportedBy = deviceId,
+            testedParty = deviceId,
+            age = report.age,
+            symptoms = report.symptoms,
+            householdSize = report.householdSize,
+            publicInteractionScale = report.publicInteractionEstimate,
+            temperature = report.temperature,
+            verified = false,
+            timestamp = report.timestamp
+        )).let(::IdWrapper)
     }
 }

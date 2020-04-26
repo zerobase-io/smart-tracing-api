@@ -7,11 +7,13 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.dropwizard.testing.ConfigOverride.config
 import io.dropwizard.testing.junit5.DropwizardAppExtension
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport
+import io.zerobase.smarttracing.features.devices.SelfReportedSymptoms
 import io.zerobase.smarttracing.features.devices.SelfReportedTestResult
 import io.zerobase.smarttracing.features.organizations.*
 import io.zerobase.smarttracing.gremlin.execute
 import io.zerobase.smarttracing.models.Address
 import io.zerobase.smarttracing.models.Scannable
+import io.zerobase.smarttracing.models.Symptom
 import org.apache.tinkerpop.gremlin.driver.Cluster
 import org.apache.tinkerpop.gremlin.driver.remote.DriverRemoteConnection
 import org.apache.tinkerpop.gremlin.process.traversal.AnonymousTraversalSource
@@ -198,6 +200,32 @@ class ApiIT {
             .containsEntry("testDate", LocalDate.now().minusDays(1).toString())
 
         val otherVertexes = g.V(reportId).hasLabel("TestResult").bothE("REPORTED", "REPORT_FOR").otherV().id().toList()
+        assertThat(otherVertexes).isNotNull.isNotEmpty.hasSize(2).containsOnly(deviceId)
+    }
+
+    @Test
+    fun shouldConnectBothEdgesOnSelfReportedSymptoms() {
+        val deviceId = createFake("Device")
+
+        val reportId: String? = UriBuilder.fromUri("http://localhost:${app.getPort(0)}")
+            .path("/devices/{id}/reports/symptoms")
+            .build(deviceId)
+            .let { app.client().target(it) }
+            .request()
+            .post(
+                Entity.json(SelfReportedSymptoms(Instant.now(), symptoms = setOf(Symptom.LOSS_OF_TASTE))),
+                idWrapperType
+            )["id"]
+
+        assertThat(reportId).isNotNull()
+
+        val report: Map<Any, Any> = g.V(reportId).valueMap<Any>().with(WithOptions.tokens).by(unfold<Any>()).next()
+
+        assertThat(report)
+            .containsEntry(T.label, "Symptoms")
+            .containsEntry("verified", false)
+
+        val otherVertexes = g.V(reportId).hasLabel("Symptoms").bothE("REPORTED", "REPORT_FOR").otherV().id().toList()
         assertThat(otherVertexes).isNotNull.isNotEmpty.hasSize(2).containsOnly(deviceId)
     }
 

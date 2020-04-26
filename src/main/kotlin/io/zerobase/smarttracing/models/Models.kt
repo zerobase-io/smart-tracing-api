@@ -38,3 +38,43 @@ data class TestResult(
     val result: Boolean,
     val timestamp: Instant
 )
+
+enum class Symptom {
+    FEVER, BREATHING, NEW_COUGH, SORE_THROAT, ACHING, VOMITING_DIARRHEA, MIGRAINES, LOSS_OF_TASTE
+}
+
+enum class HouseholdSize {
+    SINGLE, PARTNER,SMALL, MEDIUM, LARGE
+}
+
+enum class PublicInteractionScale {
+    NONE, SINGLE, PARTNER,SMALL, MEDIUM, LARGE
+}
+
+enum class AgeCategory {
+    MINOR, GENERAL, ELDERLY
+}
+
+enum class TemperatureUnit {
+    Celsius, Fahrenheit, Kelvin;
+}
+
+data class Temperature (val value: Float, val unit: TemperatureUnit) {
+    fun toCelsius(): Float = when (unit) {
+        TemperatureUnit.Celsius -> value
+        TemperatureUnit.Fahrenheit -> (value - 32)/1.8f
+        TemperatureUnit.Kelvin -> value - - 273.15f
+    }
+}
+
+data class SymptomSummary(
+    val reportedBy: Id,
+    val testedParty: DeviceId,
+    val age: AgeCategory?,
+    val symptoms: Set<Symptom>,
+    val householdSize: HouseholdSize?,
+    val publicInteractionScale: PublicInteractionScale?,
+    val temperature: Temperature?,
+    val verified: Boolean,
+    val timestamp: Instant
+)

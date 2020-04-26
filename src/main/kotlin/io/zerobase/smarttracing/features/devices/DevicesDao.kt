@@ -109,4 +109,28 @@ class DevicesDao @Inject constructor(private val graph: GraphTraversalSource) {
             throw EntityCreationException("Error recording test result.", ex)
         }
     }
+
+    fun recordSymptoms(data: SymptomSummary): ReportId {
+        val reportId = randomUUID().toString()
+        try {
+            val deviceNode = graph.V(data.testedParty.value).getIfPresent() ?: throw InvalidIdException(data.testedParty)
+            val reporterNode = graph.V(data.reportedBy.value).getIfPresent() ?: throw InvalidIdException(data.reportedBy)
+            val traversal = graph.addV("Symptoms").
+                property(T.id, reportId).
+                property(single, "verified", data.verified).
+                property(single, "timestamp", Date.from(data.timestamp))
+            data.temperature?.toCelsius()?.also { traversal.property(single, "temperature", it) }
+            data.age?.also { traversal.property(single, "age", it) }
+            data.householdSize?.also { traversal.property(single, "householdSize", it) }
+            data.publicInteractionScale?.also { traversal.property(single, "publicInteractionScale", it) }
+            traversal.addE("REPORTED").property(single, "timestamp", data.timestamp).from(reporterNode).
+            // go back to the report node to make the second edge
+            inV().addE("REPORT_FOR").to(deviceNode).
+            execute()
+            return ReportId(reportId)
+        } catch (ex: Exception) {
+            log.error("error recording symptoms. device={} verified={}", data.testedParty, data.verified, ex)
+            throw EntityCreationException("Error recording symptoms.", ex)
+        }
+    }
 }
