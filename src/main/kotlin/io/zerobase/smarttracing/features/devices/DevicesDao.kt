@@ -10,6 +10,7 @@ import io.zerobase.smarttracing.utils.LoggerDelegate
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource
 import org.apache.tinkerpop.gremlin.structure.T
 import org.apache.tinkerpop.gremlin.structure.VertexProperty.Cardinality.single
+import java.util.*
 import java.util.UUID.randomUUID
 
 class DevicesDao @Inject constructor(private val graph: GraphTraversalSource) {
@@ -99,6 +100,7 @@ class DevicesDao @Inject constructor(private val graph: GraphTraversalSource) {
                 property(single, "verified", testResult.verified).
                 property(single, "testDate", testResult.testDate.toString()).
                 property(single, "result", testResult.result).
+                property(single, "timestamp", Date.from(testResult.timestamp)).
                 addE("REPORTED").property(single, "timestamp", testResult.timestamp).from(reporterNode).
                 // go back to the report node to make the second edge
                 inV().addE("REPORT_FOR").to(deviceNode).
