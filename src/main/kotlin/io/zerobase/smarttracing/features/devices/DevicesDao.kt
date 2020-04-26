@@ -112,6 +112,7 @@ class DevicesDao @Inject constructor(private val graph: GraphTraversalSource) {
         }
     }
 
+    @SuppressFBWarnings("BC_BAD_CAST_TO_ABSTRACT_COLLECTION", justification = "false positive because kotlin")
     fun recordSymptoms(data: SymptomSummary): ReportId {
         val reportId = randomUUID().toString()
         try {
