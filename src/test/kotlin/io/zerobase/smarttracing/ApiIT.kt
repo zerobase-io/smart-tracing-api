@@ -204,7 +204,7 @@ class ApiIT {
     }
 
     @Test
-    fun shouldConnectBothEdgesOnSelfReportedSymptoms() {
+    fun shouldRecordSelfReportedSymptoms() {
         val deviceId = createFake("Device")
 
         val reportId: String? = UriBuilder.fromUri("http://localhost:${app.getPort(0)}")
@@ -224,6 +224,7 @@ class ApiIT {
         assertThat(report)
             .containsEntry(T.label, "Symptoms")
             .containsEntry("verified", false)
+            .containsEntry("symptoms", listOf("LOSS_OF_TASTE"))
 
         val otherVertexes = g.V(reportId).hasLabel("Symptoms").bothE("REPORTED", "REPORT_FOR").otherV().id().toList()
         assertThat(otherVertexes).isNotNull.isNotEmpty.hasSize(2).containsOnly(deviceId)

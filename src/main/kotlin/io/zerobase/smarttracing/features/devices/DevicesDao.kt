@@ -9,6 +9,7 @@ import io.zerobase.smarttracing.now
 import io.zerobase.smarttracing.utils.LoggerDelegate
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource
 import org.apache.tinkerpop.gremlin.structure.T
+import org.apache.tinkerpop.gremlin.structure.VertexProperty.Cardinality.set
 import org.apache.tinkerpop.gremlin.structure.VertexProperty.Cardinality.single
 import java.util.*
 import java.util.UUID.randomUUID
@@ -119,11 +120,12 @@ class DevicesDao @Inject constructor(private val graph: GraphTraversalSource) {
             val traversal = graph.addV("Symptoms").
                 property(T.id, reportId).
                 property(single, "verified", data.verified).
-                property(single, "timestamp", Date.from(data.timestamp))
+                property(single, "timestamp", Date.from(data.timestamp)).
+                property(set, "symptoms", data.symptoms.map(Symptom::name))
             data.temperature?.toCelsius()?.also { traversal.property(single, "temperature", it) }
-            data.age?.also { traversal.property(single, "age", it) }
-            data.householdSize?.also { traversal.property(single, "householdSize", it) }
-            data.publicInteractionScale?.also { traversal.property(single, "publicInteractionScale", it) }
+            data.age?.also { traversal.property(single, "age", it.name) }
+            data.householdSize?.also { traversal.property(single, "householdSize", it.name) }
+            data.publicInteractionScale?.also { traversal.property(single, "publicInteractionScale", it.name) }
             traversal.addE("REPORTED").property(single, "timestamp", data.timestamp).from(reporterNode).
             // go back to the report node to make the second edge
             inV().addE("REPORT_FOR").to(deviceNode).
