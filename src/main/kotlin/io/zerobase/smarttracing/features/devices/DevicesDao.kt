@@ -101,9 +101,9 @@ class DevicesDao @Inject constructor(private val graph: GraphTraversalSource) {
                 property(single, "testDate", testResult.testDate.toString()).
                 property(single, "result", testResult.result).
                 property(single, "timestamp", Date.from(testResult.timestamp)).
-                addE("REPORTED").property(single, "timestamp", testResult.timestamp).from(reporterNode).
+                addE("REPORTED").property(single, "timestamp", Date.from(testResult.timestamp)).from(reporterNode).
                 // go back to the report node to make the second edge
-                inV().addE("REPORT_FOR").to(deviceNode).
+                inV().addE("FOR").to(deviceNode).
                 execute()
             return ReportId(reportId)
         } catch (ex: Exception) {
