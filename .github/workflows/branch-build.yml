@@ -1,7 +1,7 @@
 name: Build non-master branches
 on:
   pull_request:
-    brances: master
+    branches: master
   push:
     branches-ignore: master
     paths:
