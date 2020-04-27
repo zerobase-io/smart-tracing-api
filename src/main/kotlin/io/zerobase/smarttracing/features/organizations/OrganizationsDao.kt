@@ -116,8 +116,11 @@ class OrganizationsDao @Inject constructor(private val graph: GraphTraversalSour
      * @param email contact email of site manager
      * @param contactName contact name of site manager
      */
-    fun createSite(organizationId: OrganizationId, name: String = "Default", category: String, subcategory: String, lat: Float? = null, long: Float? = null,
-                   testing: Boolean = false, phone: String? = null, email: String? = null, contactName: String? = null): SiteId {
+    fun createSite(
+        organizationId: OrganizationId, name: String = "Default", category: String, subcategory: String,
+        address: Address? = null, lat: Float? = null, long: Float? = null, testing: Boolean = false,
+        phone: String? = null, email: String? = null, contactName: String? = null
+    ): SiteId {
         val id = UUID.randomUUID().toString()
         try {
             val v = graph.addV("Site")
@@ -128,6 +131,14 @@ class OrganizationsDao @Inject constructor(private val graph: GraphTraversalSour
                 .property(single,"subcategory", subcategory)
                 .property(single,"testing", testing)
                 .property(single,"creationTimestamp", now())
+            address?.also {
+                v.property("premise", it.premise)
+                .property("thoroughfare", it.thoroughfare)
+                .property("locality", it.locality)
+                .property("administrativeArea", it.administrativeArea)
+                .property("postalCode", it.postalCode)
+                .property("country", it.country)
+            }
             lat?.also { v.property("latitude", it) }
             long?.also { v.property("longitude", it) }
             contactName?.also { v.property("contactName", it) }

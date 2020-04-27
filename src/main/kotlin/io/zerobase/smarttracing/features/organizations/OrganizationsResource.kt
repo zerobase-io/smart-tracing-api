@@ -30,6 +30,7 @@ data class CreateSiteRequest(
     val name: String?,
     val category: String,
     val subcategory: String,
+    val address: Address?,
     val location: Location?,
     val isTesting: Boolean = false,
     val siteManagerContactInfo: Contact?
@@ -70,7 +71,7 @@ class OrganizationsResource(
 
         if (!hasTestingFacilities && !hasMultipleSites) {
             log.debug("Simple business organization detected. Auto-creating site and default qr code. organization={}", organization)
-            val siteId = dao.createSite(organization.id, category = "BUSINESS", subcategory = "OTHER")
+            val siteId = dao.createSite(organization.id, category = "BUSINESS", subcategory = "OTHER", address = request.address)
             val scannableId = dao.createScannable(organization.id, siteId, "QR_CODE", false)
             log.info("Created site and default ")
             eventBus.post(SimpleOrganizationCreated(organization, scannableId))
@@ -99,7 +100,7 @@ class OrganizationsResource(
         }
 
         return dao.createSite(
-            OrganizationId(organizationId), name, category, subcategory,
+            OrganizationId(organizationId), name, category, subcategory, request.address,
             latitude, longitude, isTesting, request.siteManagerContactInfo?.phone,
             request.siteManagerContactInfo?.email, request.siteManagerContactInfo?.contactName
         ).let(::IdWrapper)
