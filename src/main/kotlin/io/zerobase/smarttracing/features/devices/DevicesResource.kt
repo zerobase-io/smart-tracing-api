@@ -93,7 +93,7 @@ class DevicesResource(val dao: DevicesDao) {
             testDate = report.testDate,
             verified = false,
             timestamp = report.timestamp
-        )).let { IdWrapper(it) }
+        )).let(::IdWrapper)
     }
 
     @Path("/{id}/reports/symptoms")

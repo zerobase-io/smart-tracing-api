@@ -199,7 +199,7 @@ class ApiIT {
             .containsEntry("verified", false)
             .containsEntry("testDate", LocalDate.now().minusDays(1).toString())
 
-        val otherVertexes = g.V(reportId).hasLabel("TestResult").bothE("REPORTED", "REPORT_FOR").otherV().id().toList()
+        val otherVertexes = g.V(reportId).hasLabel("TestResult").bothE("REPORTED", "FOR").otherV().id().toList()
         assertThat(otherVertexes).isNotNull.isNotEmpty.hasSize(2).containsOnly(deviceId)
     }
 
