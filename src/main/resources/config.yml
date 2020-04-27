@@ -21,6 +21,8 @@ logging:
   level: ${ROOT_LOG_LEVEL:-INFO}
   appenders:
   - type: console
+    threshold: NONE
+  - type: console
     layout:
       type: json
       flattenMdc: true
