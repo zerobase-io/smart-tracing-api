@@ -1,4 +1,4 @@
-package io.zerobase.smarttracing.lambdas.notification
+package io.zerobase.smarttracing.notifications
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.RequestHandler
@@ -9,7 +9,6 @@ import com.google.common.io.Resources
 import io.zerobase.smarttracing.common.LoggerDelegate
 import io.zerobase.smarttracing.common.models.SimpleOrganizationCreated
 import io.zerobase.smarttracing.common.models.ZerobaseEvent
-import io.zerobase.smarttracing.notifications.*
 import io.zerobase.smarttracing.notifications.pdf.DocumentFactory
 import io.zerobase.smarttracing.notifications.qr.QRCodeGenerator
 import org.slf4j.Logger
@@ -49,7 +48,8 @@ open class Main: RequestHandler<SNSEvent, Unit> {
     }
 
     protected open fun emailSender(): EmailSender {
-        val sesBuilder = SesClient.builder().region(Region.of(env("SES_REGION") ?: env("AWS_REGION")))
+        val sesBuilder = SesClient.builder().region(Region.of(env("SES_REGION")
+                ?: env("AWS_REGION")))
         env("SES_ENDPOINT")?.let(URI::create)?.run(sesBuilder::endpointOverride)
 
         return AmazonEmailSender(sesBuilder.build(), Session.getDefaultInstance(Properties()), requiredEnv("SES_FROM_ADDRESS"))
@@ -60,7 +60,8 @@ open class Main: RequestHandler<SNSEvent, Unit> {
     }
 
     protected open fun staticResourceLoader(): StaticResourceLoader {
-        val s3ClientBuilder = S3Client.builder().region(Region.of(env("S3_REGION") ?: requiredEnv("AWS_REGION")))
+        val s3ClientBuilder = S3Client.builder().region(Region.of(env("S3_REGION")
+                ?: requiredEnv("AWS_REGION")))
         env("S3_ENDPOINT")?.let(URI::create)?.run(s3ClientBuilder::endpointOverride)
         return S3StaticResourceLoader(s3ClientBuilder.build(), requiredEnv("STATIC_RESOURCES_BUCKET"))
     }

@@ -35,7 +35,6 @@
         <module>api</module>
         <module>common</module>
         <module>notifications</module>
-        <module>notification-lambda</module>
     </modules>
 
     <dependencyManagement>
@@ -177,10 +176,6 @@
         </dependency>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
-            <artifactId>kotlin-reflect</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-test</artifactId>
             <scope>test</scope>
         </dependency>
@@ -277,6 +272,15 @@
                     <ignoredUsedUndeclaredDependencies>
                         <dependency>org.jetbrains:annotations</dependency>
                     </ignoredUsedUndeclaredDependencies>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.basepom.maven</groupId>
+                <artifactId>duplicate-finder-maven-plugin</artifactId>
+                <configuration>
+                    <ignoredResourcePatterns>
+                        <pattern>codegen-resources/.*</pattern>
+                    </ignoredResourcePatterns>
                 </configuration>
             </plugin>
         </plugins>

@@ -69,16 +69,12 @@ notifications:
   email:
     fromAddress: ${EMAIL_NOTIFICATION_FROM_ADDRESS:-noreply@zerobase.io}
 
-eventsTopicArn: ${EVENTS_TOPIC_ARN:-null}
-
 enableAllFeatures: false
 features:
   - type: organizations
     enabled: ${ORGANIZATIONS_FEATURE_ENABLED:-false}
   - type: models
     enabled: ${MODELS_FEATURE_ENABLED:-false}
-  - type: notifications
-    enabled: ${NOTIFICATIONS_FEATURE_ENABLED:-false}
   - type: devices
     enabled: ${DEVICES_FEATURE_ENABLED:-false}
 

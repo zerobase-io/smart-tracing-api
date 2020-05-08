@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.google.common.eventbus.AsyncEventBus
-import com.google.common.eventbus.EventBus
 import com.google.common.eventbus.SubscriberExceptionHandler
 import com.google.common.util.concurrent.ThreadFactoryBuilder
 import io.dropwizard.Application
@@ -14,7 +13,6 @@ import io.dropwizard.configuration.EnvironmentVariableSubstitutor
 import io.dropwizard.configuration.SubstitutingSourceProvider
 import io.dropwizard.setup.Bootstrap
 import io.dropwizard.setup.Environment
-import io.zerobase.smarttracing.api.features.notifications.NotificationsBundle
 import io.zerobase.smarttracing.api.config.AppConfig
 import io.zerobase.smarttracing.api.resources.CreatorFilter
 import io.zerobase.smarttracing.api.resources.InvalidIdExceptionMapper
@@ -59,7 +57,7 @@ class Main : Application<AppConfig>() {
     private val guiceBundle: GuiceBundle = GuiceBundle.builder()
         .modules(AppModule())
         .option(GuiceyOptions.UseCoreInstallers, true)
-        .bundles(EventBusBundle(eventBus), NotificationsBundle())
+        .bundles(EventBusBundle(eventBus))
         .build()
 
     override fun initialize(bootstrap: Bootstrap<AppConfig>) {

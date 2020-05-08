@@ -28,6 +28,7 @@ import org.apache.tinkerpop.gremlin.process.traversal.step.util.WithOptions
 import org.apache.tinkerpop.gremlin.structure.T
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -38,6 +39,7 @@ import org.testcontainers.containers.localstack.LocalStackContainer.Service.*
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import ru.vyarus.dropwizard.guice.injector.lookup.InjectorLookup
+import software.amazon.awssdk.services.sns.SnsClient
 import java.lang.IllegalStateException
 import java.time.Instant
 import java.time.LocalDate
@@ -58,7 +60,7 @@ class ApiIT {
         val database: KGenericContainer = KGenericContainer("tinkerpop/gremlin-server:3.4")
             .withExposedPorts(8182)
             .withClasspathResourceMapping(
-                "tinkergraph-overrides.properties",
+                "/tinkergraph-overrides.properties",
                 "/opt/gremlin-server/conf/tinkergraph-empty.properties",
                 BindMode.READ_ONLY
             )
@@ -85,7 +87,9 @@ class ApiIT {
             config("aws.ses.region") { aws.getEndpointConfiguration(SES).signingRegion },
             config("aws.ses.endpoint") { aws.getEndpointConfiguration(SES).serviceEndpoint },
             config("aws.s3.region") { aws.getEndpointConfiguration(S3).signingRegion },
-            config("aws.s3.endpoint") { aws.getEndpointConfiguration(S3).serviceEndpoint }
+            config("aws.s3.endpoint") { aws.getEndpointConfiguration(S3).serviceEndpoint },
+            config("aws.sns.region") { aws.getEndpointConfiguration(SNS).signingRegion },
+            config("aws.sns.endpoint") { aws.getEndpointConfiguration(SNS).serviceEndpoint }
         )
 
         val idWrapperType = object: GenericType<Map<String,String>>(){}
