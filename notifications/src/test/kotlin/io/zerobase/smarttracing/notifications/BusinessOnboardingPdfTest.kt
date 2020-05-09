@@ -4,7 +4,6 @@ import com.google.common.io.Resources
 import io.zerobase.smarttracing.common.models.Address
 import io.zerobase.smarttracing.common.models.ContactInfo
 import io.zerobase.smarttracing.common.models.Organization
-import io.zerobase.smarttracing.common.models.OrganizationId
 import io.zerobase.smarttracing.notifications.pdf.DocumentFactory
 import io.zerobase.smarttracing.notifications.qr.QRCodeGenerator
 import org.assertj.core.api.Assertions.assertThat
@@ -12,21 +11,12 @@ import org.junit.jupiter.api.Test
 import org.thymeleaf.TemplateEngine
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver
 import org.w3c.tidy.Tidy
-import java.io.File
-import java.io.IOException
-import java.lang.IllegalStateException
 import java.net.URI
-import java.net.URISyntaxException
-import java.net.URL
-import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
-import java.util.*
-import java.util.jar.JarEntry
-import java.util.jar.JarFile
 
 class BusinessOnboardingPdfTest {
     val org = Organization(
-        id = OrganizationId("hello"),
+        id = "hello",
         name = "org",
         address = Address("123", "Happy St", "Fryburg", "CA", "90210", "USA"),
         contactName = "Bob",

@@ -1,12 +1,12 @@
 package io.zerobase.smarttracing.notifications
 
-import ch.qos.logback.classic.Level
-import ch.qos.logback.classic.Logger
 import com.google.common.io.Resources
-import io.zerobase.smarttracing.common.models.*
+import io.zerobase.smarttracing.common.models.Address
+import io.zerobase.smarttracing.common.models.ContactInfo
+import io.zerobase.smarttracing.common.models.Organization
+import io.zerobase.smarttracing.common.models.ScannableId
 import io.zerobase.smarttracing.notifications.pdf.DocumentFactory
 import io.zerobase.smarttracing.notifications.qr.QRCodeGenerator
-import org.slf4j.LoggerFactory
 import org.thymeleaf.TemplateEngine
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver
 import org.w3c.tidy.Tidy
@@ -16,7 +16,6 @@ import java.nio.file.Files
 import java.nio.file.Paths
 
 fun main() {
-    (LoggerFactory.getLogger("org.thymeleaf") as Logger).level = Level.TRACE
     val qrCodeGenerator = QRCodeGenerator(
         baseLink = URI.create("https://zerobase.io/"),
         logo = Resources.getResource("qr/qr-code-logo.png")
@@ -35,7 +34,7 @@ fun main() {
         xhtml = true
     })
 
-    val fakeOrg = Organization(id = OrganizationId("fake"), name = "Fake Org",
+    val fakeOrg = Organization(id = "fake", name = "Fake Org",
         address = Address("", "", "Manchester", "New Hampshire", "", ""),
         contactName = "", contactInfo = ContactInfo("", ""))
 

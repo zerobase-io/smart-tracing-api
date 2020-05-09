@@ -12,4 +12,4 @@ import com.fasterxml.jackson.annotation.JsonTypeName
 interface ZerobaseEvent
 
 @JsonTypeName("simple-organization-created")
-data class SimpleOrganizationCreated(val organization: Organization, val defaultQrCode: ScannableId): ZerobaseEvent
+data class SimpleOrganizationCreated(val organization: Organization, val defaultQrCode: String): ZerobaseEvent

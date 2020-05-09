@@ -47,6 +47,9 @@ Parameters:
     Type: String
   KmsAlias:
     Type: String
+  NotificationsArtifactVersion:
+    Type: String
+    Description: S3 object version of the uploaded JAR
 
 Resources:
   DatabaseStack:
@@ -64,31 +67,86 @@ Resources:
         SubnetIds: { "Fn::ImportValue":  !Sub '${InfrastructureStackName}-DatabaseSubnetIds' }
         VpcId: { "Fn::ImportValue": !Sub '${InfrastructureStackName}-VpcId' }
 
+  EventTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub ${Environment}-api-events
+      DisplayName: !Sub ${Environment}-api-events
+
+  EventTopicAccessPolicy:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      PolicyDocument:
+        Version: 2008-10-17
+        Id: __default_policy_ID
+        Statement:
+          - Sid: __default_statement_ID
+            Effect: Allow
+            Principal:
+              AWS: "*"
+            Action:
+              - SNS:GetTopicAttributes
+              - SNS:SetTopicAttributes
+              - SNS:AddPermission
+              - SNS:RemovePermission
+              - SNS:DeleteTopic
+              - SNS:Subscribe
+              - SNS:Publish
+              - SNS:Receive
+            Resource: !Ref EventTopic
+            Condition:
+              StringEquals:
+                AWS:SourceOwner: !Ref AWS::AccountId
+          - Sid: Consumers
+            Effect: Allow
+            Principal:
+              AWS: !Ref AWS::AccountId
+            Action:
+              - SNS:Subscribe
+              - SNS:Receive
+              - SNS:ListSubscriptionsByTopic
+            Resource: !Ref EventTopic
+      Topics:
+        - !Ref EventTopic
+
+  Lambdas:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub 'https://${TemplateBucketName}.s3.amazonaws.com/${Environment}/api/lambdas.template'
+      TimeoutInMinutes: 10
+      Parameters:
+        ArtifactBucketName: !Ref TemplateBucketName
+        DomainSuffix:  {"Fn::ImportValue": !Sub '${InfrastructureStackName}-DomainSuffix'}
+        EmailNotificationsFromAddress: !Ref EmailNotificationsFromAddress
+        Environment: !Ref Environment
+        EventTopicArn: !Ref EventTopic
+        NotificationsArtifactVersion: !Ref NotificationsArtifactVersion
+        StaticResourcesBucket: {"Fn::ImportValue": !Sub '${InfrastructureStackName}-StaticResourcesBucket'}
+
   Service:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Sub 'https://${TemplateBucketName}.s3.amazonaws.com/${Environment}/api/service.template'
       TimeoutInMinutes: 10
       Parameters:
-        Environment: !Ref Environment
+        AllowedOrigins: !Ref AllowedOrigins
         AppVersion: !Ref AppVersion
+        DatabaseArn: !GetAtt DatabaseStack.Outputs.ClusterArn
+        DatabasePort: !GetAtt DatabaseStack.Outputs.ClusterPort
+        DatadogApiKeyArn: !Ref DatadogApiKeyArn
         DnsName: !Join ['.', ['api', {"Fn::ImportValue": !Sub '${InfrastructureStackName}-DomainSuffix'}]]
-        LoadBalancerListener: {"Fn::ImportValue": !Sub '${InfrastructureStackName}-EcsSecureLoadBalancerListener'}
-        LoadBalancerDnsName: {"Fn::ImportValue": !Sub '${InfrastructureStackName}-EcsLoadBalancerDnsName'}
-        LoadBalancerHostedZoneId: {"Fn::ImportValue": !Sub '${InfrastructureStackName}-EcsLoadBalancerHostedZoneId'}
-        VpcId: {"Fn::ImportValue": !Sub '${InfrastructureStackName}-VpcId'}
+        DomainSuffix:  {"Fn::ImportValue": !Sub '${InfrastructureStackName}-DomainSuffix'}
         EcsClusterArn:  {"Fn::ImportValue": !Sub '${InfrastructureStackName}-EcsClusterArn'}
         EcsClusterServiceRoleArn: {"Fn::ImportValue": !Sub '${InfrastructureStackName}-EcsServiceRoleArn'}
+        Environment: !Ref Environment
+        EventTopicArn: !Ref EventTopic
         HostedZoneId: {"Fn::ImportValue": !Sub '${InfrastructureStackName}-PublicHostedZoneId'}
-        DatabaseArn: !GetAtt DatabaseStack.Outputs.ClusterArn
-        WriteEndpoint: !GetAtt DatabaseStack.Outputs.WriteEndpoint
-        ReadEndpoint: !GetAtt DatabaseStack.Outputs.ReadEndpoint
-        DatabasePort: !GetAtt DatabaseStack.Outputs.ClusterPort
-        DomainSuffix:  {"Fn::ImportValue": !Sub '${InfrastructureStackName}-DomainSuffix'}
-        AllowedOrigins: !Ref AllowedOrigins
-        EmailNotificationsFromAddress: !Ref EmailNotificationsFromAddress
-        StaticResourcesBucket: {"Fn::ImportValue": !Sub '${InfrastructureStackName}-StaticResourcesBucket'}
-        ProjectLogLevel: !Ref ProjectLogLevel
-        DatadogApiKeyArn: !Ref DatadogApiKeyArn
         KmsAlias: !Ref KmsAlias
+        LoadBalancerDnsName: {"Fn::ImportValue": !Sub '${InfrastructureStackName}-EcsLoadBalancerDnsName'}
+        LoadBalancerHostedZoneId: {"Fn::ImportValue": !Sub '${InfrastructureStackName}-EcsLoadBalancerHostedZoneId'}
+        LoadBalancerListener: {"Fn::ImportValue": !Sub '${InfrastructureStackName}-EcsSecureLoadBalancerListener'}
+        ProjectLogLevel: !Ref ProjectLogLevel
+        ReadEndpoint: !GetAtt DatabaseStack.Outputs.ReadEndpoint
+        VpcId: {"Fn::ImportValue": !Sub '${InfrastructureStackName}-VpcId'}
+        WriteEndpoint: !GetAtt DatabaseStack.Outputs.WriteEndpoint
 ...

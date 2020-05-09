@@ -1,0 +1,108 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  ArtifactBucketName:
+    Type: String
+  DomainSuffix:
+    Type: String
+  EmailNotificationsFromAddress:
+    Type: String
+  Environment:
+    Type: String
+  EventTopicArn:
+    Type: String
+  NotificationsArtifactVersion:
+    Type: String
+  NotificationsMaxConcurrency:
+    Type: Number
+    MinValue: 1
+    MaxValue: 10
+    Default: 5
+  StaticResourcesBucket:
+    Type: String
+
+Resources:
+  EventSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Endpoint: !GetAtt NotificationsLambda.Arn
+      Protocol: lambda
+      TopicArn: !Ref EventTopicArn
+
+  NotificationsDlq:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub ${AWS::StackName}-notifications-dlq
+      MessageRetentionPeriod: 1209600
+
+  NotificationsLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        S3Bucket: !Ref ArtifactBucketName
+        S3Key: !Sub artifacts/notifications-${Environment}.jar
+        S3ObjectVersion: !Ref NotificationsArtifactVersion
+      DeadLetterConfig:
+        TargetArn: !GetAtt NotificationsDlq.Arn
+      Environment:
+        Variables:
+          BASE_LINK: !Sub 'https://www.${DomainSuffix}/s'
+          SES_FROM_ADDRESS: !Ref EmailNotificationsFromAddress
+          STATIC_RESOURCES_BUCKET: !Ref StaticResourcesBucket
+      FunctionName: !Sub ${AWS::StackName}-notifications
+      Handler: io.zerobase.smarttracing.notifications.Main::handleRequest
+      MemorySize: 512
+      ReservedConcurrentExecutions: !Ref NotificationsMaxConcurrency
+      Role: !GetAtt NotificationLambdaRole.Arn
+      Runtime: java11
+      Timeout: 60
+
+  NotificationsLambdaInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref NotificationsLambda
+      Principal: sns.amazonaws.com
+
+  NotificationsLambdaLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${NotificationsLambda}
+      RetentionInDays: 3
+
+  NotificationLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: lambda.amazonaws.com
+          Action: sts:AssumeRole
+      Path: "/"
+      Policies:
+        - PolicyName: DefaultPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+            - Action:
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+              - ec2:CreateNetworkInterface
+              - ec2:DeleteNetworkInterface
+              - ec2:DescribeNetworkInterfaces
+              Effect: Allow
+              Resource: '*'
+            - Action:
+              - sqs:GetQueueUrl
+              - sqs:SendMessage
+              Effect: Allow
+              Resource: !GetAtt NotificationsDlq.Arn
+            - Action: ses:Send*
+              Effect: Allow
+              Resource: '*'
+            - Action: s3:Get*
+              Effect: Allow
+              Resource: !Sub arn:aws:s3:::${StaticResourcesBucket}/*
+
+

@@ -83,6 +83,7 @@ class Main : Application<AppConfig>() {
         addCorsFilter(config.allowedOrigins, env)
 
         config.eventsTopicArn?.also {
+            log.info("Found event topic ARN. Setting up event publisher. topic={}", it)
             val sns = guiceBundle.injector.getInstance(SnsClient::class.java)
             eventBus.register(EventPublisher(sns, it, env.objectMapper))
         }

@@ -3,32 +3,46 @@ AWSTemplateFormatVersion: 2010-09-09
 Description: Zerobase API Service Stack
 
 Parameters:
+  AllowedOrigins:
+    Type: String
+    Description: Value for CORS filter
+  AppVersion:
+    Type: String
+  Cpu:
+    Type: Number
+    Default: 10
+  DatabaseArn:
+    Type: String
+    Description: ARN for neptune database, used for task IAM role
+  DatabasePort:
+    Type: Number
+    MinValue: 0
+  DatadogApiKeyArn:
+    Type: String
+  DnsName:
+    Type: String
+  DomainSuffix:
+    Type: String
+  EcsClusterArn:
+    Type: String
+    Description: ARN of the cluster to deploy to
+  EcsClusterServiceRoleArn:
+    Type: String
   Environment:
     Type: String
     AllowedValues: ['staging', 'prod']
-  AppVersion:
+  EventTopicArn:
     Type: String
-  DnsName:
+    Description: SNS Topic for publishing events from the backend
+  HostedZoneId:
+    Type: String
+  KmsAlias:
     Type: String
   LoadBalancerListener:
     Type: String
   LoadBalancerDnsName:
     Type: String
   LoadBalancerHostedZoneId:
-    Type: String
-  VpcId:
-    Type: AWS::EC2::VPC::Id
-  EcsClusterArn:
-    Type: String
-    Description: ARN of the cluster to deploy to
-  TaskCount:
-    Type: Number
-    MinValue: 1
-    MaxValue: 6
-    Default: 2
-  EcsClusterServiceRoleArn:
-    Type: String
-  HostedZoneId:
     Type: String
   LogRetentionDays:
     Type: Number
@@ -38,33 +52,18 @@ Parameters:
   Memory:
     Type: Number
     Default: 512
-  Cpu:
-    Type: Number
-    Default: 10
-  DatabaseArn:
-    Type: String
-    Description: ARN for neptune database, used for task IAM role
-  WriteEndpoint:
+  ProjectLogLevel:
     Type: String
   ReadEndpoint:
     Type: String
-  DatabasePort:
+  TaskCount:
     Type: Number
-    MinValue: 0
-  DomainSuffix:
-    Type: String
-  AllowedOrigins:
-    Type: String
-    Description: Value for CORS filter
-  EmailNotificationsFromAddress:
-    Type: String
-  StaticResourcesBucket:
-    Type: String
-  ProjectLogLevel:
-    Type: String
-  DatadogApiKeyArn:
-    Type: String
-  KmsAlias:
+    MinValue: 1
+    MaxValue: 6
+    Default: 2
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+  WriteEndpoint:
     Type: String
 
 Resources:
@@ -157,10 +156,6 @@ Resources:
           Value: !Sub 'https://www.${DomainSuffix}/s'
         - Name: JAVA_OPTS
           Value: -Xms256m -Xmx256m
-        - Name: EMAIL_NOTIFICATION_FROM_ADDRESS
-          Value: !Ref EmailNotificationsFromAddress
-        - Name: STATIC_RESOURCES_BUCKET
-          Value: !Ref StaticResourcesBucket
         - Name: PROJECT_LOG_LEVEL
           Value: !Ref ProjectLogLevel
         - Name: ENVIRONMENT
@@ -170,10 +165,10 @@ Resources:
           Value: true
         - Name: MODELS_FEATURE_ENABLED
           Value: true
-        - Name: NOTIFICATIONS_FEATURE_ENABLED
-          Value: true
         - Name: DEVICES_FEATURE_ENABLED
           Value: true
+        - Name: EVENT_TOPIC_ARN
+          Value: !Ref EventTopicArn
         Image: !Sub 'zerobaseio/smart-tracing-api:${AppVersion}'
         Memory: !Ref Memory
         LogConfiguration:
@@ -272,8 +267,7 @@ Resources:
             - ses:Send*
             Effect: Allow
             Resource: '*'
-          - Action:
-            - s3:Get*
+          - Action: sns:Publish
             Effect: Allow
-            Resource: !Sub arn:aws:s3:::${StaticResourcesBucket}/*
+            Resource: !Ref EventTopicArn
 ...

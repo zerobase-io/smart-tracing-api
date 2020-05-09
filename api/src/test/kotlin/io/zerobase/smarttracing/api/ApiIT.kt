@@ -39,8 +39,10 @@ import org.testcontainers.containers.localstack.LocalStackContainer.Service.*
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import ru.vyarus.dropwizard.guice.injector.lookup.InjectorLookup
+import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.sns.SnsClient
 import java.lang.IllegalStateException
+import java.net.URI
 import java.time.Instant
 import java.time.LocalDate
 import java.util.*
@@ -89,7 +91,12 @@ class ApiIT {
             config("aws.s3.region") { aws.getEndpointConfiguration(S3).signingRegion },
             config("aws.s3.endpoint") { aws.getEndpointConfiguration(S3).serviceEndpoint },
             config("aws.sns.region") { aws.getEndpointConfiguration(SNS).signingRegion },
-            config("aws.sns.endpoint") { aws.getEndpointConfiguration(SNS).serviceEndpoint }
+            config("aws.sns.endpoint") { aws.getEndpointConfiguration(SNS).serviceEndpoint },
+            config("eventsTopicArn") {
+                val config = aws.getEndpointConfiguration(SNS)
+                val sns = SnsClient.builder().region(Region.of(config.signingRegion)).endpointOverride(URI.create(config.serviceEndpoint)).build()
+                sns.createTopic { it.name("test-topic") }.topicArn()
+            }
         )
 
         val idWrapperType = object: GenericType<Map<String,String>>(){}

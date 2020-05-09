@@ -69,15 +69,16 @@ class OrganizationsResource(
 
         val organization = dao.createOrganization(name, phone, email, contactName, address, hasTestingFacilities, hasMultipleSites)
 
+        val orgId = OrganizationId(organization.id)
         if (!hasTestingFacilities && !hasMultipleSites) {
             log.debug("Simple business organization detected. Auto-creating site and default qr code. organization={}", organization)
-            val siteId = dao.createSite(organization.id, category = "BUSINESS", subcategory = "OTHER", address = request.address)
-            val scannableId = dao.createScannable(organization.id, siteId, "QR_CODE", false)
+            val siteId = dao.createSite(orgId, category = "BUSINESS", subcategory = "OTHER", address = request.address)
+            val scannableId = dao.createScannable(orgId, siteId, "QR_CODE", false)
             log.info("Created site and default ")
-            eventBus.post(SimpleOrganizationCreated(organization, scannableId))
+            eventBus.post(SimpleOrganizationCreated(organization, scannableId.value))
         }
 
-        return IdWrapper(organization.id)
+        return IdWrapper(orgId)
     }
 
     @Path("/{id}/sites")

@@ -4,6 +4,7 @@ import com.google.common.eventbus.AllowConcurrentEvents
 import com.google.common.eventbus.Subscribe
 import io.zerobase.smarttracing.common.LoggerDelegate
 import io.zerobase.smarttracing.common.models.ContactInfo
+import io.zerobase.smarttracing.common.models.ScannableId
 import io.zerobase.smarttracing.common.models.SimpleOrganizationCreated
 
 class NotificationManager(
@@ -31,7 +32,7 @@ class NotificationManager(
     fun handleNotificationRequest(event: SimpleOrganizationCreated) {
         log.debug("got notification that new simple business was created. sending onboarding notification. organization={}",
             event.organization)
-        val notification = notificationFactory.simpleBusinessOnboarding(event.organization, event.defaultQrCode)
+        val notification = notificationFactory.simpleBusinessOnboarding(event.organization, ScannableId(event.defaultQrCode))
         send(event.organization.contactInfo, notification)
     }
 }

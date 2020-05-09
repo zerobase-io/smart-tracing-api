@@ -1,0 +1,3 @@
+io.zerobase.smarttracing.api.features.devices.DevicesApiFeatureFactory
+io.zerobase.smarttracing.api.features.models.ModelsApiFeatureFactory
+io.zerobase.smarttracing.api.features.organizations.OrganizationsApiFeatureFactory

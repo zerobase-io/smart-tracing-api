@@ -13,7 +13,7 @@
     <name>Zerobase SmartTracing API</name>
 
     <properties>
-        <basepom.shaded.main-class>io.zerobase.smarttracing.MainKt</basepom.shaded.main-class>
+        <basepom.shaded.main-class>io.zerobase.smarttracing.api.MainKt</basepom.shaded.main-class>
     </properties>
 
     <dependencies>

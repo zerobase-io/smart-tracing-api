@@ -63,7 +63,7 @@ class OrganizationsDao @Inject constructor(private val graph: GraphTraversalSour
                 .property("creationTimestamp", now())
             v.execute()
 
-            return Organization(OrganizationId(id), name, address, contactName, ContactInfo(email, phone))
+            return Organization(id, name, address, contactName, ContactInfo(email, phone))
         } catch (ex: Exception) {
             log.error("Error creating organization. name={}", name, ex)
             throw EntityCreationException("Error creating organization", ex)
@@ -83,7 +83,7 @@ class OrganizationsDao @Inject constructor(private val graph: GraphTraversalSour
             .getIfPresent()
             ?.let {
                 Organization(
-                    id=id,
+                    id=id.value,
                     name=it["name"]!!,
                     address= Address(
                         it["premise"]!!, it["thoroughfare"]!!,

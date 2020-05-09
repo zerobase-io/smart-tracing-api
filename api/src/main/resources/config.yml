@@ -63,11 +63,11 @@ aws:
   s3:
     region: ${AWS_S3_REGION:-us-east-1}
     endpoint: ${AWS_S3_ENDPOINT:-null}
+  sns:
+    region: ${AWS_SNS_REGION:-us-east-1}
+    endpoint: ${AWS_SNS_ENDPOINT:-null}
 
-notifications:
-  staticResourcesBucket: ${STATIC_RESOURCES_BUCKET}
-  email:
-    fromAddress: ${EMAIL_NOTIFICATION_FROM_ADDRESS:-noreply@zerobase.io}
+eventsTopicArn: ${EVENT_TOPIC_ARN:-null}
 
 enableAllFeatures: false
 features:

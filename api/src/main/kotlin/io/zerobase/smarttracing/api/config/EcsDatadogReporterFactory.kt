@@ -42,7 +42,7 @@ class EcsMetadataTagFactory: DynamicTagsCallbackFactory {
         val tags = listOf(
             "revision:$taskRevision",
             "container_id:$containerId",
-            "image:$dockerImage",
+            "image:${dockerImage.substringAfter(":")}",
             "availibility_zone:$az",
             "instance_id:$instanceId"
         )
