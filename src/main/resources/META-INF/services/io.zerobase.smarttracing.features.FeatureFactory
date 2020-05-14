@@ -1,4 +1,0 @@
-io.zerobase.smarttracing.features.organizations.OrganizationsApiFeatureFactory
-io.zerobase.smarttracing.features.models.ModelsApiFeatureFactory
-io.zerobase.smarttracing.features.notifications.NotificationsFeatureFactory
-io.zerobase.smarttracing.features.devices.DevicesApiFeatureFactory
