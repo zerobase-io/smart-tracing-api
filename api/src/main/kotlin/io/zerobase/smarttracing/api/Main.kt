@@ -87,6 +87,8 @@ class Main : Application<AppConfig>() {
             val sns = guiceBundle.injector.getInstance(SnsClient::class.java)
             eventBus.register(EventPublisher(sns, it, env.objectMapper))
         }
+
+
     }
 
     private fun addCorsFilter(allowedOrigins: String, env: Environment) {

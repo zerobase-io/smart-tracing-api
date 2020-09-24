@@ -5,7 +5,6 @@ import com.google.common.net.MediaType
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import io.zerobase.smarttracing.common.models.ContactInfo
 import io.zerobase.smarttracing.common.models.Organization
-import io.zerobase.smarttracing.common.models.ScannableId
 import io.zerobase.smarttracing.notifications.pdf.DocumentFactory
 import io.zerobase.smarttracing.notifications.qr.QRCodeGenerator
 import org.thymeleaf.TemplateEngine
@@ -26,7 +25,7 @@ class NotificationFactory(
             private val staticResourceLoader: StaticResourceLoader
     ) {
 
-    fun simpleBusinessOnboarding(organization: Organization, defaultQrCode: ScannableId)
+    fun simpleBusinessOnboarding(organization: Organization, defaultQrCode: String)
         = SimpleBusinessOnboarding(templateEngine, documentFactory, qrCodeGenerator, staticResourceLoader, organization, defaultQrCode)
 }
 
@@ -45,14 +44,14 @@ class SimpleBusinessOnboarding(
         private val qrCodeGenerator: QRCodeGenerator,
         private val staticResourceLoader: StaticResourceLoader,
         private val organization: Organization,
-        private val qrCodeId: ScannableId
+        private val qrCodeId: String
 ) : Notification() {
     override val subject = "Welcome to Zerobase!"
     override val attachments: List<Attachment> by lazy {
         listOf(
             Attachment(
                 name = "QR Code Poster.pdf",
-                data = qrCodeGenerator.generate(qrCodeId.value).let { documentFactory.siteOnboarding(organization, it) }.render(),
+                data = qrCodeGenerator.generate(qrCodeId).let { documentFactory.siteOnboarding(organization, it) }.render(),
                 contentType = MediaType.PDF
             ),
             Attachment(

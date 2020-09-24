@@ -1,5 +1,6 @@
 package io.zerobase.smarttracing.api.config
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import io.dropwizard.setup.Environment
 import io.zerobase.smarttracing.common.LoggerDelegate
 import org.apache.tinkerpop.gremlin.driver.Cluster
@@ -22,10 +23,14 @@ class GraphDatabaseFactory {
     enum class Mode { READ, WRITE }
 
     var endpoints: Endpoints = Endpoints(write = "localhost", read = null)
+    @JsonProperty("port")
     var port: UInt = 8182u
     var path: String? = null
+    @JsonProperty("maxConnectionPoolSize")
     var maxConnectionPoolSize: UInt? = null
+    @JsonProperty("minConnectionPoolSize")
     var minConnectionPoolSize: UInt? = null
+    @JsonProperty("workerPoolSize")
     var workerPoolSize: UInt? = null
     var credentials: Credentials? = null
     var enableAwsSigner: Boolean = false

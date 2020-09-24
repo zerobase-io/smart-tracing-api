@@ -58,7 +58,7 @@ class OrganizationsResource(
 
     @POST
     @Creator
-    fun createOrganization(request: CreateOrganizationRequest): IdWrapper {
+    fun createOrganization(request: CreateOrganizationRequest): Id {
         val name = request.name
         val phone = request.contactInfo.phone
         val email = request.contactInfo.email
@@ -69,22 +69,21 @@ class OrganizationsResource(
 
         val organization = dao.createOrganization(name, phone, email, contactName, address, hasTestingFacilities, hasMultipleSites)
 
-        val orgId = OrganizationId(organization.id)
         if (!hasTestingFacilities && !hasMultipleSites) {
             log.debug("Simple business organization detected. Auto-creating site and default qr code. organization={}", organization)
-            val siteId = dao.createSite(orgId, category = "BUSINESS", subcategory = "OTHER", address = request.address)
-            val scannableId = dao.createScannable(orgId, siteId, "QR_CODE", false)
+            val siteId = dao.createSite(organization.id, category = "BUSINESS", subcategory = "OTHER", address = request.address)
+            val scannableId = dao.createScannable(organization.id, siteId, "QR_CODE", false)
             log.info("Created site and default ")
-            eventBus.post(SimpleOrganizationCreated(organization, scannableId.value))
+            eventBus.post(SimpleOrganizationCreated(organization, scannableId))
         }
 
-        return IdWrapper(orgId)
+        return Id(organization.id)
     }
 
     @Path("/{id}/sites")
     @POST
     @Creator
-    fun createSite(@PathParam("id") organizationId: String, request: CreateSiteRequest): IdWrapper {
+    fun createSite(@PathParam("id") organizationId: String, request: CreateSiteRequest): Id {
         val name = request.name ?: ""
         val category = request.category
         val subcategory = request.subcategory
@@ -101,27 +100,27 @@ class OrganizationsResource(
         }
 
         return dao.createSite(
-            OrganizationId(organizationId), name, category, subcategory, request.address,
+            organizationId, name, category, subcategory, request.address,
             latitude, longitude, isTesting, request.siteManagerContactInfo?.phone,
             request.siteManagerContactInfo?.email, request.siteManagerContactInfo?.contactName
-        ).let(::IdWrapper)
+        ).let(::Id)
     }
 
     @Path("/{id}/sites")
     @GET
     @SuppressFBWarnings("BC_BAD_CAST_TO_ABSTRACT_COLLECTION", justification = "false positive")
     fun getSites(@PathParam("id") id: String): List<SiteResponse> {
-        return dao.getSites(OrganizationId(id)).map { (id, name) -> SiteResponse(id, name) }
+        return dao.getSites(id).map { (id, name) -> SiteResponse(id, name) }
     }
 
     @Path("/{id}/multiple-sites-setting")
     @PUT
     fun updateMultipleSitesSetting(@PathParam("id") id: String, hasMultipleSites: Boolean) {
-        dao.setMultiSite(OrganizationId(id), hasMultipleSites)
+        dao.setMultiSite(id, hasMultipleSites)
     }
 
     @Path("/{orgId}/sites/{siteId}")
     fun delegateSiteRequest(@PathParam("orgId") orgId: String, @PathParam("siteId") siteId: String): SitesResource {
-        return SitesResource(OrganizationId(orgId), SiteId(siteId), dao, scanTypes)
+        return SitesResource(orgId, siteId, dao, scanTypes)
     }
 }

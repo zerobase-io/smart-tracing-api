@@ -20,38 +20,40 @@ database:
 aws:
   ses:
     region: ${REGION:-us-east-1}
-    endpoint: ${FAKE_SES_ENDPOINT:-http://127.0.0.1:4579}
+    endpoint: ${LOCALSTACK_ENDPOINT:-http://127.0.0.1:4566}
   s3:
     region: ${REGION:-us-east-1}
+    endpoint: ${LOCALSTACK_ENDPOINT:-http://127.0.0.1:4566}
+  sns:
+    region: ${REGION:-us-east-1}
+    endpoint: ${LOCALSTACK_ENDPOINT:-http://127.0.0.1:4566}
 
 baseQrCodeLink: http://127.0.0.1:8080/s/
-
-notifications:
-  staticResourcesBucket: ${STATIC_RESOURCES_BUCKET:-local-static-resources}
-  email:
-    fromAddress: ${NOTIFICATION_FROM_EMAIL_ADDRESS:-noreply@zerobase.io}
 
 enableAllFeatures: true
 features:
   - type: organizations
   - type: models
-  - type: notifications
   - type: devices
+  - type: admin
+    config:
+      ssm:
+        region: us-east-1
+        endpoint: ${LOCALSTACK_ENDPOINT:-http://127.0.0.1:4566}
+      oauth:
+        client: arn:aws:ssm:us-east-1:1234567890:parameter/dev-oauth
+        callback: http://127.0.0.1:${PORT:-9000}/oauth/callback
+      signing:
+        endpoint: ${LOCALSTACK_ENDPOINT:-http://127.0.0.1:4566}
+        key: arn:aws:kms:us-east-1:000000000000:key/bc6eec2c-a1bd-49a7-b90f-6234724789fa
+      database:
+        region: us-east-1
+        endpoint: ${LOCALSTACK_ENDPOINT:-http://127.0.0.1:4566}
+        tableName: admin-management
 
 siteTypeCategories:
-  BUSINESS:
-  - GROCERY
-  - RESTAURANT
-  - OTHER
-  FINANCIAL:
-  - BANK
-  - OTHER
-  HEALTH:
-  - DOCTOR_OFFICE
-  - HOSPITAL
-  - PHARMACY
-  - OTHER
-  OTHER:
-  - OTHER
-scannableTypes:
-- QR_CODE
+  BUSINESS: ["GROCERY", "RESTAURANT", "OTHER"]
+  FINANCIAL: ["BANK", "OTHER"]
+  HEALTH: ["DOCTOR_OFFICE", "HOSPITAL", "PHARMACY", "OTHER"]
+  OTHER: ["OTHER"]
+scannableTypes: ["QR_CODE"]

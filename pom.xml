@@ -25,9 +25,10 @@
         <basepom.failsafe.timeout>120</basepom.failsafe.timeout>
         <dropwizard.version>2.0.5</dropwizard.version>
         <gremlin.version>[3.4.6,4)</gremlin.version>
+        <jackson.version>2.11.2</jackson.version>
         <kotlin.compiler.jvmTarget>11</kotlin.compiler.jvmTarget>
-        <kotlin.version>1.3.72</kotlin.version>
-        <testcontainers.version>1.13.0</testcontainers.version>
+        <kotlin.version>1.4.0</kotlin.version>
+        <testcontainers.version>1.14.3</testcontainers.version>
         <metrics-datadog.version>1.1.14</metrics-datadog.version>
     </properties>
 
@@ -47,15 +48,15 @@
                 <type>pom</type>
             </dependency>
             <dependency>
-                <groupId>io.dropwizard</groupId>
-                <artifactId>dropwizard-bom</artifactId>
-                <version>${dropwizard.version}</version>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>${jackson.version}</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
             <dependency>
                 <groupId>io.dropwizard</groupId>
-                <artifactId>dropwizard-dependencies</artifactId>
+                <artifactId>dropwizard-bom</artifactId>
                 <version>${dropwizard.version}</version>
                 <scope>import</scope>
                 <type>pom</type>
@@ -123,7 +124,7 @@
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-bom</artifactId>
-                <version>4.1.48.Final</version>
+                <version>4.1.49.Final</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -197,11 +198,11 @@
             <artifactId>junit-jupiter-engine</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.junit.platform</groupId>
-            <artifactId>junit-platform-runner</artifactId>
-            <scope>test</scope>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.junit.platform</groupId>-->
+<!--            <artifactId>junit-platform-runner</artifactId>-->
+<!--            <scope>test</scope>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>

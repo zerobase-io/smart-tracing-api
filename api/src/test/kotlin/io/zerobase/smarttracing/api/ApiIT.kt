@@ -7,7 +7,6 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.google.common.eventbus.EventBus
 import com.google.common.eventbus.Subscribe
 import io.dropwizard.Application
-import io.dropwizard.Configuration
 import io.dropwizard.testing.ConfigOverride.config
 import io.dropwizard.testing.junit5.DropwizardAppExtension
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport
@@ -28,7 +27,6 @@ import org.apache.tinkerpop.gremlin.process.traversal.step.util.WithOptions
 import org.apache.tinkerpop.gremlin.structure.T
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -41,7 +39,6 @@ import org.testcontainers.junit.jupiter.Testcontainers
 import ru.vyarus.dropwizard.guice.injector.lookup.InjectorLookup
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.sns.SnsClient
-import java.lang.IllegalStateException
 import java.net.URI
 import java.time.Instant
 import java.time.LocalDate
@@ -69,7 +66,11 @@ class ApiIT {
 
         @JvmStatic
         @Container
-        val aws: LocalStackContainer = LocalStackContainer().withServices(SES, S3, SNS)
+        val aws: KGenericContainer = KGenericContainer("localstack/localstack:0.11.4")
+            .withExposedPorts(4566)
+            .withEnv("SERVICES", "s3,sns,ses,dynamo,kms,ssm")
+            .withEnv("DATA_DIR", "/tmp/localstack/data")
+//        val aws: LocalStackContainer = LocalStackContainer().withServices(SES, S3, SNS, DYNAMODB, /*KMS,*/ SSM)
 
         @JvmStatic
         val app = DropwizardAppExtension(Main::class.java, "src/main/resources/config.yml",
@@ -86,15 +87,17 @@ class ApiIT {
             config("database.enableAwsSigner", "false"),
             config("database.enableSsl", "false"),
             config("baseQrCodeLink", "http://zerobase.test"),
-            config("aws.ses.region") { aws.getEndpointConfiguration(SES).signingRegion },
-            config("aws.ses.endpoint") { aws.getEndpointConfiguration(SES).serviceEndpoint },
-            config("aws.s3.region") { aws.getEndpointConfiguration(S3).signingRegion },
-            config("aws.s3.endpoint") { aws.getEndpointConfiguration(S3).serviceEndpoint },
-            config("aws.sns.region") { aws.getEndpointConfiguration(SNS).signingRegion },
-            config("aws.sns.endpoint") { aws.getEndpointConfiguration(SNS).serviceEndpoint },
+            config("aws.ses.region", "us-east-1"),
+            config("aws.ses.endpoint") { "http://localhost:${aws.getMappedPort(4566)}" },
+            config("aws.s3.region", "us-east-1"),
+            config("aws.s3.endpoint") { "http://localhost:${aws.getMappedPort(4566)}" },
+            config("aws.sns.region", "us-east-1"),
+            config("aws.sns.endpoint") { "http://localhost:${aws.getMappedPort(4566)}" },
             config("eventsTopicArn") {
-                val config = aws.getEndpointConfiguration(SNS)
-                val sns = SnsClient.builder().region(Region.of(config.signingRegion)).endpointOverride(URI.create(config.serviceEndpoint)).build()
+                val sns = SnsClient.builder()
+                    .region(Region.US_EAST_1)
+                    .endpointOverride(URI.create("http://localhost:${aws.getMappedPort(4566)}"))
+                    .build()
                 sns.createTopic { it.name("test-topic") }.topicArn()
             }
         )

@@ -1,10 +1,8 @@
 package io.zerobase.smarttracing.api.features.devices
 
 import io.zerobase.smarttracing.api.InvalidPhoneNumberException
-import io.zerobase.smarttracing.common.models.DeviceId
-import io.zerobase.smarttracing.common.models.IdWrapper
+import io.zerobase.smarttracing.common.models.Id
 import io.zerobase.smarttracing.common.models.User
-import io.zerobase.smarttracing.common.models.UserId
 import io.zerobase.smarttracing.api.resources.Creator
 import javax.ws.rs.*
 import javax.ws.rs.core.MediaType
@@ -30,15 +28,15 @@ class UsersResource(val dao: UsersDao) {
 
     @POST
     @Creator
-    fun createUser(request: CreateUserRequest): IdWrapper? {
+    fun createUser(request: CreateUserRequest): Id? {
         if (request.name == null && request.contact.phone == null && request.contact.email == null) {
             throw BadRequestException("At least one contact method or a name is required to create a user")
         }
         try {
             return dao.createUser(
                 request.name, request.contact.phone,
-                request.contact.email, DeviceId(request.deviceId)
-            ).let(::IdWrapper)
+                request.contact.email, request.deviceId
+            ).let(::Id)
         } catch (e: InvalidPhoneNumberException) {
             throw BadRequestException(e.message)
         }
@@ -47,7 +45,7 @@ class UsersResource(val dao: UsersDao) {
     @Path("/{id}")
     @DELETE
     fun deleteUser(@PathParam("id") id: String) {
-        dao.getUser(UserId(id))?.also {
+        dao.getUser(id)?.also {
             dao.deleteUser(it.id)
         }
     }
@@ -55,6 +53,6 @@ class UsersResource(val dao: UsersDao) {
     @Path("/{id}/summary")
     @GET
     fun getUserDump(@PathParam("id") id: String): User? {
-        return dao.getUser(UserId(id)) ?: throw NotFoundException()
+        return dao.getUser(id) ?: throw NotFoundException()
     }
 }

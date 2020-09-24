@@ -1,0 +1,48 @@
+version: "3.7"
+
+volumes:
+  maven_repository:
+
+services:
+
+  database:
+    image: tinkerpop/gremlin-server:latest
+    ports:
+    - ${DB_PORT:-8182}:8182
+    volumes:
+    - ${PWD}/api/src/test/resources/tinkergraph-overrides.properties:/opt/gremlin-server/conf/tinkergraph-empty.properties
+
+  aws:
+    image: localstack/localstack:latest
+    ports:
+    - 4566:4566
+    volumes:
+      - ${PWD}/api/src/test/resources/localstack-kms-storage:/tmp/local-kms
+    environment:
+    - SERVICES=ses,dynamo,kms,ssm
+    - DEBUG=${AWS_DEBUG:-true}
+    - DATA_DIR=/tmp/localstack/data
+
+  api:
+    image: maven:amazoncorretto
+    depends_on:
+    - aws
+    - database
+    ports:
+      - 9000:9000
+    volumes:
+    - ${PWD}:/usr/src/zerobase-api
+    - maven_repository:/root/.m2/respository
+    working_dir: /usr/src/zerobase-api
+    command: >
+      bash -c "
+        mvn -ntp install -DskipTests -Dbasepom.check.skip-all &&
+        mvn -ntp -pl api exec:java -Dexec.mainClass=io.zerobase.smarttracing.api.MainKt -Dexec.args='server api/src/main/resources/local-config.yml'
+      "
+    environment:
+      DB_HOST: database
+      LOCALSTACK_ENDPOINT: http://aws:4566
+      PORT: 9000
+      AWS_ACCESS_KEY_ID: fake-access-key
+      AWS_SECRET_ACCESS_KEY: fake-secret-key
+#      MAVEN_OPTS: -Dorg.slf4j.simpleLogger.defaultLogLevel=warn

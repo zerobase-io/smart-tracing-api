@@ -7,6 +7,8 @@ import io.zerobase.smarttracing.api.features.FeatureFactory
 import software.amazon.awssdk.regions.Region
 import java.net.URI
 
+data class AmazonServiceConfig(val region: Region, val endpoint: URI? = null)
+
 data class AmazonEmailConfig(val region: Region, val endpoint: URI? = null)
 
 data class S3Config(val region: Region, val endpoint: URI? = null)

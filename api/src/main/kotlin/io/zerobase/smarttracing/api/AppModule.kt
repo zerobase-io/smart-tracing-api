@@ -1,5 +1,6 @@
 package io.zerobase.smarttracing.api
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.inject.AbstractModule
 import com.google.inject.Provides
 import com.google.inject.Scopes
@@ -24,6 +25,9 @@ class AppModule: AbstractModule() {
         bind(TraceIdFilter::class.java).`in`(Scopes.SINGLETON)
         bind(InvalidIdExceptionMapper::class.java).`in`(Scopes.SINGLETON)
     }
+
+    @Provides
+    fun objectMapper(env: Environment): ObjectMapper = env.objectMapper
 
     @Provides
     fun sns(@Config config: SnsConfig): SnsClient {

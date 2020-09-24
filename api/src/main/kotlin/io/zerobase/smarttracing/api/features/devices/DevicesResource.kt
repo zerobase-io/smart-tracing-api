@@ -44,31 +44,29 @@ class DevicesResource(val dao: DevicesDao) {
 
     @POST
     @Creator
-    fun createDevice(request: CreateDeviceRequest): IdWrapper? {
-        val fingerprint = request.fingerprint?.let { Fingerprint(it) }
+    fun createDevice(request: CreateDeviceRequest): Id? {
+        val newDeviceId = dao.createDevice(request.fingerprint)
 
-        val newDeviceId = dao.createDevice(fingerprint)
-
-        return IdWrapper(newDeviceId)
+        return Id(newDeviceId)
     }
 
     @Path("/{id}/check-ins")
     @POST
     @Creator
-    fun createCheckIn(@PathParam("id") deviceId: String, request: CreateCheckInRequest): IdWrapper {
+    fun createCheckIn(@PathParam("id") deviceId: String, request: CreateCheckInRequest): Id {
         val scannedId = request.scannedId
         val type = request.type
         val loc = request.location
 
         val newCheckInId = if (type == ScanType.DEVICE_TO_SCANNABLE) {
-            dao.createCheckIn(DeviceId(deviceId), ScannableId(scannedId), loc)
+            dao.createCheckIn(deviceId, scannedId, loc)
         } else if (type == ScanType.DEVICE_TO_DEVICE) {
-            dao.recordPeerToPeerScan(DeviceId(deviceId), DeviceId(scannedId), loc)
+            dao.recordPeerToPeerScan(deviceId, scannedId, loc)
         } else {
             throw BadRequestException("Incorrect type")
         }
 
-        return IdWrapper(newCheckInId)
+        return Id(newCheckInId)
     }
 
     @Path("/{deviceId}/check-ins/{checkInId}/location")
@@ -78,14 +76,14 @@ class DevicesResource(val dao: DevicesDao) {
             @PathParam("checkInId") checkInId: String,
             loc: Location
     ) {
-        dao.updateCheckInLocation(DeviceId(deviceId), ScanId(checkInId), loc)
+        dao.updateCheckInLocation(deviceId, checkInId, loc)
     }
 
     @Path("/{id}/reports/tests")
     @POST
     @Creator
-    fun selfReportTestResult(@PathParam("id") id: String, report: SelfReportedTestResult): IdWrapper {
-        val deviceId = DeviceId(id)
+    fun selfReportTestResult(@PathParam("id") id: String, report: SelfReportedTestResult): Id {
+        val deviceId = id
         return dao.recordTestResult(TestResult(
             reportedBy = deviceId,
             testedParty = deviceId,
@@ -93,14 +91,14 @@ class DevicesResource(val dao: DevicesDao) {
             testDate = report.testDate,
             verified = false,
             timestamp = report.timestamp
-        )).let(::IdWrapper)
+        )).let(::Id)
     }
 
     @Path("/{id}/reports/symptoms")
     @POST
     @Creator
-    fun selfReportSymtoms(@PathParam("id") id: String, report: SelfReportedSymptoms): IdWrapper {
-        val deviceId = DeviceId(id)
+    fun selfReportSymtoms(@PathParam("id") id: String, report: SelfReportedSymptoms): Id {
+        val deviceId = id
         return dao.recordSymptoms(SymptomSummary(
             reportedBy = deviceId,
             testedParty = deviceId,
@@ -111,6 +109,6 @@ class DevicesResource(val dao: DevicesDao) {
             temperature = report.temperature,
             verified = false,
             timestamp = report.timestamp
-        )).let(::IdWrapper)
+        )).let(::Id)
     }
 }

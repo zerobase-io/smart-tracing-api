@@ -25,15 +25,15 @@ class DevicesDao @Inject constructor(private val graph: GraphTraversalSource) {
      * Creates a new Device and returns its ID
      */
     @SuppressFBWarnings("RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE", justification = "false positive")
-    fun createDevice(fingerprint: Fingerprint?): DeviceId {
+    fun createDevice(fingerprint: String?): String {
         val id = randomUUID().toString()
         try {
             val vertex = graph.addV("Device")
                 .property(T.id, id)
-                .property("fingerprint", fingerprint?.value ?: "none")
+                .property("fingerprint", fingerprint ?: "none")
                 .property("creationTimestamp", now())
                 .execute()
-            return vertex?.run { DeviceId(id) } ?: throw EntityCreationException("Failed to save device")
+            return vertex?.run { id } ?: throw EntityCreationException("Failed to save device")
         } catch (ex: Exception) {
             log.error("error creating device. fingerprint={}", fingerprint, ex)
             throw EntityCreationException("Error creating device", ex)
@@ -43,11 +43,11 @@ class DevicesDao @Inject constructor(private val graph: GraphTraversalSource) {
     /**
      * Creates a new CheckIn and returns its ID
      */
-    fun createCheckIn(deviceId: DeviceId, scannedId: ScannableId, loc: Location?): ScanId {
+    fun createCheckIn(deviceId: String, scannedId: String, loc: Location?): String {
         val scanId = randomUUID().toString()
         try {
-            val deviceNode = graph.V(deviceId.value).getIfPresent() ?: throw InvalidIdException(deviceId)
-            val scannableNode = graph.V(scannedId.value).hasLabel("Scannable").getIfPresent() ?: throw InvalidIdException(scannedId)
+            val deviceNode = graph.V(deviceId).getIfPresent() ?: throw InvalidIdException(deviceId)
+            val scannableNode = graph.V(scannedId).hasLabel("Scannable").getIfPresent() ?: throw InvalidIdException(scannedId)
             val traversal = graph.addE("SCAN")
                 .from(deviceNode)
                 .to(scannableNode)
@@ -55,7 +55,7 @@ class DevicesDao @Inject constructor(private val graph: GraphTraversalSource) {
                 .property("timestamp", now())
             loc?.also { (lat, long) -> traversal.property("latitude", lat).property("longitude", long) }
             traversal.execute()
-            return ScanId(scanId)
+            return scanId
         } catch (ex: Exception) {
             log.error("error creating check-in. device={} scannable={}", deviceId, scannedId, ex)
             throw EntityCreationException("Error creating check-in", ex)
@@ -65,19 +65,19 @@ class DevicesDao @Inject constructor(private val graph: GraphTraversalSource) {
     /**
      * Updates the location attribute of a CheckIn. Throws 404 if CheckIn doesn't exist.
      */
-    fun updateCheckInLocation(deviceId: DeviceId, checkInId: ScanId, loc: Location) {
-        graph.V(checkInId.value).inE("SCAN")
-            .from(graph.V(deviceId.value))
+    fun updateCheckInLocation(deviceId: String, checkInId: String, loc: Location) {
+        graph.V(checkInId).inE("SCAN")
+            .from(graph.V(deviceId))
             .property("latitude", loc.latitude)
             .property("longitude", loc.longitude)
             .execute()
     }
 
-    fun recordPeerToPeerScan(scanner: DeviceId, scanned: DeviceId, loc: Location?): ScanId {
+    fun recordPeerToPeerScan(scanner: String, scanned: String, loc: Location?): String {
         val scanId = randomUUID().toString()
         try {
-            val aNode = graph.V(scanner.value).getIfPresent() ?: throw InvalidIdException(scanner)
-            val bNode = graph.V(scanned.value).getIfPresent() ?: throw InvalidIdException(scanned)
+            val aNode = graph.V(scanner).getIfPresent() ?: throw InvalidIdException(scanner)
+            val bNode = graph.V(scanned).getIfPresent() ?: throw InvalidIdException(scanned)
             graph.addE("SCAN")
                 .from(aNode)
                 .to(bNode)
@@ -86,18 +86,18 @@ class DevicesDao @Inject constructor(private val graph: GraphTraversalSource) {
                 .property("latitude", loc?.latitude ?: 0)
                 .property("longitude", loc?.longitude ?: 0)
                 .execute()
-            return ScanId(scanId)
+            return scanId
         } catch (ex: Exception) {
             log.error("error creating p2p scan. scanner={} scanned={}", scanner, scanned, ex)
             throw EntityCreationException("Error creating scan relationship between devices.", ex)
         }
     }
 
-    fun recordTestResult(testResult: TestResult): ReportId {
+    fun recordTestResult(testResult: TestResult): String {
         val reportId = randomUUID().toString()
         try {
-            val deviceNode = graph.V(testResult.testedParty.value).getIfPresent() ?: throw InvalidIdException(testResult.testedParty)
-            val reporterNode = graph.V(testResult.reportedBy.value).getIfPresent() ?: throw InvalidIdException(testResult.reportedBy)
+            val deviceNode = graph.V(testResult.testedParty).getIfPresent() ?: throw InvalidIdException(testResult.testedParty)
+            val reporterNode = graph.V(testResult.reportedBy).getIfPresent() ?: throw InvalidIdException(testResult.reportedBy)
             graph.addV("TestResult").
                 property(T.id, reportId).
                 property(single, "verified", testResult.verified).
@@ -108,7 +108,7 @@ class DevicesDao @Inject constructor(private val graph: GraphTraversalSource) {
                 // go back to the report node to make the second edge
                 inV().addE("FOR").to(deviceNode).
                 execute()
-            return ReportId(reportId)
+            return reportId
         } catch (ex: Exception) {
             log.error("error recording test result. device={} verified={}", testResult.testedParty, testResult.verified, ex)
             throw EntityCreationException("Error recording test result.", ex)
@@ -116,11 +116,11 @@ class DevicesDao @Inject constructor(private val graph: GraphTraversalSource) {
     }
 
     @SuppressFBWarnings("BC_BAD_CAST_TO_ABSTRACT_COLLECTION", justification = "false positive because kotlin")
-    fun recordSymptoms(data: SymptomSummary): ReportId {
+    fun recordSymptoms(data: SymptomSummary): String {
         val reportId = randomUUID().toString()
         try {
-            val deviceNode = graph.V(data.testedParty.value).getIfPresent() ?: throw InvalidIdException(data.testedParty)
-            val reporterNode = graph.V(data.reportedBy.value).getIfPresent() ?: throw InvalidIdException(data.reportedBy)
+            val deviceNode = graph.V(data.testedParty).getIfPresent() ?: throw InvalidIdException(data.testedParty)
+            val reporterNode = graph.V(data.reportedBy).getIfPresent() ?: throw InvalidIdException(data.reportedBy)
             val traversal = graph.addV("Symptoms").
                 property(T.id, reportId).
                 property(single, "verified", data.verified).
@@ -134,7 +134,7 @@ class DevicesDao @Inject constructor(private val graph: GraphTraversalSource) {
             // go back to the report node to make the second edge
             inV().addE("REPORT_FOR").to(deviceNode).
             execute()
-            return ReportId(reportId)
+            return reportId
         } catch (ex: Exception) {
             log.error("error recording symptoms. device={} verified={}", data.testedParty, data.verified, ex)
             throw EntityCreationException("Error recording symptoms.", ex)

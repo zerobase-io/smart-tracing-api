@@ -77,13 +77,13 @@ class OrganizationsDao @Inject constructor(private val graph: GraphTraversalSour
      *
      * @return email of the organization.
      */
-    fun getOrganization(id: OrganizationId): Organization? {
-        return graph.V(id.value)
+    fun getOrganization(id: String): Organization? {
+        return graph.V(id)
             .propertyMap<String>()
             .getIfPresent()
             ?.let {
                 Organization(
-                    id=id.value,
+                    id=id,
                     name=it["name"]!!,
                     address= Address(
                         it["premise"]!!, it["thoroughfare"]!!,
@@ -101,8 +101,8 @@ class OrganizationsDao @Inject constructor(private val graph: GraphTraversalSour
      * @param id organization uuid.
      * @param state the value for the multi-site flag
      */
-    fun setMultiSite(id: OrganizationId, state: Boolean) {
-        graph.V(id.value).property("multisite", state).execute()
+    fun setMultiSite(id: String, state: Boolean) {
+        graph.V(id).property("multisite", state).execute()
     }
 
     /**
@@ -120,15 +120,15 @@ class OrganizationsDao @Inject constructor(private val graph: GraphTraversalSour
      * @param contactName contact name of site manager
      */
     fun createSite(
-        organizationId: OrganizationId, name: String = "Default", category: String, subcategory: String,
+        organizationId: String, name: String = "Default", category: String, subcategory: String,
         address: Address? = null, lat: Float? = null, long: Float? = null, testing: Boolean = false,
         phone: String? = null, email: String? = null, contactName: String? = null
-    ): SiteId {
+    ): String {
         val id = UUID.randomUUID().toString()
         try {
             val v = graph.addV("Site")
                 .property(T.id, id)
-                .property(single,"organizationId", organizationId.value)
+                .property(single,"organizationId", organizationId)
                 .property(single,"name", name)
                 .property(single,"category", category)
                 .property(single,"subcategory", subcategory)
@@ -147,8 +147,8 @@ class OrganizationsDao @Inject constructor(private val graph: GraphTraversalSour
             contactName?.also { v.property("contactName", it) }
             phone?.also { v.property("phone", it) }
             email?.also { v.property("email", it) }
-            v.addE("OWNS").from(graph.V(organizationId.value)).to(graph.V(id)).execute()
-            return SiteId(id)
+            v.addE("OWNS").from(graph.V(organizationId)).to(graph.V(id)).execute()
+            return id
         } catch (ex: Exception) {
             log.error("error creating site. organization={} name={} category={}-{} testing={}", id, name, category, subcategory, testing, ex)
             throw EntityCreationException("Error creating site.", ex)
@@ -163,8 +163,8 @@ class OrganizationsDao @Inject constructor(private val graph: GraphTraversalSour
      * @return list of all the sites.
      */
     @SuppressFBWarnings("BC_BAD_CAST_TO_ABSTRACT_COLLECTION", justification = "false positive")
-    fun getSites(id: OrganizationId): List<Pair<String, String>> {
-        return graph.V(id.value).out("OWNS").hasLabel("Site")
+    fun getSites(id: String): List<Pair<String, String>> {
+        return graph.V(id).out("OWNS").hasLabel("Site")
             .valueMap<String>().with(WithOptions.tokens).by(unfold<String>()).toList()
             .map{ it[T.id]!! to it["name"]!! }
     }
@@ -180,23 +180,23 @@ class OrganizationsDao @Inject constructor(private val graph: GraphTraversalSour
      *
      * @return id of the scannable.
      */
-    fun createScannable(oid: OrganizationId, sid: SiteId, type: String, singleUse: Boolean): ScannableId {
+    fun createScannable(oid: String, sid: String, type: String, singleUse: Boolean): String {
         val id = UUID.randomUUID().toString()
         try {
             graph.addV("Scannable").property(T.id, id).property("type", type).property("singleUse", singleUse)
                 .property("active", true).addE("OWNS")
-                .from(graph.V(sid.value))
+                .from(graph.V(sid))
                 .execute()
-            return ScannableId(id)
+            return id
         } catch (ex: Exception) {
             log.error("error creating scannable. organization={} site={} type={}", oid, sid, type)
             throw EntityCreationException("Error creating scannable.", ex)
         }
     }
 
-    fun updateEntityName(id: Id, nodeType: String, name: String) {
+    fun updateEntityName(id: String, nodeType: String, name: String) {
         try {
-            graph.V(id.value).hasLabel(nodeType).property(single, "name", name).execute()
+            graph.V(id).hasLabel(nodeType).property(single, "name", name).execute()
         } catch (ex: Exception) {
             log.error("error updating name of site. id={} label={}", id, nodeType, ex);
             throw UpdateFailedException("Site Name")
@@ -204,11 +204,11 @@ class OrganizationsDao @Inject constructor(private val graph: GraphTraversalSour
     }
 
     @SuppressFBWarnings("BC_BAD_CAST_TO_ABSTRACT_COLLECTION", justification = "False positive from kotlin")
-    fun getScannables(id: SiteId): List<Scannable> {
+    fun getScannables(id: String): List<Scannable> {
         try {
-            return graph.V(id.value).hasLabel("Site").outE("OWNS").otherV().hasLabel("Scannable")
+            return graph.V(id).hasLabel("Site").outE("OWNS").otherV().hasLabel("Scannable")
                 .valueMap<String>("name", "type").with(WithOptions.tokens).by(unfold<String>()).toList()
-                .map { Scannable(ScannableId(it[T.id]!!), it["name"] ?: "None", it["type"]!!) }
+                .map { Scannable(it[T.id]!!, it["name"] ?: "None", it["type"]!!) }
         } catch (ex: Exception) {
             log.error("error executing query. siteId={}", id, ex)
             throw QueryFailedException("Site Scannables")

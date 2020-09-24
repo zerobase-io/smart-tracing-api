@@ -4,7 +4,6 @@ import com.google.common.io.Resources
 import io.zerobase.smarttracing.common.models.Address
 import io.zerobase.smarttracing.common.models.ContactInfo
 import io.zerobase.smarttracing.common.models.Organization
-import io.zerobase.smarttracing.common.models.ScannableId
 import io.zerobase.smarttracing.notifications.pdf.DocumentFactory
 import io.zerobase.smarttracing.notifications.qr.QRCodeGenerator
 import org.thymeleaf.TemplateEngine
@@ -20,7 +19,7 @@ fun main() {
         baseLink = URI.create("https://zerobase.io/"),
         logo = Resources.getResource("qr/qr-code-logo.png")
     )
-    val qrCodeId = ScannableId("qr01")
+    val qrCodeId = "qr01"
     val resolver = ClassLoaderTemplateResolver().apply {
         suffix = ".html"
         characterEncoding = StandardCharsets.UTF_8.displayName()
@@ -39,7 +38,7 @@ fun main() {
         contactName = "", contactInfo = ContactInfo("", ""))
 
     // qr pdf
-     val result = qrCodeGenerator.generate(qrCodeId.value).let { documentFactory.siteOnboarding(fakeOrg, it) }.render()
+     val result = qrCodeGenerator.generate(qrCodeId).let { documentFactory.siteOnboarding(fakeOrg, it) }.render()
     //     And finally, we create the PDF:
     Files.copy(result, Paths.get("pdfs", "zerobase-qr.pdf"))
 }

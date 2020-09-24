@@ -9,8 +9,8 @@ import javax.ws.rs.core.Response
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 class SitesResource(
-    private val orgId: OrganizationId,
-    private val id: SiteId,
+    private val orgId: String,
+    private val id: String,
     private val dao: OrganizationsDao,
     private val scanTypes: Set<String>
 ) {
@@ -24,7 +24,7 @@ class SitesResource(
     @Path("/scannables")
     @POST
     @Creator
-    fun createScannable(request: CreateScannableRequest): IdWrapper {
+    fun createScannable(request: CreateScannableRequest): Id {
         val type = request.type
         val singleUse = request.singleUse
 
@@ -35,7 +35,7 @@ class SitesResource(
             throw WebApplicationException(res)
         }
 
-        return dao.createScannable(orgId, id, type, singleUse).let(::IdWrapper)
+        return dao.createScannable(orgId, id, type, singleUse).let(::Id)
     }
 
     @Path("/scannables")
@@ -46,6 +46,6 @@ class SitesResource(
 
     @Path("/scannables/{id}")
     fun delegateScannableRequest(@PathParam("id") scannableId: String): ScannablesResource {
-        return ScannablesResource(orgId, id, ScannableId(scannableId), dao)
+        return ScannablesResource(orgId, id, scannableId, dao)
     }
 }

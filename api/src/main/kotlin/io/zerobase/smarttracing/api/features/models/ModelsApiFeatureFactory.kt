@@ -1,6 +1,7 @@
 package io.zerobase.smarttracing.api.features.models
 
 import com.fasterxml.jackson.annotation.JsonTypeName
+import com.google.common.collect.Multimap
 import com.google.inject.Injector
 import io.dropwizard.setup.Environment
 import io.zerobase.smarttracing.api.features.FeatureFactory
